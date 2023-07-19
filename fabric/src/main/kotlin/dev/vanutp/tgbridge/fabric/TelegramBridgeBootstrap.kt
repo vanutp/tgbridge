@@ -9,6 +9,6 @@ object TelegramBridgeBootstrap : ModInitializer {
 
     override fun onInitialize() {
         logger.info("meow meow from fabric")
-        MOD.onStart()
+        MOD.init()
     }
 }

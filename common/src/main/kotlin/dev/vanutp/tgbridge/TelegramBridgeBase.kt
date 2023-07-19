@@ -1,7 +1,11 @@
 package dev.vanutp.tgbridge
 
 abstract class TelegramBridgeBase {
-    fun onStart() {
+    companion object {
+        const val MOD_ID = "tgbridge"
+    }
+
+    fun init() {
         println("meow meow from base")
     }
 }

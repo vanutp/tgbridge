@@ -1,13 +1,13 @@
 # Make sure this is set to "kotlinforforge"
-modLoader="kotlinforforge"
+modLoader="javafml"
 # Make sure this is set to the appropriate version range
-loaderVersion="[3,)" # Require at least 3.x
+loaderVersion="[43,)" # Require at least 3.x
 # License is REQUIRED after 1.16
 license='MIT'
 
 [[mods]]
 modId="tgbridge"
-version="${file.jarVersion}"
+version="${version}"
 displayName="Telegram Bridge"
 authors="vanutp"
 description='''
