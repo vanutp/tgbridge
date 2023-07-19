@@ -1,0 +1,34 @@
+{
+	"schemaVersion": 1,
+	"id": "tgbridge",
+	"version": "${version}",
+	"name": "Telegram Bridge",
+	"description": "",
+	"authors": [
+		"vanutp"
+	],
+	"contact": {
+		"homepage": "https://git.vanutp.dev/minecraft/tgbridge",
+		"sources": "https://git.vanutp.dev/minecraft/tgbridge"
+	},
+	"license": "MIT",
+	"icon": "assets/tgbridge/icon.png",
+	"environment": "server",
+	"entrypoints": {
+		"main": [
+			{
+				"value": "dev.vanutp.tgbridge.fabric.TelegramBridgeBootstrap",
+				"adapter": "kotlin"
+			}
+		]
+	},
+	"mixins": [],
+	"depends": {
+		"fabricloader": ">=0.14.21",
+		"minecraft": "~1.19.2",
+		"java": ">=17",
+		"fabric-api": "*",
+		"fabric-language-kotlin": ">=1.9.0"
+	},
+	"suggests": {}
+}

@@ -1,0 +1,114 @@
+plugins {
+    id 'net.minecraftforge.gradle' version '5.1.+'
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+println ("Java: ${System.getProperty('java.version')}, JVM: ${System.getProperty('java.vm.version')} (${System.getProperty('java.vendor')}), Arch: ${System.getProperty('os.arch')}")
+minecraft {
+    // Change to your preferred mappings
+    mappings channel: 'official', version: '1.19.2'
+    // Add your AccessTransformer
+    // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+
+    runs {
+        client {
+            workingDirectory project.file('run')
+
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            property 'forge.enabledGameTestNamespaces', 'tgbridge'
+
+            mods {
+                tgbridge {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        server {
+            workingDirectory project.file('run/server')
+
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            property 'forge.enabledGameTestNamespaces', 'tgbridge'
+
+            mods {
+                tgbridge {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        gameTestServer {
+            workingDirectory project.file('run/server')
+
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            property 'forge.enabledGameTestNamespaces', 'tgbridge'
+
+            mods {
+                tgbridge {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        data {
+            workingDirectory project.file('run')
+
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+
+            args '--mod', 'tgbridge', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources')
+
+            mods {
+                tgbridge {
+                    source sourceSets.main
+                }
+            }
+        }
+    }
+}
+
+// Include assets and data from data generators
+sourceSets.main.resources { srcDirs 'src/generated/resources/' }
+
+repositories {
+    maven {
+        name = 'Kotlin for Forge'
+        url = 'https://thedarkcolour.github.io/KotlinForForge/'
+        content { includeGroup "thedarkcolour" }
+    }
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}"
+
+    implementation "thedarkcolour:kotlinforforge:${rootProject.forge_kotlin_version}"
+
+    implementation project(":common")
+}
+
+reobf {
+    shadowJar {}
+}
+
+shadowJar {
+    archiveFileName = "tgbridge-forge-${rootProject.version}.jar"
+
+    configurations = [project.configurations.shadow]
+    // TODO
+//    dependencies {
+//        exclude(dependency("org.jetbrains.kotlin:.*"))
+//    }
+    classifier ''
+}
+
+artifacts {
+    archives shadowJar
+}
+
+jar {
+    from project
+}
