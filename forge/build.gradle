@@ -15,7 +15,7 @@ dependencies {
     forge "net.minecraftforge:forge:${rootProject.forge_version}"
     mappings "net.fabricmc:yarn:${rootProject.yarn_mappings}:v2"
 
-//    implementation "thedarkcolour:kotlinforforge:${rootProject.forge_kotlin_version}"
+    implementation "thedarkcolour:kotlinforforge:${rootProject.forge_kotlin_version}"
 
     implementation project(":common")
     shadow project(":common")

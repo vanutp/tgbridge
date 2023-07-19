@@ -1,11 +1,10 @@
 package dev.vanutp.tgbridge
 
 abstract class TelegramBridgeBase {
-    companion object {
-        const val MOD_ID = "tgbridge"
+    fun init() {
+        logger.info("tgbridge starting on $platform")
     }
 
-    fun init() {
-        println("meow meow from base")
-    }
+    protected abstract val logger: LoggerBase
+    abstract val platform: String
 }

@@ -24,7 +24,11 @@ allprojects {
     }
 
     dependencies {
-        compileOnly 'org.jetbrains.kotlin:kotlin-stdlib:1.8.22'
+        if (project.name == "paper") {
+            implementation "org.jetbrains.kotlin:kotlin-stdlib:${rootProject.kotlin_version}"
+        } else {
+            compileOnly "org.jetbrains.kotlin:kotlin-stdlib:${rootProject.kotlin_version}"
+        }
     }
 
     tasks.withType(JavaCompile).configureEach {
