@@ -19,6 +19,12 @@ allprojects {
 
     repositories {
         mavenCentral()
+        maven {
+            url "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+            content {
+                includeGroup "com.squareup.retrofit2"
+            }
+        }
     }
 
     dependencies {
@@ -35,16 +41,25 @@ allprojects {
             compileOnly "org.jetbrains.kotlinx:kotlinx-serialization-core:1.5.1"
             compileOnly "org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1"
         }
-        implementation("dev.inmo:tgbotapi:9.0.0") {
+        if (project.name == "paper" || project.name == "common") {
+            compileOnly("net.kyori:adventure-api:4.12.0")
+            compileOnly("net.kyori:adventure-text-serializer-gson:4.12.0") {
+                exclude(module: 'gson')
+            }
+        } else {
+            shadow "net.kyori:adventure-api:4.12.0"
+            shadow("net.kyori:adventure-text-serializer-gson:4.12.0") {
+                exclude(module: 'gson')
+            }
+        }
+        implementation("com.squareup.retrofit2:retrofit:2.10.0-SNAPSHOT") {
             exclude(module: 'kotlin-stdlib')
             exclude(module: 'kotlin-reflect')
             exclude(module: 'kotlinx-coroutines-core')
             exclude(module: 'kotlinx-serialization-core')
             exclude(module: 'kotlinx-serialization-json')
-            exclude(module: 'slf4j-api')
         }
-        api "net.kyori:adventure-api:4.12.0"
-        api("net.kyori:adventure-text-serializer-gson:4.12.0") {
+        implementation("com.squareup.retrofit2:converter-gson:2.10.0-SNAPSHOT") {
             exclude(module: 'gson')
         }
         compileOnly "com.google.code.gson:gson:2.10.1"

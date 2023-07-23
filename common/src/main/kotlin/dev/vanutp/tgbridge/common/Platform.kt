@@ -8,5 +8,6 @@ abstract class Platform {
     abstract val configDir: Path
 
     abstract fun registerChatMessageListener(handler: (TBChatMessageEvent) -> Unit)
+//    abstract fun registerPlayerDeathListener(handler: (TBChatMessageEvent) -> Unit)
     abstract fun broadcastMessage(text: Component)
 }

@@ -1,4 +1,4 @@
 name: tgbridge
 version: '${version}'
-main: dev.vanutp.tgbridge.paper.PaperPlugin
+main: dev.vanutp.tgbridge.paper.PaperBootstrap
 api-version: 1.19

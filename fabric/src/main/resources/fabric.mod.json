@@ -8,8 +8,8 @@
 		"vanutp"
 	],
 	"contact": {
-		"homepage": "https://git.vanutp.dev/minecraft/tgbridge",
-		"sources": "https://git.vanutp.dev/minecraft/tgbridge"
+		"homepage": "https://github.com/vanutp/tgbridge",
+		"sources": "https://github.com/vanutp/tgbridge"
 	},
 	"license": "MIT",
 	"icon": "assets/tgbridge/icon.png",
@@ -17,7 +17,7 @@
 	"entrypoints": {
 		"main": [
 			{
-				"value": "dev.vanutp.tgbridge.fabric.FabricMod",
+				"value": "dev.vanutp.tgbridge.fabric.FabricBootstrap",
 				"adapter": "kotlin"
 			}
 		]

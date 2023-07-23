@@ -4,8 +4,10 @@ import dev.vanutp.tgbridge.common.Platform
 import dev.vanutp.tgbridge.common.TBChatMessageEvent
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
+import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.text.Text
 import net.minecraftforge.event.ServerChatEvent
+import net.minecraftforge.event.entity.living.LivingDeathEvent
 import net.minecraftforge.fml.loading.FMLPaths
 import net.minecraftforge.server.ServerLifecycleHooks
 import thedarkcolour.kotlinforforge.forge.FORGE_BUS
@@ -30,6 +32,15 @@ class ForgePlatform : Platform() {
                     minecraftToAdventure(e.message)
                 )
             )
+        }
+    }
+
+    fun registerPlayerDeathListener(handler: (TBChatMessageEvent) -> Unit) {
+        FORGE_BUS.addListener { e: LivingDeathEvent ->
+            if (e.entity !is PlayerEntity) {
+                return@addListener
+            }
+            val deathMessage = e.source.getDeathMessage(e.entity)
         }
     }
 

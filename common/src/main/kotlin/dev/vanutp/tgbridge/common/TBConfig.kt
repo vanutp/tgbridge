@@ -8,6 +8,7 @@ data class TBConfig(
     val botToken: String = "your bot token",
     val chatId: Long = 0,
     val bluemapHost: String = "",
+    val requirePrefixInMinecraft: String = "",
 ) {
     companion object {
         private val gson = GsonBuilder().setPrettyPrinting().create()

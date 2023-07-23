@@ -2,7 +2,7 @@ package dev.vanutp.tgbridge.paper
 
 import org.bukkit.plugin.java.JavaPlugin
 
-class PaperPlugin : JavaPlugin() {
+class PaperBootstrap : JavaPlugin() {
     private val bridge = PaperTelegramBridge(this)
     override fun onEnable() {
         bridge.init()

@@ -17,7 +17,4 @@ class ForgeTelegramBridge : TelegramBridge() {
 
     override val logger = ForgeLogger()
     override val platform = ForgePlatform()
-
-    init {
-    }
 }

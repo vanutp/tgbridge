@@ -3,7 +3,7 @@ package dev.vanutp.tgbridge.fabric
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 
-object FabricMod : ModInitializer {
+object FabricBootstrap : ModInitializer {
     private lateinit var bridge: FabricTelegramBridge
 
     override fun onInitialize() {

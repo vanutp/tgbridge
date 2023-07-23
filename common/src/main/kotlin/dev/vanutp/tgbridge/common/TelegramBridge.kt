@@ -1,21 +1,7 @@
-@file:OptIn(RiskFeature::class)
-
 package dev.vanutp.tgbridge.common
 
-import dev.inmo.tgbotapi.bot.TelegramBot
-import dev.inmo.tgbotapi.extensions.api.send.sendMessage
-import dev.inmo.tgbotapi.extensions.behaviour_builder.telegramBotWithBehaviourAndLongPolling
-import dev.inmo.tgbotapi.extensions.behaviour_builder.triggers_handling.onContentMessage
-import dev.inmo.tgbotapi.extensions.utils.extensions.raw.caption
-import dev.inmo.tgbotapi.extensions.utils.extensions.raw.from
-import dev.inmo.tgbotapi.extensions.utils.extensions.raw.sender_chat
-import dev.inmo.tgbotapi.extensions.utils.extensions.raw.text
-import dev.inmo.tgbotapi.types.ChatId
-import dev.inmo.tgbotapi.types.message.HTMLParseMode
-import dev.inmo.tgbotapi.utils.RiskFeature
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
@@ -27,8 +13,7 @@ abstract class TelegramBridge {
     protected abstract val logger: AbstractLogger
     protected abstract val platform: Platform
     private val config by lazy { TBConfig.load(platform.configDir.resolve("config.json")) }
-    private lateinit var bot: TelegramBot
-    private lateinit var pollJob: Job
+    private val bot by lazy { TelegramBot(config, logger) }
 
     fun init() {
         logger.info("tgbridge starting on ${platform.name}")
@@ -36,40 +21,84 @@ abstract class TelegramBridge {
             logger.error("Can't start with default config values: please fill in botToken and chatId")
             return
         }
-        coroutineScope.launch {
-            telegramBotWithBehaviourAndLongPolling(config.botToken, coroutineScope) {
-                onContentMessage {
-                    val senderName =
-                        if (it.from != null)
-                            (it.from!!.firstName + " " + it.from!!.lastName).trim()
-                        else
-                            it.sender_chat?.title ?: ""
-                    platform.broadcastMessage(
-                        Component.text()
-                            .append(Component.text("[${senderName}]", NamedTextColor.AQUA))
-                            .append(Component.text(" "))
-                            .append(Component.text(it.text ?: it.caption ?: ""))
-                            .build()
-                    )
-                }
-            }.let {
-                bot = it.first
-                pollJob = it.second
+        bot.registerMessageHandler { msg ->
+            val senderName = msg.from?.let { _ ->
+                (msg.from.firstName + " " + (msg.from.lastName ?: "")).trim()
+            } ?: msg.senderChat?.title ?: ""
+            val components = mutableListOf<Component>()
+
+            components.add(Component.text("<${senderName}>", NamedTextColor.AQUA))
+
+            val forwardFromName = msg.forwardFrom?.let { _ ->
+                (msg.forwardFrom.firstName + " " + (msg.forwardFrom.lastName ?: "")).trim()
+            } ?: msg.forwardFromChat?.let {
+                msg.forwardFromChat.title
             }
+
+            forwardFromName?.let {
+                components.add(Component.text("[Forwarded from $it]", NamedTextColor.BLUE))
+            }
+
+            msg.animation?.let {
+                components.add(Component.text("[GIF]", NamedTextColor.GREEN))
+            } ?: msg.document.let {
+                components.add(Component.text("[Document]", NamedTextColor.GREEN))
+            }
+            msg.photo?.let {
+                components.add(Component.text("[Photo]", NamedTextColor.GREEN))
+            }
+            msg.audio?.let {
+                components.add(Component.text("[Audio]", NamedTextColor.GREEN))
+            }
+            msg.sticker?.let {
+                components.add(Component.text("[Sticker]", NamedTextColor.GREEN))
+            }
+            msg.video?.let {
+                components.add(Component.text("[Video]", NamedTextColor.GREEN))
+            }
+            msg.videoNote?.let {
+                components.add(Component.text("[Video message]", NamedTextColor.GREEN))
+            }
+            msg.voice?.let {
+                components.add(Component.text("[Voice message]", NamedTextColor.GREEN))
+            }
+            msg.poll?.let {
+                components.add(Component.text("[Poll]", NamedTextColor.GREEN))
+            }
+
+            components.add(Component.text(msg.text ?: msg.caption ?: ""))
+
+
+            platform.broadcastMessage(
+                components
+                    .flatMap { listOf(it, Component.text(" ")) }
+                    .fold(Component.text()) { acc, component -> acc.append(component) }
+                    .build()
+            )
+        }
+        coroutineScope.launch {
+            bot.startPolling()
         }
         platform.registerChatMessageListener { e ->
             coroutineScope.launch {
                 val text = (e.text as TextComponent).content()
+                if (!text.startsWith(config.requirePrefixInMinecraft)) {
+                    return@launch
+                }
                 bot.sendMessage(
-                    ChatId(config.chatId),
+                    config.chatId,
                     "<b>[${e.username}]</b> ${text.escapeHTML()}",
-                    parseMode = HTMLParseMode,
                 )
             }
         }
+//        platform.registerPlayerDeathListener { e ->
+//
+//        }
     }
 
     fun shutdown() {
-        pollJob.cancel()
+        coroutineScope.launch {
+            bot.stopPolling()
+        }
     }
 }
