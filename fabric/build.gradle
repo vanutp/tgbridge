@@ -18,6 +18,8 @@ dependencies {
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
 	modImplementation "net.fabricmc:fabric-language-kotlin:${rootProject.fabric_kotlin_version}"
 
+	modImplementation include("net.kyori:adventure-platform-fabric:5.5.2")
+
 	implementation project(':common')
 	shadow project(":common")
 }
@@ -31,14 +33,13 @@ processResources {
 }
 
 shadowJar {
-	archiveFileName = "tgbridge-fabric-${rootProject.version}.jar"
-
 	configurations = [project.configurations.shadow]
 }
 
 remapJar {
 	inputFile.set shadowJar.archiveFile
 	dependsOn shadowJar
+	archiveFileName = "tgbridge-fabric-${rootProject.version}.jar"
 }
 
 components.java {

@@ -30,14 +30,13 @@ processResources {
 }
 
 shadowJar {
-    archiveFileName = "tgbridge-forge-${rootProject.version}.jar"
-
     configurations = [project.configurations.shadow]
 }
 
 remapJar {
     inputFile.set shadowJar.archiveFile
     dependsOn shadowJar
+    archiveFileName = "tgbridge-forge-${rootProject.version}.jar"
 }
 
 components.java {

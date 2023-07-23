@@ -2,12 +2,13 @@ package dev.vanutp.tgbridge.paper
 
 import org.bukkit.plugin.java.JavaPlugin
 
-class TelegramBridgeBootstrap : JavaPlugin() {
-    private val mod = TelegramBridge(this)
+class PaperPlugin : JavaPlugin() {
+    private val bridge = PaperTelegramBridge(this)
     override fun onEnable() {
-        mod.init()
+        bridge.init()
     }
 
     override fun onDisable() {
+        bridge.shutdown()
     }
 }

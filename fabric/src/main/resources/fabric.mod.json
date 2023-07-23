@@ -17,7 +17,7 @@
 	"entrypoints": {
 		"main": [
 			{
-				"value": "dev.vanutp.tgbridge.fabric.TelegramBridgeBootstrap",
+				"value": "dev.vanutp.tgbridge.fabric.FabricMod",
 				"adapter": "kotlin"
 			}
 		]

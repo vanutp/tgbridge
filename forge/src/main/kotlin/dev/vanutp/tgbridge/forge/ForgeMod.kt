@@ -1,29 +1,33 @@
 package dev.vanutp.tgbridge.forge
 
-import net.minecraft.client.MinecraftClient
+import net.minecraft.entity.Entity
+import net.minecraftforge.event.ServerChatEvent
+import net.minecraftforge.event.server.ServerStoppingEvent
 import net.minecraftforge.fml.common.Mod
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent
 import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent
-import org.apache.logging.log4j.Level
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger
+import thedarkcolour.kotlinforforge.forge.FORGE_BUS
 import thedarkcolour.kotlinforforge.forge.MOD_BUS
 import thedarkcolour.kotlinforforge.forge.runForDist
 
-@Mod(TelegramBridge.MOD_ID)
-object TelegramBridgeBootstrap {
-    val mod = TelegramBridge()
+@Mod(ForgeTelegramBridge.MOD_ID)
+object ForgeMod {
+    private val bridge = ForgeTelegramBridge()
 
     init {
         val obj = runForDist(
             clientTarget = {},
             serverTarget = {
                 MOD_BUS.addListener(::onServerSetup)
+                FORGE_BUS.addListener(::onServerShutdown)
             }
         )
     }
 
     private fun onServerSetup(event: FMLDedicatedServerSetupEvent) {
-        mod.init()
+        bridge.init()
+    }
+
+    private fun onServerShutdown(event: ServerStoppingEvent) {
+        bridge.shutdown()
     }
 }
