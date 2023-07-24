@@ -41,7 +41,7 @@ abstract class TelegramBridge {
 
             msg.animation?.let {
                 components.add(Component.text("[GIF]", NamedTextColor.GREEN))
-            } ?: msg.document.let {
+            } ?: msg.document?.let {
                 components.add(Component.text("[Document]", NamedTextColor.GREEN))
             }
             msg.photo?.let {
