@@ -25,12 +25,13 @@ abstract class TelegramBridge {
             if (msg.chat.id != config.chatId) {
                 return@registerMessageHandler
             }
-            val senderName = msg.from?.let { _ ->
-                (msg.from.firstName + " " + (msg.from.lastName ?: "")).trim()
-            } ?: msg.senderChat?.title ?: ""
             val components = mutableListOf<Component>()
 
-            components.add(Component.text("<${senderName}>", NamedTextColor.AQUA))
+            components.add(Component.text("<${msg.senderName}>", NamedTextColor.AQUA))
+
+            msg.replyToMessage?.let { reply ->
+                components.add(Component.text("[R ${reply.senderName}: ${reply.effectiveText.take(40)}]", NamedTextColor.BLUE))
+            }
 
             val forwardFromName = msg.forwardFrom?.let { _ ->
                 (msg.forwardFrom.firstName + " " + (msg.forwardFrom.lastName ?: "")).trim()
@@ -39,7 +40,7 @@ abstract class TelegramBridge {
             }
 
             forwardFromName?.let {
-                components.add(Component.text("[Forwarded from $it]", NamedTextColor.BLUE))
+                components.add(Component.text("[F $it]", NamedTextColor.GRAY))
             }
 
             msg.animation?.let {
@@ -69,7 +70,7 @@ abstract class TelegramBridge {
                 components.add(Component.text("[Poll]", NamedTextColor.GREEN))
             }
 
-            components.add(Component.text(msg.text ?: msg.caption ?: ""))
+            components.add(Component.text(msg.effectiveText))
 
 
             platform.broadcastMessage(

@@ -54,7 +54,18 @@ data class TgMessage(
     val videoNote: TgAny? = null,
     val voice: TgAny? = null,
     val poll: TgAny? = null,
-)
+) {
+    val senderName: String
+        get() {
+            return from?.let { _ ->
+                (from.firstName + " " + (from.lastName ?: "")).trim()
+            } ?: senderChat?.title ?: ""
+        }
+    val effectiveText: String
+        get() {
+            return text ?: caption ?: ""
+        }
+}
 
 data class TgUpdate(
     @SerializedName("update_id")
