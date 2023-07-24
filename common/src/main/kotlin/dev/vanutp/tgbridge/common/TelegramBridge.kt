@@ -22,6 +22,9 @@ abstract class TelegramBridge {
             return
         }
         bot.registerMessageHandler { msg ->
+            if (msg.chat.id != config.chatId) {
+                return@registerMessageHandler
+            }
             val senderName = msg.from?.let { _ ->
                 (msg.from.firstName + " " + (msg.from.lastName ?: "")).trim()
             } ?: msg.senderChat?.title ?: ""
