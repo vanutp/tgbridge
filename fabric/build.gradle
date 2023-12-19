@@ -1,14 +1,12 @@
 plugins {
-	id 'dev.architectury.loom' version '1.2-SNAPSHOT'
+	id "java"
+	id "dev.architectury.loom" version "1.3-SNAPSHOT"
+	id "org.jetbrains.kotlin.jvm"
+	id "org.jetbrains.kotlin.plugin.serialization"
+	id "com.github.johnrengelman.shadow"
 }
 
-repositories {
-	// Add repositories to retrieve artifacts from in here.
-	// You should only use this when depending on other mods because
-	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
-	// for more information about repositories.
-}
+repositories {}
 
 dependencies {
 	minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
@@ -18,7 +16,7 @@ dependencies {
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
 	modImplementation "net.fabricmc:fabric-language-kotlin:${rootProject.fabric_kotlin_version}"
 
-	modImplementation include("net.kyori:adventure-platform-fabric:5.5.2")
+	modImplementation include("net.kyori:adventure-platform-fabric:${rootProject.adventure_fabric_version}")
 
 	implementation project(':common')
 	shadow project(":common")
@@ -32,18 +30,25 @@ processResources {
 	}
 }
 
+jar.enabled = false // Replaced by "shadowJar"
+
 shadowJar {
+	dependsOn 'processResources'
+	finalizedBy 'remapJar'
+
+	from sourceSets.main.output.classesDirs
+	from sourceSets.main.output.resourcesDir
+
 	configurations = [project.configurations.shadow]
+	archiveClassifier = jar.archiveClassifier
+	destinationDirectory = jar.destinationDirectory
 }
 
 remapJar {
-	inputFile.set shadowJar.archiveFile
-	dependsOn shadowJar
+	inputFile = shadowJar.archiveFile
 	archiveFileName = "tgbridge-fabric-${rootProject.version}.jar"
 }
 
-components.java {
-	withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
-		skip()
-	}
+artifacts {
+	archives remapJar
 }

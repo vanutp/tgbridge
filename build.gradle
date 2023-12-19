@@ -1,7 +1,8 @@
 plugins {
-    id 'java'
-    id 'org.jetbrains.kotlin.jvm' version '1.8.22' apply false
-    id 'com.github.johnrengelman.shadow' version '8.1.1' apply false
+    id "java"
+    id "org.jetbrains.kotlin.jvm" version "1.9.21" apply false
+    id "org.jetbrains.kotlin.plugin.serialization" version "1.9.21" apply false
+    id "com.github.johnrengelman.shadow" version "8.1.1" apply false
 }
 
 allprojects {
@@ -29,28 +30,37 @@ allprojects {
 
     dependencies {
         if (project.name == "paper") {
+            implementation "org.jetbrains.kotlinx:kotlinx-datetime:${rootProject.kotlinx_datetime_version}"
+        } else if (project.name == "forge") {
+            shadow implementation("org.jetbrains.kotlinx:kotlinx-datetime:${rootProject.kotlinx_datetime_version}")
+        } else {
+            compileOnly "org.jetbrains.kotlinx:kotlinx-datetime:${rootProject.kotlinx_datetime_version}"
+        }
+        if (project.name == "paper") {
             implementation "org.jetbrains.kotlin:kotlin-stdlib:${rootProject.kotlin_version}"
             implementation "org.jetbrains.kotlin:kotlin-reflect:${rootProject.kotlin_version}"
-            implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.2"
-            implementation "org.jetbrains.kotlinx:kotlinx-serialization-core:1.5.1"
-            implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1"
+            implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:${rootProject.kotlinx_coroutines_version}"
+            implementation "org.jetbrains.kotlinx:kotlinx-serialization-core:${rootProject.kotlinx_serialization_version}"
+            implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:${rootProject.kotlinx_serialization_version}"
         } else {
             compileOnly "org.jetbrains.kotlin:kotlin-stdlib:${rootProject.kotlin_version}"
             compileOnly "org.jetbrains.kotlin:kotlin-reflect:${rootProject.kotlin_version}"
-            compileOnly "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.2"
-            compileOnly "org.jetbrains.kotlinx:kotlinx-serialization-core:1.5.1"
-            compileOnly "org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1"
+            compileOnly "org.jetbrains.kotlinx:kotlinx-coroutines-core:${rootProject.kotlinx_coroutines_version}"
+            compileOnly "org.jetbrains.kotlinx:kotlinx-serialization-core:${rootProject.kotlinx_serialization_version}"
+            compileOnly "org.jetbrains.kotlinx:kotlinx-serialization-json:${rootProject.kotlinx_serialization_version}"
         }
         if (project.name == "paper" || project.name == "common") {
-            compileOnly("net.kyori:adventure-api:4.12.0")
-            compileOnly("net.kyori:adventure-text-serializer-gson:4.12.0") {
+            compileOnly("net.kyori:adventure-api:${rootProject.adventure_version}")
+            compileOnly("net.kyori:adventure-text-serializer-gson:${rootProject.adventure_version}") {
                 exclude(module: 'gson')
             }
+            implementation "io.github.xn32:json5k:0.3.0"
         } else {
-            shadow "net.kyori:adventure-api:4.12.0"
-            shadow("net.kyori:adventure-text-serializer-gson:4.12.0") {
+            shadow "net.kyori:adventure-api:${rootProject.adventure_version}"
+            shadow("net.kyori:adventure-text-serializer-gson:${rootProject.adventure_version}") {
                 exclude(module: 'gson')
             }
+            shadow implementation("io.github.xn32:json5k:0.3.0")
         }
         implementation("com.squareup.retrofit2:retrofit:2.10.0-SNAPSHOT") {
             exclude(module: 'kotlin-stdlib')
@@ -77,5 +87,13 @@ allprojects {
     java {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        toolchain.languageVersion = JavaLanguageVersion.of(17)
+    }
+
+    shadowJar {
+        from("LICENSE") {
+            rename { "${it}_${project.base.archivesName.get()}" }
+        }
+        relocate "io.github.xn32", "tgbridge.shaded.xn32"
     }
 }

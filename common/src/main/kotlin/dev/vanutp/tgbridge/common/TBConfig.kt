@@ -1,31 +1,41 @@
 package dev.vanutp.tgbridge.common
 
-import com.google.gson.GsonBuilder
+import io.github.xn32.json5k.Json5
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 import java.nio.file.Path
 import kotlin.io.path.*
 
+@Serializable
 data class TBConfig(
     val botToken: String = "your bot token",
     val chatId: Long = 0,
-    val bluemapHost: String = "",
-    val requirePrefixInMinecraft: String = "",
+    val threadId: Int? = null,
+    val bluemapHost: String? = null,
+    val requirePrefixInMinecraft: String? = null,
+    val messageMergeWindowSeconds: Int? = null,
 ) {
     companion object {
-        private val gson = GsonBuilder().setPrettyPrinting().create()
-        fun load(path: Path): TBConfig {
-            if (!path.parent.exists()) {
-                path.parent.createDirectory()
+        private val json5 = Json5 {
+            encodeDefaults = true
+            prettyPrint = true
+        }
+
+        fun load(configDir: Path): TBConfig {
+            if (!configDir.exists()) {
+                configDir.createDirectory()
             }
-            if (!path.exists()) {
+            val configPath = configDir.resolve("config.json5")
+            if (!configDir.exists()) {
+                configDir.createDirectory()
+            }
+            if (!configPath.exists()) {
                 val defaultConfig = TBConfig()
-                path.writeText(gson.toJson(defaultConfig))
+                configPath.writeText(json5.encodeToString(defaultConfig))
                 return defaultConfig
             }
-            return gson.fromJson(path.readText(), TBConfig::class.java)
+            return json5.decodeFromString<TBConfig>(configPath.readText())
         }
-    }
-
-    fun save(path: Path) {
-        path.writeText(gson.toJson(this))
     }
 }

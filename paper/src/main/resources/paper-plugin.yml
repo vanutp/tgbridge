@@ -1,0 +1,8 @@
+name: tgbridge
+version: '${version}'
+main: dev.vanutp.tgbridge.paper.PaperBootstrap
+api-version: '1.20'
+#dependencies:
+#  server:
+#    MCKotlin-Paper:
+#      required: true

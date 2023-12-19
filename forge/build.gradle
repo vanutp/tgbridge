@@ -1,8 +1,13 @@
 plugins {
-    id "dev.architectury.loom" version "1.2-SNAPSHOT"
+    id "java"
+    id "dev.architectury.loom" version "1.3-SNAPSHOT"
+    id "org.jetbrains.kotlin.jvm"
+    id "org.jetbrains.kotlin.plugin.serialization"
+    id "com.github.johnrengelman.shadow"
 }
 
 repositories {
+    maven { url = 'https://maven.neoforged.net/releases' }
     maven {
         name = 'Kotlin for Forge'
         url = 'https://thedarkcolour.github.io/KotlinForForge/'
@@ -12,7 +17,7 @@ repositories {
 
 dependencies {
     minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
-    forge "net.minecraftforge:forge:${rootProject.forge_version}"
+    forge "net.neoforged:forge:${rootProject.minecraft_version}-${rootProject.neo_version}"
     mappings "net.fabricmc:yarn:${rootProject.yarn_mappings}:v2"
 
     implementation "thedarkcolour:kotlinforforge:${rootProject.forge_kotlin_version}"
@@ -30,13 +35,19 @@ processResources {
 }
 
 shadowJar {
+    dependsOn 'processResources'
+    finalizedBy 'remapJar'
+
     configurations = [project.configurations.shadow]
 }
 
 remapJar {
-    inputFile.set shadowJar.archiveFile
-    dependsOn shadowJar
+    inputFile = shadowJar.archiveFile
     archiveFileName = "tgbridge-forge-${rootProject.version}.jar"
+}
+
+artifacts {
+    archives remapJar
 }
 
 components.java {

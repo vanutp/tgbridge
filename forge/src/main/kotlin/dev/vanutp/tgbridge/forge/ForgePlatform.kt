@@ -1,7 +1,7 @@
 package dev.vanutp.tgbridge.forge
 
 import dev.vanutp.tgbridge.common.Platform
-import dev.vanutp.tgbridge.common.TBChatMessageEvent
+import dev.vanutp.tgbridge.common.TBPlayerEventData
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 import net.minecraft.entity.player.PlayerEntity
@@ -24,10 +24,10 @@ class ForgePlatform : Platform() {
         return GsonComponentSerializer.gson().deserializeFromTree(Text.Serializer.toJsonTree(minecraft))
     }
 
-    override fun registerChatMessageListener(handler: (TBChatMessageEvent) -> Unit) {
+    override fun registerChatMessageListener(handler: (TBPlayerEventData) -> Unit) {
         FORGE_BUS.addListener { e: ServerChatEvent ->
             handler.invoke(
-                TBChatMessageEvent(
+                TBPlayerEventData(
                     e.player.displayName.string,
                     minecraftToAdventure(e.message)
                 )
@@ -35,7 +35,7 @@ class ForgePlatform : Platform() {
         }
     }
 
-    fun registerPlayerDeathListener(handler: (TBChatMessageEvent) -> Unit) {
+    fun registerPlayerDeathListener(handler: (TBPlayerEventData) -> Unit) {
         FORGE_BUS.addListener { e: LivingDeathEvent ->
             if (e.entity !is PlayerEntity) {
                 return@addListener

@@ -3,6 +3,7 @@ package dev.vanutp.tgbridge.common
 import com.google.gson.annotations.SerializedName
 import kotlinx.coroutines.*
 import okhttp3.OkHttpClient
+import retrofit2.HttpException
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
@@ -42,6 +43,8 @@ data class TgMessage(
     val forwardFromChat: TgChat? = null,
     @SerializedName("reply_to_message")
     val replyToMessage: TgMessage? = null,
+    @SerializedName("message_thread_id")
+    val messageThreadId: Int? = null,
     val text: String? = null,
     val caption: String? = null,
     val animation: TgAny? = null,
@@ -84,6 +87,21 @@ data class TgSendMessageRequest(
     val chatId: Long,
     @SerializedName("text")
     val text: String,
+    @SerializedName("reply_to_message_id")
+    val replyToMessageId: Int? = null,
+    @SerializedName("parse_mode")
+    val parseMode: String = "HTML",
+    @SerializedName("disable_web_page_preview")
+    val disableWebPagePreview: Boolean = true,
+)
+
+data class TgEditMessageRequest(
+    @SerializedName("chat_id")
+    val chatId: Long,
+    @SerializedName("message_id")
+    val messageId: Int,
+    @SerializedName("text")
+    val text: String,
     @SerializedName("parse_mode")
     val parseMode: String = "HTML",
     @SerializedName("disable_web_page_preview")
@@ -93,6 +111,9 @@ data class TgSendMessageRequest(
 interface TgApi {
     @POST("sendMessage")
     suspend fun sendMessage(@Body data: TgSendMessageRequest): TgResponse<TgMessage>
+
+    @POST("editMessageText")
+    suspend fun editMessageText(@Body data: TgEditMessageRequest): TgResponse<TgMessage>
 
     @GET("getUpdates")
     suspend fun getUpdates(
@@ -135,9 +156,10 @@ class TelegramBot(private val config: TBConfig, private val logger: AbstractLogg
                         offset,
                         timeout = POLL_TIMEOUT_SECONDS,
                     ).result?.let { updates ->
-                        if (updates.isNotEmpty()) {
-                            offset = updates.last().updateId + 1
+                        if (updates.isEmpty()) {
+                            return@let
                         }
+                        offset = updates.last().updateId + 1
                         updates.forEach { update ->
                             update.message?.let {
                                 messageHandlers.forEach {
@@ -163,16 +185,32 @@ class TelegramBot(private val config: TBConfig, private val logger: AbstractLogg
         pollTask?.cancelAndJoin()
     }
 
+    private suspend fun <T> call(f: suspend () -> TgResponse<T>): T {
+        try {
+            return f().result!!
+        } catch (e: HttpException) {
+            val resp = e.response() ?: throw e
+            throw Exception("Telegram exception: ${resp.errorBody()?.string() ?: "no response body"}")
+        }
+    }
+
     suspend fun sendMessage(
         chatId: Long,
         text: String,
+        replyToMessageId: Int? = null,
         parseMode: String = "HTML",
         disableWebPagePreview: Boolean = true,
-    ): TgMessage {
-        val response = client.sendMessage(TgSendMessageRequest(chatId, text, parseMode, disableWebPagePreview))
-        if (response.result == null) {
-            throw Exception("Telegram exception: ${response.description ?: "unknown error"}")
-        }
-        return response.result
+    ): TgMessage = call {
+        client.sendMessage(TgSendMessageRequest(chatId, text, replyToMessageId, parseMode, disableWebPagePreview))
+    }
+
+    suspend fun editMessageText(
+        chatId: Long,
+        messageId: Int,
+        text: String,
+        parseMode: String = "HTML",
+        disableWebPagePreview: Boolean = true,
+    ): TgMessage = call {
+        client.editMessageText(TgEditMessageRequest(chatId, messageId, text, parseMode, disableWebPagePreview))
     }
 }
