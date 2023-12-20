@@ -1,6 +1,7 @@
 package dev.vanutp.tgbridge.common
 
 import com.google.gson.annotations.SerializedName
+import dev.vanutp.tgbridge.common.models.Config
 import kotlinx.coroutines.*
 import okhttp3.OkHttpClient
 import retrofit2.HttpException
@@ -108,12 +109,25 @@ data class TgEditMessageRequest(
     val disableWebPagePreview: Boolean = true,
 )
 
+data class TgDeleteMessageRequest(
+    @SerializedName("chat_id")
+    val chatId: Long,
+    @SerializedName("message_id")
+    val messageId: Int,
+)
+
 interface TgApi {
+    @GET("getMe")
+    suspend fun getMe(): TgResponse<TgUser>
+
     @POST("sendMessage")
     suspend fun sendMessage(@Body data: TgSendMessageRequest): TgResponse<TgMessage>
 
     @POST("editMessageText")
     suspend fun editMessageText(@Body data: TgEditMessageRequest): TgResponse<TgMessage>
+
+    @POST("deleteMessage")
+    suspend fun deleteMessage(@Body data: TgDeleteMessageRequest): TgResponse<Boolean>
 
     @GET("getUpdates")
     suspend fun getUpdates(
@@ -125,7 +139,7 @@ interface TgApi {
 
 const val POLL_TIMEOUT_SECONDS = 60
 
-class TelegramBot(private val config: TBConfig, private val logger: AbstractLogger) {
+class TelegramBot(private val config: Config, private val logger: AbstractLogger) {
     private val client = Retrofit.Builder()
         .client(
             OkHttpClient.Builder()
@@ -138,10 +152,24 @@ class TelegramBot(private val config: TBConfig, private val logger: AbstractLogg
         .create(TgApi::class.java)
     private var pollTask: Job? = null
     private val messageHandlers: MutableList<suspend (TgMessage) -> Unit> = mutableListOf()
+    private lateinit var me: TgUser
 
 
     fun registerMessageHandler(handler: suspend (TgMessage) -> Unit) {
         messageHandlers.add(handler)
+    }
+
+    fun registerCommandHandler(command: String, handler: suspend (TgMessage) -> Unit) {
+        val cmdRegex = Regex("^/$command(@${me.username})?(\\s|\$)", RegexOption.IGNORE_CASE)
+        messageHandlers.add {
+            if (cmdRegex.matches(it.effectiveText)) {
+                handler(it)
+            }
+        }
+    }
+
+    suspend fun init() {
+        me = call { client.getMe() }
     }
 
     suspend fun startPolling() {
@@ -212,5 +240,9 @@ class TelegramBot(private val config: TBConfig, private val logger: AbstractLogg
         disableWebPagePreview: Boolean = true,
     ): TgMessage = call {
         client.editMessageText(TgEditMessageRequest(chatId, messageId, text, parseMode, disableWebPagePreview))
+    }
+
+    suspend fun deleteMessage(chatId: Long, messageId: Int) = call {
+        client.deleteMessage(TgDeleteMessageRequest(chatId, messageId))
     }
 }

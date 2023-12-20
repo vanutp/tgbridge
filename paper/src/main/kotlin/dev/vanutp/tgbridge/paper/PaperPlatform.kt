@@ -1,7 +1,8 @@
 package dev.vanutp.tgbridge.paper
 
 import dev.vanutp.tgbridge.common.Platform
-import dev.vanutp.tgbridge.common.TBPlayerEventData
+import dev.vanutp.tgbridge.common.models.TBCommandContext
+import dev.vanutp.tgbridge.common.models.TBPlayerEventData
 import io.papermc.paper.event.player.AsyncChatEvent
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
@@ -70,7 +71,28 @@ class PaperPlatform(private val plugin: JavaPlugin) : Platform() {
         }, plugin)
     }
 
+    override fun registerCommand(command: Array<String>, handler: (TBCommandContext) -> Boolean) {
+        plugin.getCommand(command[0])!!.setExecutor { commandSender, _, _, args ->
+            command.drop(1).forEachIndexed { i, x ->
+                if (x != args[i]) {
+                    return@setExecutor false
+                }
+            }
+            return@setExecutor handler(
+                TBCommandContext(
+                    reply = { text ->
+                        commandSender.sendMessage(text)
+                    }
+                )
+            )
+        }
+    }
+
     override fun broadcastMessage(text: Component) {
         plugin.server.broadcast(text)
+    }
+
+    override fun getOnlinePlayerNames(): Array<String> {
+        return plugin.server.onlinePlayers.map { it.name }.toTypedArray()
     }
 }

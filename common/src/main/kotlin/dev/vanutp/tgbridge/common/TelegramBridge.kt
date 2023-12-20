@@ -1,8 +1,12 @@
 package dev.vanutp.tgbridge.common
 
+import dev.vanutp.tgbridge.common.models.Config
+import dev.vanutp.tgbridge.common.models.LastMessage
+import dev.vanutp.tgbridge.common.models.LastMessageType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.datetime.Clock
@@ -13,7 +17,6 @@ import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.format.NamedTextColor
 import kotlin.io.path.exists
 import kotlin.io.path.readText
-import kotlin.math.log
 import kotlin.time.Duration.Companion.seconds
 
 
@@ -21,8 +24,8 @@ abstract class TelegramBridge {
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
     protected abstract val logger: AbstractLogger
     protected abstract val platform: Platform
-    private val config by lazy { TBConfig.load(platform.configDir) }
-    private val bot by lazy { TelegramBot(config, logger) }
+    private lateinit var config: Config
+    private lateinit var bot: TelegramBot
 
     private var lastMessage: LastMessage? = null
     private val lastMessageLock = Mutex()
@@ -43,6 +46,10 @@ abstract class TelegramBridge {
         return bot.editMessageText(config.chatId, messageId, text)
     }
 
+    private suspend fun deleteMessage(messageId: Int) {
+        bot.deleteMessage(config.chatId, messageId)
+    }
+
     private fun loadLang() {
         val langPath = platform.configDir.resolve("lang.json")
         if (!langPath.exists()) {
@@ -53,13 +60,21 @@ abstract class TelegramBridge {
 
     fun init() {
         logger.info("tgbridge starting on ${platform.name}")
-        if (config.botToken == TBConfig().botToken || config.chatId == TBConfig().chatId) {
+        config = Config.load(platform.configDir)
+        bot = TelegramBot(config, logger)
+        if (config.botToken == Config().botToken || config.chatId == Config().chatId) {
             logger.error("Can't start with default config values: please fill in botToken and chatId")
             return
         }
         loadLang()
-        coroutineScope.launch {
+
+        runBlocking {
+            bot.init()
             sendMessage("✅ <b>Сервер запущен!</b>")
+        }
+        bot.registerCommandHandler("list") {
+            val onlinePlayerNames = platform.getOnlinePlayerNames()
+            sendMessage("${onlinePlayerNames.size} игроков онлайн: ${onlinePlayerNames.joinToString()}")
         }
         bot.registerMessageHandler { msg ->
             if (msg.chat.id != config.chatId || config.threadId != null && msg.messageThreadId != config.threadId) {
@@ -129,6 +144,17 @@ abstract class TelegramBridge {
         coroutineScope.launch {
             bot.startPolling()
         }
+        platform.registerCommand(arrayOf("tgbridge", "reload")) { ctx ->
+            try {
+                config = Config.load(platform.configDir)
+                loadLang()
+            } catch (e: Exception) {
+                ctx.reply("Error reloading config: " + (e.message ?: e.javaClass.name))
+                return@registerCommand false
+            }
+            ctx.reply("Config reloaded. Note that bot token can't be changed without a restart")
+            return@registerCommand true
+        }
         platform.registerChatMessageListener { e ->
             coroutineScope.launch {
                 val rawMinecraftText = (e.text as TextComponent).content()
@@ -140,18 +166,20 @@ abstract class TelegramBridge {
                 lastMessageLock.withLock {
                     lastMessage?.let {
                         if (
-                            (it.text + "\n" + currText).length <= 4000
+                            it.type == LastMessageType.TEXT
+                            && (it.text + "\n" + currText).length <= 4000
                             && currDate - it.date < (config.messageMergeWindowSeconds ?: 0).seconds
                         ) {
                             it.text += "\n" + currText
                             it.date = currDate
-                            editMessageText(lastMessage!!.id, it.text)
+                            editMessageText(lastMessage!!.id, it.text!!)
+                            true
                         } else {
                             null
                         }
                     } ?: let {
                         val newMsg = sendMessage(currText)
-                        lastMessage = LastMessage(newMsg.messageId, currText, currDate)
+                        lastMessage = LastMessage(LastMessageType.TEXT, newMsg.messageId, currDate, text = currText)
                     }
                 }
             }
@@ -165,14 +193,36 @@ abstract class TelegramBridge {
         }
         platform.registerPlayerJoinListener { e ->
             coroutineScope.launch {
-                resetLastMessage()
-                sendMessage("<b>\uD83E\uDD73 ${e.username} зашёл на сервер</b>")
+                lastMessageLock.withLock {
+                    lastMessage?.let {
+                        if (
+                            it.type == LastMessageType.LEAVE
+                            && it.leftPlayer!! == e.username
+                            && Clock.System.now() - it.date < (config.messageMergeWindowSeconds ?: 0).seconds
+                        ) {
+                            deleteMessage(it.id)
+                            true
+                        } else {
+                            null
+                        }
+                    }
+                        ?: sendMessage("<b>\uD83E\uDD73 ${e.username} зашёл на сервер</b>")
+                    lastMessage = null
+                }
             }
         }
         platform.registerPlayerLeaveListener { e ->
             coroutineScope.launch {
                 resetLastMessage()
-                sendMessage("<b>\uD83D\uDE15 ${e.username} покинул сервер</b>")
+                val newMsg = sendMessage("<b>\uD83D\uDE15 ${e.username} покинул сервер</b>")
+                lastMessageLock.withLock {
+                    lastMessage = LastMessage(
+                        LastMessageType.LEAVE,
+                        newMsg.messageId,
+                        Clock.System.now(),
+                        leftPlayer = e.username
+                    )
+                }
             }
         }
         platform.registerPlayerAdvancementListener { e ->

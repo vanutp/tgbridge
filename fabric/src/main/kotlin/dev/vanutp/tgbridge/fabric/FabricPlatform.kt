@@ -1,15 +1,19 @@
 package dev.vanutp.tgbridge.fabric
 
+import com.mojang.brigadier.arguments.IntegerArgumentType
 import dev.vanutp.tgbridge.common.Platform
-import dev.vanutp.tgbridge.common.TBPlayerEventData
+import dev.vanutp.tgbridge.common.models.TBCommandContext
+import dev.vanutp.tgbridge.common.models.TBPlayerEventData
 import net.fabricmc.fabric.api.message.v1.ServerMessageEvents
 import net.fabricmc.loader.api.FabricLoader
 import net.kyori.adventure.chat.SignedMessage
 import net.kyori.adventure.platform.fabric.FabricServerAudiences
 import net.kyori.adventure.text.Component
 import net.minecraft.server.MinecraftServer
+import net.minecraft.server.command.CommandManager
 import net.minecraft.text.Text
 import net.minecraft.text.TranslatableTextContent
+
 
 class FabricPlatform(private val server: MinecraftServer) : Platform() {
     override val name = "fabric"
@@ -52,11 +56,45 @@ class FabricPlatform(private val server: MinecraftServer) : Platform() {
         registerFilteredPlayerEvent(handler) { it.key == "multiplayer.player.left" }
     }
 
+    override fun registerCommand(command: Array<String>, handler: (TBCommandContext) -> Boolean) {
+        val cmd1 = CommandManager.literal("mul")
+            .then(
+                CommandManager.literal("aaaa")
+                    .executes { context ->
+                        context.source.sendFeedback({ Text.literal("meow") }, false)
+                        1
+                    }
+            )
+        server.commandManager.dispatcher.register(cmd1)
+        val builder = CommandManager.literal(command[0])
+        var lastArg = builder
+        command.drop(1).forEachIndexed { i, x ->
+            val newArg = CommandManager.literal(x)
+            if (i == command.size - 2) {
+                newArg.executes { ctx ->
+                    val res = handler(TBCommandContext(
+                        reply = { text ->
+                            ctx.source.sendFeedback({ Text.literal(text) }, false)
+                        }
+                    ))
+                    return@executes if (res) 1 else -1
+                }
+            }
+            lastArg.then(newArg)
+            lastArg = newArg
+        }
+        server.commandManager.dispatcher.register(builder)
+    }
+
     override fun registerPlayerAdvancementListener(handler: (TBPlayerEventData) -> Unit) {
         registerFilteredPlayerEvent(handler) { it.key.startsWith("chat.type.advancement.") }
     }
 
     override fun broadcastMessage(text: Component) {
         FabricServerAudiences.of(server).all().sendMessage(text)
+    }
+
+    override fun getOnlinePlayerNames(): Array<String> {
+        return server.playerNames
     }
 }

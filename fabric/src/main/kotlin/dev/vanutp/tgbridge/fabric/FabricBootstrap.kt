@@ -7,8 +7,7 @@ object FabricBootstrap : ModInitializer {
     private lateinit var bridge: FabricTelegramBridge
 
     override fun onInitialize() {
-        ServerLifecycleEvents.SERVER_STARTING.register {
-            server ->
+        ServerLifecycleEvents.SERVER_STARTING.register { server ->
             bridge = FabricTelegramBridge(server)
             bridge.init()
         }

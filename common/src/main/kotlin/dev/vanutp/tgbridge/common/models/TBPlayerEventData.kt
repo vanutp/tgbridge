@@ -1,4 +1,4 @@
-package dev.vanutp.tgbridge.common
+package dev.vanutp.tgbridge.common.models
 
 import net.kyori.adventure.text.Component
 
