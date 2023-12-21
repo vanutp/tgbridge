@@ -86,6 +86,9 @@ abstract class TelegramBridge {
             components.add(Component.text("<${msg.senderName}>", NamedTextColor.AQUA))
 
             msg.replyToMessage?.let { reply ->
+                if (reply.messageId == config.threadId) {
+                    return@let
+                }
                 components.add(
                     Component.text(
                         "[R ${reply.senderName}: ${reply.effectiveText.take(40)}]",
