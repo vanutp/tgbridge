@@ -18,8 +18,7 @@ dependencies {
 
 	modImplementation include("net.kyori:adventure-platform-fabric:${rootProject.adventure_fabric_version}")
 
-	implementation project(':common')
-	shadow project(":common")
+	shadow implementation(project(":common"))
 }
 
 processResources {

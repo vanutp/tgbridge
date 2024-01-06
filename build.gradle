@@ -54,13 +54,19 @@ allprojects {
             compileOnly("net.kyori:adventure-text-serializer-gson:${rootProject.adventure_version}") {
                 exclude(module: 'gson')
             }
-            implementation "io.github.xn32:json5k:0.3.0"
+            implementation("io.github.xn32:json5k:0.3.0") {
+                exclude(module: 'kotlin-stdlib')
+                exclude(module: 'kotlinx-serialization-core')
+            }
         } else {
             shadow "net.kyori:adventure-api:${rootProject.adventure_version}"
             shadow("net.kyori:adventure-text-serializer-gson:${rootProject.adventure_version}") {
                 exclude(module: 'gson')
             }
-            shadow implementation("io.github.xn32:json5k:0.3.0")
+            shadow(implementation("io.github.xn32:json5k:0.3.0")) {
+                exclude(module: 'kotlin-stdlib')
+                exclude(module: 'kotlinx-serialization-core')
+            }
         }
         implementation("com.squareup.retrofit2:retrofit:2.10.0-SNAPSHOT") {
             exclude(module: 'kotlin-stdlib')
