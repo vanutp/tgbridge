@@ -58,12 +58,20 @@ allprojects {
                 exclude(module: 'kotlin-stdlib')
                 exclude(module: 'kotlinx-serialization-core')
             }
+            implementation("com.charleskorn.kaml:kaml:0.56.0") {
+                exclude(module: 'kotlin-stdlib')
+                exclude(module: 'kotlinx-serialization-core')
+            }
         } else {
             shadow "net.kyori:adventure-api:${rootProject.adventure_version}"
             shadow("net.kyori:adventure-text-serializer-gson:${rootProject.adventure_version}") {
                 exclude(module: 'gson')
             }
             shadow(implementation("io.github.xn32:json5k:0.3.0")) {
+                exclude(module: 'kotlin-stdlib')
+                exclude(module: 'kotlinx-serialization-core')
+            }
+            shadow(implementation("com.charleskorn.kaml:kaml:0.56.0")) {
                 exclude(module: 'kotlin-stdlib')
                 exclude(module: 'kotlinx-serialization-core')
             }

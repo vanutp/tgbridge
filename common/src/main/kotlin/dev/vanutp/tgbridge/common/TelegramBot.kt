@@ -1,7 +1,6 @@
 package dev.vanutp.tgbridge.common
 
 import com.google.gson.annotations.SerializedName
-import dev.vanutp.tgbridge.common.models.Config
 import kotlinx.coroutines.*
 import okhttp3.OkHttpClient
 import retrofit2.HttpException
@@ -31,6 +30,10 @@ data class TgChat(
 
 class TgAny
 
+data class TgPoll(
+    val question: String,
+)
+
 data class TgMessage(
     val chat: TgChat,
     @SerializedName("message_id")
@@ -57,7 +60,7 @@ data class TgMessage(
     @SerializedName("video_note")
     val videoNote: TgAny? = null,
     val voice: TgAny? = null,
-    val poll: TgAny? = null,
+    val poll: TgPoll? = null,
 ) {
     val senderName: String
         get() {
@@ -139,18 +142,19 @@ interface TgApi {
 
 const val POLL_TIMEOUT_SECONDS = 60
 
-class TelegramBot(private val config: Config, private val logger: AbstractLogger) {
+class TelegramBot(private val botToken: String, private val logger: AbstractLogger) {
     private val client = Retrofit.Builder()
         .client(
             OkHttpClient.Builder()
                 .readTimeout(Duration.ofSeconds((POLL_TIMEOUT_SECONDS + 10).toLong()))
                 .build()
         )
-        .baseUrl("https://api.telegram.org/bot${config.botToken}/")
+        .baseUrl("https://api.telegram.org/bot${botToken}/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
         .create(TgApi::class.java)
     private var pollTask: Job? = null
+    private val commandHandlers: MutableList<suspend (TgMessage) -> Boolean> = mutableListOf()
     private val messageHandlers: MutableList<suspend (TgMessage) -> Unit> = mutableListOf()
     private lateinit var me: TgUser
 
@@ -161,9 +165,12 @@ class TelegramBot(private val config: Config, private val logger: AbstractLogger
 
     fun registerCommandHandler(command: String, handler: suspend (TgMessage) -> Unit) {
         val cmdRegex = Regex("^/$command(@${me.username})?(\\s|\$)", RegexOption.IGNORE_CASE)
-        messageHandlers.add {
+        commandHandlers.add {
             if (cmdRegex.matches(it.effectiveText)) {
                 handler(it)
+                return@add true
+            } else {
+                return@add false
             }
         }
     }
@@ -189,10 +196,16 @@ class TelegramBot(private val config: Config, private val logger: AbstractLogger
                         }
                         offset = updates.last().updateId + 1
                         updates.forEach { update ->
-                            update.message?.let {
-                                messageHandlers.forEach {
-                                    it.invoke(update.message)
+                            if (update.message == null) {
+                                return@forEach
+                            }
+                            for (handler in commandHandlers) {
+                                if (handler.invoke(update.message)) {
+                                    return@forEach
                                 }
+                            }
+                            messageHandlers.forEach {
+                                it.invoke(update.message)
                             }
                         }
                     }
