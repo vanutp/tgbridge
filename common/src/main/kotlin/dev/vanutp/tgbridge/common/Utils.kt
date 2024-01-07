@@ -107,3 +107,23 @@ fun TgMessage.toMinecraft(): Component {
         .fold(Component.text()) { acc, component -> acc.append(component) }
         .build()
 }
+
+
+val XAERO_WAYPOINT_RGX =
+    Regex("""xaero-waypoint:([^:]+):[^:]:([-\d]+):([-\d]+):([-\d]+):\d+:(?:false|true):\d+:Internal-(?:the-)?(overworld|nether|end)-waypoints""")
+
+fun String.asBluemapLinkOrNone(): String? {
+    XAERO_WAYPOINT_RGX.matchEntire(this)?.let {
+        try {
+            val waypointName = it.groupValues[1]
+            val x = Integer.parseInt(it.groupValues[2])
+            val y = Integer.parseInt(it.groupValues[3])
+            val z = Integer.parseInt(it.groupValues[4])
+            val worldName = it.groupValues[5]
+
+            return """<a href="${config.bluemapUrl}#$worldName:$x:$y:$z:50:0:0:0:0:perspective">$waypointName</a>"""
+        } catch (_: NumberFormatException) {
+        }
+    }
+    return null
+}

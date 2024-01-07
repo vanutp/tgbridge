@@ -30,6 +30,7 @@ data class Config(
     @YamlComment(
         "If this value is set, waypoints shared from Xaero's Minimap/World Map will be rendered",
         "as links to a specified Bluemap instance.",
+        "Note that shared waypoints will be sent regardless of the requirePrefixInMinecraft setting.",
         "Example: https://map.example.com",
         "Default value: null (disabled)",
     )

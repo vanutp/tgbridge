@@ -106,14 +106,18 @@ abstract class TelegramBridge {
 
     private fun onChatMessage(e: TBPlayerEventData) = withScopeAndLock {
         val rawMinecraftText = (e.text as TextComponent).content()
-        if (!rawMinecraftText.startsWith(config.requirePrefixInMinecraft ?: "")) {
+        val escapedText = rawMinecraftText.escapeHTML()
+        val bluemapLink = rawMinecraftText.asBluemapLinkOrNone()
+        if (bluemapLink == null && !rawMinecraftText.startsWith(config.requirePrefixInMinecraft ?: "")) {
             return@withScopeAndLock
         }
+
         val currText = lang.telegram.chatMessage.formatLang(
             "username" to e.username,
-            "text" to rawMinecraftText.escapeHTML(),
+            "text" to (bluemapLink ?: escapedText),
         )
         val currDate = Clock.System.now()
+
         val lm = lastMessage
         if (
             lm != null
