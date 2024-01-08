@@ -39,6 +39,15 @@ fun String.formatLang(vararg args: Pair<String, String>): String {
     return res
 }
 
+fun trimTextForMessagePart(text: String): String {
+    val lines = text.split("\n", limit = 1)
+    return if (lines.size > 1 || lines[0].length > 50) {
+        lines[0].take(50) + "..."
+    } else {
+        lines[0]
+    }
+}
+
 fun TgMessage.toMinecraft(botId: Long): Component {
     val components = mutableListOf<Component>()
 
@@ -48,17 +57,17 @@ fun TgMessage.toMinecraft(botId: Long): Component {
         if (reply.messageId == config.topicId) {
             return@let
         }
-        val text = if (reply.from?.id == botId) {
+        val formattedReply = if (reply.from?.id == botId) {
             lang.minecraft.messageMeta.replyToMinecraft.formatLang(
-                "text" to reply.effectiveText.take(50),
+                "text" to trimTextForMessagePart(reply.effectiveText),
             )
         } else {
             lang.minecraft.messageMeta.reply.formatLang(
                 "sender" to reply.senderName,
-                "text" to reply.effectiveText.take(40)
+                "text" to trimTextForMessagePart(reply.effectiveText),
             )
         }
-        components.add(Component.text(text, NamedTextColor.BLUE))
+        components.add(Component.text(formattedReply, NamedTextColor.BLUE))
     }
 
     val forwardFromName = this.forwardFrom?.let { _ ->
