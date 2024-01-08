@@ -156,7 +156,8 @@ class TelegramBot(private val botToken: String, private val logger: AbstractLogg
     private var pollTask: Job? = null
     private val commandHandlers: MutableList<suspend (TgMessage) -> Boolean> = mutableListOf()
     private val messageHandlers: MutableList<suspend (TgMessage) -> Unit> = mutableListOf()
-    private lateinit var me: TgUser
+    lateinit var me: TgUser
+        private set
 
 
     fun registerMessageHandler(handler: suspend (TgMessage) -> Unit) {

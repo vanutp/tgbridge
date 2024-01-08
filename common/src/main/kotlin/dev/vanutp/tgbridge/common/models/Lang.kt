@@ -30,6 +30,7 @@ data class LangTelegram(
 @Serializable
 data class MessageMeta(
     val reply: String = "[R {sender}: {text}]",
+    val replyToMinecraft: String = "[R {text}]",
     val forward: String = "[F {from}]",
     val gif: String = "[GIF]",
     val document: String = "[Document]",

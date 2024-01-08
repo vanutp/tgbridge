@@ -39,7 +39,7 @@ fun String.formatLang(vararg args: Pair<String, String>): String {
     return res
 }
 
-fun TgMessage.toMinecraft(): Component {
+fun TgMessage.toMinecraft(botId: Long): Component {
     val components = mutableListOf<Component>()
 
     components.add(Component.text("<${this.senderName}>", NamedTextColor.AQUA))
@@ -48,15 +48,17 @@ fun TgMessage.toMinecraft(): Component {
         if (reply.messageId == config.topicId) {
             return@let
         }
-        components.add(
-            Component.text(
-                lang.minecraft.messageMeta.reply.formatLang(
-                    "sender" to reply.senderName,
-                    "text" to reply.effectiveText.take(40)
-                ),
-                NamedTextColor.BLUE
+        val text = if (reply.from?.id == botId) {
+            lang.minecraft.messageMeta.replyToMinecraft.formatLang(
+                "text" to reply.effectiveText.take(50),
             )
-        )
+        } else {
+            lang.minecraft.messageMeta.reply.formatLang(
+                "sender" to reply.senderName,
+                "text" to reply.effectiveText.take(40)
+            )
+        }
+        components.add(Component.text(text, NamedTextColor.BLUE))
     }
 
     val forwardFromName = this.forwardFrom?.let { _ ->

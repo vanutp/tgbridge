@@ -81,7 +81,7 @@ abstract class TelegramBridge {
         lastMessageLock.withLock {
             lastMessage = null
         }
-        platform.broadcastMessage(msg.toMinecraft())
+        platform.broadcastMessage(msg.toMinecraft(bot.me.id))
     }
 
     private fun registerMinecraftHandlers() {
