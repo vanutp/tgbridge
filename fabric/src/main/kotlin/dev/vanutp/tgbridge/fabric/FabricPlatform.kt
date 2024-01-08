@@ -1,6 +1,5 @@
 package dev.vanutp.tgbridge.fabric
 
-import com.mojang.brigadier.arguments.IntegerArgumentType
 import dev.vanutp.tgbridge.common.Platform
 import dev.vanutp.tgbridge.common.models.TBCommandContext
 import dev.vanutp.tgbridge.common.models.TBPlayerEventData
@@ -57,15 +56,6 @@ class FabricPlatform(private val server: MinecraftServer) : Platform() {
     }
 
     override fun registerCommand(command: Array<String>, handler: (TBCommandContext) -> Boolean) {
-        val cmd1 = CommandManager.literal("mul")
-            .then(
-                CommandManager.literal("aaaa")
-                    .executes { context ->
-                        context.source.sendFeedback({ Text.literal("meow") }, false)
-                        1
-                    }
-            )
-        server.commandManager.dispatcher.register(cmd1)
         val builder = CommandManager.literal(command[0])
         var lastArg = builder
         command.drop(1).forEachIndexed { i, x ->
