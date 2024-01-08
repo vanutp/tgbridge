@@ -53,8 +53,22 @@ fun TgMessage.toMinecraft(botId: Long): Component {
 
     components.add(Component.text("<${this.senderName}>", NamedTextColor.AQUA))
 
+    this.pinnedMessage?.let {
+        val langString = if (it.effectiveText == "") {
+            lang.minecraft.messageMeta.pinNoText
+        } else {
+            lang.minecraft.messageMeta.pin
+        }
+        components.add(Component.text(langString.formatLang("text" to it.effectiveText), NamedTextColor.DARK_AQUA))
+    }
+
     this.replyToMessage?.let { reply ->
-        if (reply.messageId == config.topicId) {
+        if (
+            // Telegram sends reply message when message is pinned
+            this.pinnedMessage != null
+            // All messages to a topic are sent as replies to a service message
+            || reply.messageId == config.topicId
+        ) {
             return@let
         }
         val formattedReply = if (reply.from?.id == botId) {

@@ -61,6 +61,8 @@ data class TgMessage(
     val videoNote: TgAny? = null,
     val voice: TgAny? = null,
     val poll: TgPoll? = null,
+    @SerializedName("pinned_message")
+    val pinnedMessage: TgMessage? = null,
 ) {
     val senderName: String
         get() {
