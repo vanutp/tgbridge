@@ -1,5 +1,6 @@
 package dev.vanutp.tgbridge.forge
 
+import net.minecraftforge.event.server.ServerStartingEvent
 import net.minecraftforge.event.server.ServerStoppingEvent
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent
@@ -15,13 +16,13 @@ object ForgeBootstrap {
         runForDist(
             clientTarget = {},
             serverTarget = {
-                MOD_BUS.addListener(::onServerSetup)
+                FORGE_BUS.addListener(::onServerStartup)
                 FORGE_BUS.addListener(::onServerShutdown)
             }
         )
     }
 
-    private fun onServerSetup(event: FMLDedicatedServerSetupEvent) {
+    private fun onServerStartup(event: ServerStartingEvent) {
         bridge.init()
     }
 

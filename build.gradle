@@ -30,9 +30,13 @@ allprojects {
 
     dependencies {
         if (project.name == "paper") {
-            implementation "org.jetbrains.kotlinx:kotlinx-datetime:${rootProject.kotlinx_datetime_version}"
+            implementation("org.jetbrains.kotlinx:kotlinx-datetime:${rootProject.kotlinx_datetime_version}") {
+                exclude(module: 'kotlin-stdlib')
+            }
         } else if (project.name == "forge") {
-            shadow implementation("org.jetbrains.kotlinx:kotlinx-datetime:${rootProject.kotlinx_datetime_version}")
+            shadow(implementation("org.jetbrains.kotlinx:kotlinx-datetime:${rootProject.kotlinx_datetime_version}")) {
+                exclude(module: 'kotlin-stdlib')
+            }
         } else {
             compileOnly "org.jetbrains.kotlinx:kotlinx-datetime:${rootProject.kotlinx_datetime_version}"
         }
@@ -108,6 +112,11 @@ allprojects {
         from("LICENSE") {
             rename { "${it}_${project.base.archivesName.get()}" }
         }
+        relocate "okio", "tgbridge.shaded.okio"
+        relocate "okhttp3", "tgbridge.shaded.okhttp3"
+        relocate "retrofit2", "tgbridge.shaded.retrofit2"
+        relocate "org.snakeyaml", "tgbridge.shaded.snakeyaml"
+        relocate "com.charleskorn.kaml", "tgbridge.shaded.kaml"
         relocate "io.github.xn32", "tgbridge.shaded.xn32"
     }
 }

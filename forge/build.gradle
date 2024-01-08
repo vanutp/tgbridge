@@ -22,8 +22,7 @@ dependencies {
 
     implementation "thedarkcolour:kotlinforforge:${rootProject.forge_kotlin_version}"
 
-    implementation project(":common")
-    shadow project(":common")
+    shadow implementation(project(":common"))
 }
 
 processResources {
