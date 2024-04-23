@@ -16,9 +16,6 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.10.0-SNAPSHOT") {
         exclude(module: 'gson')
     }
-    implementation("io.github.xn32:json5k:0.3.0") {
-        transitive = false
-    }
     implementation("com.charleskorn.kaml:kaml:0.56.0") {
         exclude(module: 'kotlin-stdlib')
         exclude(module: 'kotlinx-serialization-core')

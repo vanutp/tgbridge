@@ -4,7 +4,6 @@ import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.YamlConfiguration
 import dev.vanutp.tgbridge.common.models.Config
 import dev.vanutp.tgbridge.common.models.Lang
-import io.github.xn32.json5k.Json5
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -49,9 +48,6 @@ object ConfigManager {
             configDir.createDirectory()
         }
 
-        migrateConfig(configDir)
-        migrateMinecraftLang(configDir)
-
         val configPath = configDir.resolve("config.yml")
         if (configPath.notExists()) {
             configPath.writeText(yaml.encodeToString(Config()))
@@ -76,35 +72,5 @@ object ConfigManager {
         if (minecraftLangPath.exists()) {
             minecraftLang = Json.decodeFromString<Map<String, String>>(minecraftLangPath.readText())
         }
-    }
-
-    private fun migrateConfig(configDir: Path) {
-        val oldConfigPath = configDir.resolve("config.json5")
-        val newConfigPath = configDir.resolve("config.yml")
-        if (newConfigPath.exists() || oldConfigPath.notExists()) {
-            return
-        }
-        val json5 = Json5 {}
-        val oldConfig = json5.decodeFromString<OldConfig>(oldConfigPath.readText())
-        val newConfig = Config(
-            botToken = oldConfig.botToken,
-            chatId = oldConfig.chatId,
-            topicId = oldConfig.threadId,
-            bluemapUrl = oldConfig.bluemapHost,
-            requirePrefixInMinecraft = oldConfig.requirePrefixInMinecraft ?: "",
-            messageMergeWindow = oldConfig.messageMergeWindowSeconds,
-            leaveJoinMergeWindow = oldConfig.messageMergeWindowSeconds,
-        )
-        newConfigPath.writeText(yaml.encodeToString(newConfig))
-        oldConfigPath.deleteIfExists()
-    }
-
-    private fun migrateMinecraftLang(configDir: Path) {
-        val oldLangPath = configDir.resolve("lang.json")
-        val newLangPath = configDir.resolve("minecraft_lang.json")
-        if (newLangPath.exists() || oldLangPath.notExists()) {
-            return
-        }
-        oldLangPath.moveTo(newLangPath)
     }
 }

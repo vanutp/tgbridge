@@ -82,7 +82,6 @@ allprojects {
         relocate "retrofit2", "tgbridge.shaded.retrofit2"
         relocate "org.snakeyaml", "tgbridge.shaded.snakeyaml"
         relocate "com.charleskorn.kaml", "tgbridge.shaded.kaml"
-        relocate "io.github.xn32", "tgbridge.shaded.xn32"
         relocate "net.kyori", "tgbridge.shaded.kyori"
     }
 }
