@@ -1,8 +1,4 @@
 plugins {
-    id "java"
-    id "org.jetbrains.kotlin.jvm"
-    id "org.jetbrains.kotlin.plugin.serialization"
-    id "com.github.johnrengelman.shadow"
     id "io.papermc.paperweight.userdev"
     id "xyz.jpenilla.run-paper"
 }
