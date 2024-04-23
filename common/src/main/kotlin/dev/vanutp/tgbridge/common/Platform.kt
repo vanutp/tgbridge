@@ -17,4 +17,5 @@ abstract class Platform {
     abstract fun registerCommand(command: Array<String>, handler: (TBCommandContext) -> Boolean)
     abstract fun broadcastMessage(text: Component)
     abstract fun getOnlinePlayerNames(): Array<String>
+    abstract fun getLanguageKey(key: String): String?
 }

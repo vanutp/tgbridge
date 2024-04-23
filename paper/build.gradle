@@ -3,6 +3,8 @@ plugins {
     id "org.jetbrains.kotlin.jvm"
     id "org.jetbrains.kotlin.plugin.serialization"
     id "com.github.johnrengelman.shadow"
+    id "io.papermc.paperweight.userdev"
+    id "xyz.jpenilla.run-paper"
 }
 
 repositories {
@@ -17,8 +19,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly "io.papermc.paper:paper-api:1.20.2-R0.1-SNAPSHOT"
-
+    paperweight.paperDevBundle("1.20.1-R0.1-SNAPSHOT")
     implementation project(':common')
 }
 
@@ -31,8 +32,12 @@ processResources {
     }
 }
 
-shadowJar {
-    archiveFileName = "tgbridge-paper-${rootProject.version}.jar"
+reobfJar {
+    outputJar.set(rootProject.layout.buildDirectory.file("release/${rootProject.name}-${rootProject.version}-${project.name}.jar"))
+}
+
+assemble {
+    dependsOn reobfJar
 }
 
 artifacts {

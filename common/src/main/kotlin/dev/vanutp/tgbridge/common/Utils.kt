@@ -1,8 +1,8 @@
 package dev.vanutp.tgbridge.common
 
 import dev.vanutp.tgbridge.common.ConfigManager.config
+import dev.vanutp.tgbridge.common.ConfigManager.getMinecraftLangKey
 import dev.vanutp.tgbridge.common.ConfigManager.lang
-import dev.vanutp.tgbridge.common.ConfigManager.minecraftLang
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.TranslatableComponent
@@ -14,7 +14,7 @@ fun String.escapeHTML(): String = this
     .replace("<", "&lt;")
 
 fun TranslatableComponent.translate(): String {
-    var res = minecraftLang[this.key()] ?: this.key()
+    var res = getMinecraftLangKey(this.key()) ?: this.key()
     this.args().forEachIndexed { i, x ->
         val child = when (x) {
             is TranslatableComponent -> x.translate()

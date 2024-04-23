@@ -2,7 +2,6 @@ package dev.vanutp.tgbridge.common
 
 import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.YamlConfiguration
-import com.charleskorn.kaml.yamlMap
 import dev.vanutp.tgbridge.common.models.Config
 import dev.vanutp.tgbridge.common.models.Lang
 import io.github.xn32.json5k.Json5
@@ -10,7 +9,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import java.io.FileNotFoundException
 import java.nio.file.Path
 import kotlin.io.path.*
 
@@ -33,11 +31,16 @@ object ConfigManager {
         private set
     lateinit var lang: Lang
         private set
-    lateinit var minecraftLang: Map<String, String>
-        private set
+    private lateinit var fallbackMinecraftLangGetter: (String) -> String?
+    private var minecraftLang: Map<String, String>? = null
 
-    fun init(configDir: Path) {
+    fun getMinecraftLangKey(key: String): String? {
+        return minecraftLang?.get(key) ?: fallbackMinecraftLangGetter(key)
+    }
+
+    fun init(configDir: Path, fallbackMinecraftLangGetter: (String) -> String?) {
         this.configDir = configDir
+        this.fallbackMinecraftLangGetter = fallbackMinecraftLangGetter
         reload()
     }
 
@@ -70,11 +73,9 @@ object ConfigManager {
         langPath.writeText(yaml.encodeToString(lang))
 
         val minecraftLangPath = configDir.resolve("minecraft_lang.json")
-        if (minecraftLangPath.notExists()) {
-            throw FileNotFoundException("minecraft_lang.json not found")
+        if (minecraftLangPath.exists()) {
+            minecraftLang = Json.decodeFromString<Map<String, String>>(minecraftLangPath.readText())
         }
-        minecraftLang = Json.decodeFromString<Map<String, String>>(minecraftLangPath.readText())
-
     }
 
     private fun migrateConfig(configDir: Path) {

@@ -3,6 +3,8 @@ plugins {
     id "org.jetbrains.kotlin.jvm" version "1.9.21" apply false
     id "org.jetbrains.kotlin.plugin.serialization" version "1.9.21" apply false
     id "com.github.johnrengelman.shadow" version "8.1.1" apply false
+    id "io.papermc.paperweight.userdev" version "1.5.15" apply false
+    id "xyz.jpenilla.run-paper" version "2.2.3" apply false
 }
 
 allprojects {
@@ -11,12 +13,8 @@ allprojects {
     apply plugin: 'com.github.johnrengelman.shadow'
 
     group = rootProject.maven_group
-    archivesBaseName = rootProject.archives_base_name
+    archivesBaseName = rootProject.name + "-" + project.name
     version = rootProject.mod_version
-
-    base {
-        archivesName = rootProject.archives_base_name
-    }
 
     repositories {
         mavenCentral()
@@ -30,17 +28,7 @@ allprojects {
 
     dependencies {
         if (project.name == "paper") {
-            implementation("org.jetbrains.kotlinx:kotlinx-datetime:${rootProject.kotlinx_datetime_version}") {
-                exclude(module: 'kotlin-stdlib')
-            }
-        } else if (project.name == "forge") {
-            shadow(implementation("org.jetbrains.kotlinx:kotlinx-datetime:${rootProject.kotlinx_datetime_version}")) {
-                exclude(module: 'kotlin-stdlib')
-            }
-        } else {
-            compileOnly "org.jetbrains.kotlinx:kotlinx-datetime:${rootProject.kotlinx_datetime_version}"
-        }
-        if (project.name == "paper") {
+            // I didn't find a good kotlin for paper library
             implementation "org.jetbrains.kotlin:kotlin-stdlib:${rootProject.kotlin_version}"
             implementation "org.jetbrains.kotlin:kotlin-reflect:${rootProject.kotlin_version}"
             implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:${rootProject.kotlinx_coroutines_version}"
@@ -54,48 +42,25 @@ allprojects {
             compileOnly "org.jetbrains.kotlinx:kotlinx-serialization-json:${rootProject.kotlinx_serialization_version}"
         }
         if (project.name == "paper" || project.name == "common") {
+            // paper already includes adventure
             compileOnly("net.kyori:adventure-api:${rootProject.adventure_version}")
             compileOnly("net.kyori:adventure-text-serializer-gson:${rootProject.adventure_version}") {
                 exclude(module: 'gson')
             }
-            implementation("io.github.xn32:json5k:0.3.0") {
-                exclude(module: 'kotlin-stdlib')
-                exclude(module: 'kotlinx-serialization-core')
-            }
-            implementation("com.charleskorn.kaml:kaml:0.56.0") {
-                exclude(module: 'kotlin-stdlib')
-                exclude(module: 'kotlinx-serialization-core')
-            }
         } else {
+            // shadow for all other loaders
             shadow "net.kyori:adventure-api:${rootProject.adventure_version}"
             shadow("net.kyori:adventure-text-serializer-gson:${rootProject.adventure_version}") {
                 exclude(module: 'gson')
             }
-            shadow(implementation("io.github.xn32:json5k:0.3.0")) {
-                exclude(module: 'kotlin-stdlib')
-                exclude(module: 'kotlinx-serialization-core')
-            }
-            shadow(implementation("com.charleskorn.kaml:kaml:0.56.0")) {
-                exclude(module: 'kotlin-stdlib')
-                exclude(module: 'kotlinx-serialization-core')
-            }
         }
-        implementation("com.squareup.retrofit2:retrofit:2.10.0-SNAPSHOT") {
-            exclude(module: 'kotlin-stdlib')
-            exclude(module: 'kotlin-reflect')
-            exclude(module: 'kotlinx-coroutines-core')
-            exclude(module: 'kotlinx-serialization-core')
-            exclude(module: 'kotlinx-serialization-json')
-        }
-        implementation("com.squareup.retrofit2:converter-gson:2.10.0-SNAPSHOT") {
-            exclude(module: 'gson')
-        }
-        compileOnly "com.google.code.gson:gson:2.10.1"
+        // is available in all loaders at runtime
+        compileOnly "com.google.code.gson:gson:${rootProject.gson_version}"
     }
 
     tasks.withType(JavaCompile).configureEach {
         options.encoding = "UTF-8"
-        it.options.release = 17
+        options.release = 17
     }
 
     compileKotlin {
@@ -118,5 +83,6 @@ allprojects {
         relocate "org.snakeyaml", "tgbridge.shaded.snakeyaml"
         relocate "com.charleskorn.kaml", "tgbridge.shaded.kaml"
         relocate "io.github.xn32", "tgbridge.shaded.xn32"
+        relocate "net.kyori", "tgbridge.shaded.kyori"
     }
 }

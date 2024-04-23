@@ -1,6 +1,6 @@
 package dev.vanutp.tgbridge.common.models
 
-import kotlinx.datetime.Instant
+import java.time.Instant
 
 enum class LastMessageType {
     TEXT,

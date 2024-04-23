@@ -14,6 +14,7 @@ import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.plugin.java.JavaPlugin
 import kotlin.io.path.absolute
+import net.minecraft.locale.Language
 
 class PaperPlatform(private val plugin: JavaPlugin) : Platform() {
     override val name = "paper"
@@ -94,5 +95,13 @@ class PaperPlatform(private val plugin: JavaPlugin) : Platform() {
 
     override fun getOnlinePlayerNames(): Array<String> {
         return plugin.server.onlinePlayers.map { it.name }.toTypedArray()
+    }
+
+    override fun getLanguageKey(key: String) = with(Language.getInstance()) {
+        if (has(key)) {
+            this.getOrDefault(key)
+        } else {
+            null
+        }
     }
 }

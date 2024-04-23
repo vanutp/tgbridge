@@ -11,7 +11,6 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Query
 import java.time.Duration
-import kotlin.coroutines.coroutineContext
 
 data class TgUser(
     val id: Long,
@@ -145,12 +144,11 @@ interface TgApi {
 const val POLL_TIMEOUT_SECONDS = 60
 
 class TelegramBot(private val botToken: String, private val logger: AbstractLogger) {
+    private val okhttpClient = OkHttpClient.Builder()
+            .readTimeout(Duration.ofSeconds((POLL_TIMEOUT_SECONDS + 10).toLong()))
+            .build()
     private val client = Retrofit.Builder()
-        .client(
-            OkHttpClient.Builder()
-                .readTimeout(Duration.ofSeconds((POLL_TIMEOUT_SECONDS + 10).toLong()))
-                .build()
-        )
+        .client(okhttpClient)
         .baseUrl("https://api.telegram.org/bot${botToken}/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
@@ -182,11 +180,11 @@ class TelegramBot(private val botToken: String, private val logger: AbstractLogg
         me = call { client.getMe() }
     }
 
-    suspend fun startPolling() {
+    suspend fun startPolling(scope: CoroutineScope) {
         if (pollTask != null) {
-            throw Exception("polling already started")
+            throw IllegalStateException("polling already started")
         }
-        pollTask = CoroutineScope(coroutineContext).launch {
+        pollTask = scope.launch {
             var offset = -1
             while (true) {
                 try {
@@ -225,8 +223,10 @@ class TelegramBot(private val botToken: String, private val logger: AbstractLogg
         }
     }
 
-    suspend fun stopPolling() {
+    suspend fun shutdown() {
         pollTask?.cancelAndJoin()
+        okhttpClient.dispatcher().executorService().shutdown()
+        okhttpClient.connectionPool().evictAll()
     }
 
     private suspend fun <T> call(f: suspend () -> TgResponse<T>): T {

@@ -6,22 +6,20 @@ import dev.vanutp.tgbridge.common.models.LastMessage
 import dev.vanutp.tgbridge.common.models.LastMessageType
 import dev.vanutp.tgbridge.common.models.TBCommandContext
 import dev.vanutp.tgbridge.common.models.TBPlayerEventData
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.datetime.Clock
 import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.TranslatableComponent
-import kotlin.time.Duration.Companion.seconds
+import java.time.Clock
+import java.time.temporal.ChronoUnit
 
 
 abstract class TelegramBridge {
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
     protected abstract val logger: AbstractLogger
     protected abstract val platform: Platform
+    private var initialized: Boolean = false
     private lateinit var bot: TelegramBot
 
     private var lastMessage: LastMessage? = null
@@ -30,7 +28,7 @@ abstract class TelegramBridge {
     fun init() {
         logger.info("tgbridge starting on ${platform.name}")
         try {
-            ConfigManager.init(platform.configDir)
+            ConfigManager.init(platform.configDir, platform::getLanguageKey)
         } catch (_: DefaultConfigUnchangedException) {
             logger.error("Can't start with default config values: please fill in botToken and chatId")
             return
@@ -44,15 +42,20 @@ abstract class TelegramBridge {
         registerTelegramHandlers()
         registerMinecraftHandlers()
         coroutineScope.launch {
-            bot.startPolling()
+            bot.startPolling(coroutineScope)
         }
+        initialized = true
     }
 
     fun shutdown() {
+        if (!initialized) {
+            return
+        }
         runBlocking {
             sendMessage(lang.telegram.serverStopped)
-            bot.stopPolling()
+            bot.shutdown()
         }
+        coroutineScope.cancel()
     }
 
     private fun registerTelegramHandlers() {
@@ -116,14 +119,13 @@ abstract class TelegramBridge {
             "username" to e.username,
             "text" to (bluemapLink ?: escapedText),
         )
-        val currDate = Clock.System.now()
+        val currDate = Clock.systemUTC().instant()
 
         val lm = lastMessage
-        if (
-            lm != null
-            && lm.type == LastMessageType.TEXT
-            && (lm.text + "\n" + currText).length <= 4000
-            && currDate - lm.date < (config.messageMergeWindow ?: 0).seconds
+        if (lm != null && lm.type == LastMessageType.TEXT && (lm.text + "\n" + currText).length <= 4000 && currDate.minus(
+                (config.messageMergeWindow ?: 0).toLong(),
+                ChronoUnit.SECONDS
+            ) < lm.date
         ) {
             lm.text += "\n" + currText
             lm.date = currDate
@@ -142,11 +144,10 @@ abstract class TelegramBridge {
 
     private fun onPlayerJoin(e: TBPlayerEventData) = withScopeAndLock {
         val lm = lastMessage
-        if (
-            lm != null
-            && lm.type == LastMessageType.LEAVE
-            && lm.leftPlayer!! == e.username
-            && Clock.System.now() - lm.date < (config.leaveJoinMergeWindow ?: 0).seconds
+        val currDate = Clock.systemUTC().instant()
+        if (lm != null && lm.type == LastMessageType.LEAVE && lm.leftPlayer!! == e.username && currDate.minus(
+                (config.leaveJoinMergeWindow ?: 0).toLong(), ChronoUnit.SECONDS
+            ) < lm.date
         ) {
             deleteMessage(lm.id)
         } else {
@@ -158,10 +159,7 @@ abstract class TelegramBridge {
     private fun onPlayerLeave(e: TBPlayerEventData) = withScopeAndLock {
         val newMsg = sendMessage(lang.telegram.playerLeft.formatLang("username" to e.username))
         lastMessage = LastMessage(
-            LastMessageType.LEAVE,
-            newMsg.messageId,
-            Clock.System.now(),
-            leftPlayer = e.username
+            LastMessageType.LEAVE, newMsg.messageId, Clock.systemUTC().instant(), leftPlayer = e.username
         )
     }
 
