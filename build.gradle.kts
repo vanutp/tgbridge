@@ -14,7 +14,7 @@ plugins {
 group = "dev.vanutp"
 version = "0.2.1"
 
-allprojects {
+subprojects {
     apply {
         plugin("org.jetbrains.kotlin.jvm")
         plugin("org.jetbrains.kotlin.plugin.serialization")
@@ -54,18 +54,9 @@ allprojects {
         }
 
         val adventureVersion = "4.15.0"
-        if (project.name == "paper" || project.name == "common") {
-            // paper already includes adventure
-            compileOnly("net.kyori:adventure-api:${adventureVersion}")
-            compileOnly("net.kyori:adventure-text-serializer-gson:${adventureVersion}") {
-                exclude(module = "gson")
-            }
-        } else {
-            // shadow for all other loaders
-            shadow("net.kyori:adventure-api:${adventureVersion}")
-            shadow("net.kyori:adventure-text-serializer-gson:${adventureVersion}") {
-                exclude(module = "gson")
-            }
+        compileOnly("net.kyori:adventure-api:${adventureVersion}")
+        compileOnly("net.kyori:adventure-text-serializer-gson:${adventureVersion}") {
+            exclude(module = "gson")
         }
 
         // gson is available in all loaders at runtime
@@ -97,7 +88,6 @@ allprojects {
             relocate("retrofit2", "tgbridge.shaded.retrofit2")
             relocate("org.snakeyaml", "tgbridge.shaded.snakeyaml")
             relocate("com.charleskorn.kaml", "tgbridge.shaded.kaml")
-            relocate("net.kyori", "tgbridge.shaded.kyori")
         }
     }
 }
