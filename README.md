@@ -2,6 +2,8 @@
 
 A feature-rich multiloader Telegram bridge for Minecraft
 
+https://github.com/vanutp/tgbridge/assets/11143488/697a6d5d-1f2c-4156-bf8d-140446a83f5e
+
 ## Quick start
 
 1. Download and install the latest release for your loader from the Modrinth page: https://modrinth.com/mod/tgbridge
