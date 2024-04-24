@@ -169,7 +169,10 @@ val XAERO_WAYPOINT_RGX =
 fun String.asBluemapLinkOrNone(): String? {
     XAERO_WAYPOINT_RGX.matchEntire(this)?.let {
         try {
-            val waypointName = it.groupValues[1]
+            var waypointName = it.groupValues[1]
+            if (waypointName == "gui.xaero-deathpoint-old" || waypointName == "gui.xaero-deathpoint") {
+                waypointName = Component.translatable(waypointName).translate()
+            }
             val x = Integer.parseInt(it.groupValues[2])
             val y = Integer.parseInt(it.groupValues[3])
             val z = Integer.parseInt(it.groupValues[4])
