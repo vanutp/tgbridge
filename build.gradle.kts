@@ -94,6 +94,8 @@ subprojects {
     }
 
     modrinth {
+        val loader = project.name.replace("-", " ").replaceFirstChar { it.uppercaseChar() }
+        versionName = "${project.version} ($loader)"
         token.set(System.getenv("MODRINTH_TOKEN"))
         projectId.set("tgbridge")
         versionType.set("release")
