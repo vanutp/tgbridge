@@ -27,6 +27,10 @@ dependencies {
 	shadow(project(":common"))
 }
 
+loom {
+	accessWidenerPath = file("src/main/resources/tgbridge.accesswidener")
+}
+
 tasks {
 	named<ProcessResources>("processResources") {
 		inputs.property("version", project.version)

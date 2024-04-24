@@ -17,10 +17,10 @@ description='''
     mandatory=true
     versionRange="[43,)"
     ordering="NONE"
-    side="SERVER"
+    side="BOTH"
 [[dependencies.tgbridge]]
     modId="minecraft"
     mandatory=true
     versionRange="[1.19.2]"
     ordering="NONE"
-    side="SERVER"
+    side="BOTH"

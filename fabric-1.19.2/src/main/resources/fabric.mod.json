@@ -13,11 +13,18 @@
 	},
 	"license": "MIT",
 	"icon": "assets/tgbridge/icon.png",
-	"environment": "server",
+	"environment": "*",
+	"accessWidener": "tgbridge.accesswidener",
 	"entrypoints": {
-		"main": [
+		"server": [
 			{
 				"value": "dev.vanutp.tgbridge.fabric.FabricBootstrap",
+				"adapter": "kotlin"
+			}
+		],
+		"client": [
+			{
+				"value": "dev.vanutp.tgbridge.fabric.FabricBootstrapClient",
 				"adapter": "kotlin"
 			}
 		]
