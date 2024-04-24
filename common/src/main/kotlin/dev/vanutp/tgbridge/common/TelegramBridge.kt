@@ -33,7 +33,7 @@ abstract class TelegramBridge {
             logger.error("Can't start with default config values: please fill in botToken and chatId")
             return
         }
-        bot = TelegramBot(config.botToken, logger)
+        bot = TelegramBot(config.general.botToken, logger)
 
         runBlocking {
             bot.init()
@@ -78,7 +78,10 @@ abstract class TelegramBridge {
     }
 
     private suspend fun onTelegramMessage(msg: TgMessage) {
-        if (msg.chat.id != config.chatId || config.topicId != null && msg.messageThreadId != config.topicId) {
+        if (
+            msg.chat.id != config.general.chatId
+            || config.general.topicId != null && msg.messageThreadId != config.general.topicId
+        ) {
             return
         }
         lastMessageLock.withLock {
@@ -111,7 +114,7 @@ abstract class TelegramBridge {
         val rawMinecraftText = (e.text as TextComponent).content()
         val escapedText = rawMinecraftText.escapeHTML()
         val bluemapLink = rawMinecraftText.asBluemapLinkOrNone()
-        if (bluemapLink == null && !rawMinecraftText.startsWith(config.requirePrefixInMinecraft ?: "")) {
+        if (bluemapLink == null && !rawMinecraftText.startsWith(config.messages.requirePrefixInMinecraft ?: "")) {
             return@withScopeAndLock
         }
 
@@ -126,7 +129,7 @@ abstract class TelegramBridge {
             lm != null
             && lm.type == LastMessageType.TEXT
             && (lm.text + "\n" + currText).length <= 4000
-            && currDate.minus((config.messageMergeWindow ?: 0).toLong(), ChronoUnit.SECONDS) < lm.date
+            && currDate.minus((config.messages.mergeWindow ?: 0).toLong(), ChronoUnit.SECONDS) < lm.date
         ) {
             lm.text += "\n" + currText
             lm.date = currDate
@@ -143,19 +146,25 @@ abstract class TelegramBridge {
     }
 
     private fun onPlayerDeath(e: TBPlayerEventData) = withScopeAndLock {
+        if (!config.events.enableDeathMessages) {
+            return@withScopeAndLock
+        }
         val component = e.text as TranslatableComponent
         sendMessage(lang.telegram.playerDied.formatLang("deathMessage" to component.translate().escapeHTML()))
         lastMessage = null
     }
 
     private fun onPlayerJoin(e: TBPlayerEventData) = withScopeAndLock {
+        if (!config.events.enableJoinMessages) {
+            return@withScopeAndLock
+        }
         val lm = lastMessage
         val currDate = Clock.systemUTC().instant()
         if (
             lm != null
             && lm.type == LastMessageType.LEAVE
             && lm.leftPlayer!! == e.username
-            && currDate.minus((config.leaveJoinMergeWindow ?: 0).toLong(), ChronoUnit.SECONDS) < lm.date
+            && currDate.minus((config.events.leaveJoinMergeWindow ?: 0).toLong(), ChronoUnit.SECONDS) < lm.date
         ) {
             deleteMessage(lm.id)
         } else {
@@ -165,6 +174,9 @@ abstract class TelegramBridge {
     }
 
     private fun onPlayerLeave(e: TBPlayerEventData) = withScopeAndLock {
+        if (!config.events.enableLeaveMessages) {
+            return@withScopeAndLock
+        }
         val newMsg = sendMessage(lang.telegram.playerLeft.formatLang("username" to e.username))
         lastMessage = LastMessage(
             LastMessageType.LEAVE,
@@ -175,18 +187,25 @@ abstract class TelegramBridge {
     }
 
     private fun onPlayerAdvancement(e: TBPlayerEventData) = withScopeAndLock {
+        if (!config.events.advancementMessages.enable) {
+            return@withScopeAndLock
+        }
         val component = e.text as TranslatableComponent
         val advancementTypeKey = component.key()
         val squareBracketsComponent = component.args()[1] as TranslatableComponent
         val advancementNameComponent = squareBracketsComponent.args()[0] as TranslatableComponent
         val advancementName = advancementNameComponent.translate()
-        val advancementDescription = advancementNameComponent.style().hoverEvent()?.let {
-            val advancementTooltipComponent = it.value() as TranslatableComponent
-            if (advancementTooltipComponent.children().size < 2) {
-                return@let null
-            }
-            (advancementTooltipComponent.children()[1] as TranslatableComponent).translate()
-        } ?: ""
+        val advancementDescription = if (config.events.advancementMessages.showDescription) {
+            advancementNameComponent.style().hoverEvent()?.let {
+                val advancementTooltipComponent = it.value() as TranslatableComponent
+                if (advancementTooltipComponent.children().size < 2) {
+                    return@let null
+                }
+                (advancementTooltipComponent.children()[1] as TranslatableComponent).translate()
+            } ?: ""
+        } else {
+            ""
+        }
         val langKey = when (advancementTypeKey) {
             "chat.type.advancement.task" -> lang.telegram.advancements.regular
             "chat.type.advancement.goal" -> lang.telegram.advancements.goal
@@ -212,14 +231,14 @@ abstract class TelegramBridge {
     }
 
     private suspend fun sendMessage(text: String): TgMessage {
-        return bot.sendMessage(config.chatId, text, replyToMessageId = config.topicId)
+        return bot.sendMessage(config.general.chatId, text, replyToMessageId = config.general.topicId)
     }
 
     private suspend fun editMessageText(messageId: Int, text: String): TgMessage {
-        return bot.editMessageText(config.chatId, messageId, text)
+        return bot.editMessageText(config.general.chatId, messageId, text)
     }
 
     private suspend fun deleteMessage(messageId: Int) {
-        bot.deleteMessage(config.chatId, messageId)
+        bot.deleteMessage(config.general.chatId, messageId)
     }
 }

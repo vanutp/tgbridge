@@ -3,9 +3,8 @@ package dev.vanutp.tgbridge.common.models
 import com.charleskorn.kaml.YamlComment
 import kotlinx.serialization.Serializable
 
-
 @Serializable
-data class Config(
+data class GeneralConfig(
     @YamlComment(
         "Open https://t.me/BotFather to create a bot.",
         "Make sure to *disable* group privacy in the \"Bot Settings\" menu.",
@@ -27,6 +26,10 @@ data class Config(
         "Default value: null (disabled)",
     )
     val topicId: Int? = null,
+)
+
+@Serializable
+data class GameMessagesConfig(
     @YamlComment(
         "If this value is set, waypoints shared from Xaero's Minimap/World Map will be rendered",
         "as links to a specified Bluemap instance.",
@@ -45,12 +48,35 @@ data class Config(
         "Chat messages sent within the specified interval (in seconds) will be merged in one.",
         "Default value: 0 (disabled)",
     )
-    val messageMergeWindow: Int? = 0,
+    val mergeWindow: Int? = 0,
+)
+
+@Serializable
+data class AdvancementsConfig(
+    val enable: Boolean = true,
+    @YamlComment("Include advancement descriptions in Telegram messages")
+    val showDescription: Boolean = true,
+)
+
+@Serializable
+data class GameEventsConfig(
+    val advancementMessages: AdvancementsConfig = AdvancementsConfig(),
+    val enableDeathMessages: Boolean = true,
+    val enableJoinMessages: Boolean = true,
+    val enableLeaveMessages: Boolean = true,
     @YamlComment(
         "If a player leaves and then joins within the specified time interval (in seconds),",
         "the leave and join messages will be deleted.",
         "This is useful when players frequently re-join, for example because of connection problems.",
+        "Only has effect when both enableJoinMessages and enableLeaveMessages are set to true",
         "Default value: 0 (disabled)",
     )
     val leaveJoinMergeWindow: Int? = 0,
+)
+
+@Serializable
+data class Config(
+    val general: GeneralConfig = GeneralConfig(),
+    val messages: GameMessagesConfig = GameMessagesConfig(),
+    val events: GameEventsConfig = GameEventsConfig(),
 )

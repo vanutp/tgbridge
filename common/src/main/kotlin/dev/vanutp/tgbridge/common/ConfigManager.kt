@@ -59,7 +59,7 @@ object ConfigManager {
             configPath.writeText(yaml.encodeToString(Config()))
         }
         val loadedConfig = yaml.decodeFromString<Config>(configPath.readText())
-        if (loadedConfig.botToken == Config().botToken || loadedConfig.chatId == Config().chatId) {
+        if (loadedConfig.general.botToken == Config().general.botToken || loadedConfig.general.chatId == Config().general.chatId) {
             throw DefaultConfigUnchangedException()
         }
         config = loadedConfig

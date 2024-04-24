@@ -86,7 +86,7 @@ private fun TgMessage.replyToText(botId: Long): String? {
         // Telegram sends reply message when message is pinned
             this.pinnedMessage != null
             // All messages to a topic are sent as replies to a service message
-            || reply.messageId == config.topicId
+            || reply.messageId == config.general.topicId
         ) {
             return@let
         }
@@ -178,7 +178,7 @@ fun String.asBluemapLinkOrNone(): String? {
             val z = Integer.parseInt(it.groupValues[4])
             val worldName = it.groupValues[5]
 
-            return """<a href="${config.bluemapUrl}#$worldName:$x:$y:$z:50:0:0:0:0:perspective">$waypointName</a>"""
+            return """<a href="${config.messages.bluemapUrl}#$worldName:$x:$y:$z:50:0:0:0:0:perspective">$waypointName</a>"""
         } catch (_: NumberFormatException) {
         }
     }
