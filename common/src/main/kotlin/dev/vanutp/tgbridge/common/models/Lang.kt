@@ -41,7 +41,7 @@ data class MessageMeta(
     val videoMessage: String = "[Video message]",
     val voiceMessage: String = "[Voice message]",
     val poll: String = "[Poll: {title}]",
-    val pin: String = "[pinned a message: {text}]",
+    val pin: String = "[pinned a message]",
 )
 
 @Serializable
@@ -52,7 +52,6 @@ data class LangMinecraft(
 @Serializable
 data class Lang(
     @YamlComment("Translations to other languages can be downloaded from https://github.com/vanutp/tgbridge")
-    val version: Int = 1,
     val telegram: LangTelegram = LangTelegram(),
     val minecraft: LangMinecraft = LangMinecraft(),
 )

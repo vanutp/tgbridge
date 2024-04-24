@@ -145,7 +145,7 @@ fun TgMessage.toMinecraft(botId: Long): Component {
         pinnedMsg.effectiveText?.let { pinnedMessageText.add(it) }
         components.add(
             Component.text(
-                lang.minecraft.messageMeta.pin.formatLang("text" to pinnedMessageText.joinToString(" ")),
+                lang.minecraft.messageMeta.pin + " " + pinnedMessageText.joinToString(" "),
                 NamedTextColor.DARK_AQUA
             )
         )

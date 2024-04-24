@@ -17,10 +17,10 @@ data class GeneralConfig(
         "The copied link will be in the format \"https://t.me/c/<chat_id>/<topic_id>/<message_id>\".",
         "Topic id will only be present if the chat has topics enabled.",
     )
-    val chatId: Long = 0,
+    var chatId: Long = 0,
     @YamlComment(
-        "If the specified chat has topics enabled, specify the topic id where bot should send all messages.",
-        "Commands will have no effect in other topics.",
+        "If the specified chat has topics enabled, specify the id of the topic that will be",
+        "synchronized with the game. Commands will have no effect in other topics.",
         "If you don't set this, the bot will send all messages to the \"General\" topic",
         "and the /list command will have weird behaviour when sent in other topics.",
         "Default value: null (disabled)",
@@ -46,6 +46,7 @@ data class GameMessagesConfig(
     val requirePrefixInMinecraft: String? = "",
     @YamlComment(
         "Chat messages sent within the specified interval (in seconds) will be merged in one.",
+        "The value is specified in seconds",
         "Default value: 0 (disabled)",
     )
     val mergeWindow: Int? = 0,
@@ -69,6 +70,7 @@ data class GameEventsConfig(
         "the leave and join messages will be deleted.",
         "This is useful when players frequently re-join, for example because of connection problems.",
         "Only has effect when both enableJoinMessages and enableLeaveMessages are set to true",
+        "The value is specified in seconds",
         "Default value: 0 (disabled)",
     )
     val leaveJoinMergeWindow: Int? = 0,
@@ -76,6 +78,10 @@ data class GameEventsConfig(
 
 @Serializable
 data class Config(
+    @YamlComment(
+        "It's enough to set botToken and chatId for the plugin to work.",
+        "When your group has topics enabled, you should also set topicId."
+    )
     val general: GeneralConfig = GeneralConfig(),
     val messages: GameMessagesConfig = GameMessagesConfig(),
     val events: GameEventsConfig = GameEventsConfig(),

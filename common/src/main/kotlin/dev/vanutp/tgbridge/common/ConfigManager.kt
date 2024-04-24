@@ -62,6 +62,9 @@ object ConfigManager {
         if (loadedConfig.general.botToken == Config().general.botToken || loadedConfig.general.chatId == Config().general.chatId) {
             throw DefaultConfigUnchangedException()
         }
+        if (loadedConfig.general.chatId > 0) {
+            loadedConfig.general.chatId = -1000000000000 - loadedConfig.general.chatId
+        }
         config = loadedConfig
         // write new keys & update docs
         configPath.writeText(yaml.encodeToString(config))
