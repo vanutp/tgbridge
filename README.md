@@ -18,6 +18,7 @@ https://github.com/vanutp/tgbridge/assets/11143488/697a6d5d-1f2c-4156-bf8d-14044
 ## Features
 
 - Supports most of Telegram messages
+- Supports Telegram topics (bot will work only in its dedicated topic)
 - `/list` command in Telegram will print the list of currently online players
 - If you have BlueMap and Xaero's Minimap/World Map installed, you can set the `messages.bluemapUrl` option
   to be able to view shared waypoints from Telegram on the BlueMap
