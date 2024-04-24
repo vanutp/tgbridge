@@ -1,6 +1,6 @@
 # Minecraft Telegram Bridge
 
-A feature-rich multiloader Telegram bridge for Minecraft
+A feature-rich multiloader mod to sync Telegram and Minecraft chats
 
 https://github.com/vanutp/tgbridge/assets/11143488/697a6d5d-1f2c-4156-bf8d-140446a83f5e
 
