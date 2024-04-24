@@ -42,7 +42,6 @@ data class MessageMeta(
     val voiceMessage: String = "[Voice message]",
     val poll: String = "[Poll: {title}]",
     val pin: String = "[pinned a message: {text}]",
-    val pinNoText: String = "[pinned a message]",
 )
 
 @Serializable

@@ -15,6 +15,7 @@ fun String.escapeHTML(): String = this
 
 fun TranslatableComponent.translate(): String {
     var res = getMinecraftLangKey(this.key()) ?: this.key()
+    // We're using older versions of kyori on some platforms, so using deprecated args() is ok
     this.args().forEachIndexed { i, x ->
         val child = when (x) {
             is TranslatableComponent -> x.translate()
@@ -39,8 +40,8 @@ fun String.formatLang(vararg args: Pair<String, String>): String {
     return res
 }
 
-fun trimTextForMessagePart(text: String): String {
-    val lines = text.split("\n", limit = 1)
+fun trimReplyMessageText(text: String): String {
+    val lines = text.split("\n", limit = 2)
     return if (lines.size > 1 || lines[0].length > 50) {
         lines[0].take(50) + "..."
     } else {
@@ -48,56 +49,7 @@ fun trimTextForMessagePart(text: String): String {
     }
 }
 
-fun TgMessage.toMinecraft(botId: Long): Component {
-    val components = mutableListOf<Component>()
-
-    components.add(Component.text("<${this.senderName}>", NamedTextColor.AQUA))
-
-    this.pinnedMessage?.let {
-        val langString = if (it.effectiveText == "") {
-            lang.minecraft.messageMeta.pinNoText
-        } else {
-            lang.minecraft.messageMeta.pin
-        }
-        components.add(Component.text(langString.formatLang("text" to it.effectiveText), NamedTextColor.DARK_AQUA))
-    }
-
-    this.replyToMessage?.let { reply ->
-        if (
-            // Telegram sends reply message when message is pinned
-            this.pinnedMessage != null
-            // All messages to a topic are sent as replies to a service message
-            || reply.messageId == config.topicId
-        ) {
-            return@let
-        }
-        val formattedReply = if (reply.from?.id == botId) {
-            lang.minecraft.messageMeta.replyToMinecraft.formatLang(
-                "text" to trimTextForMessagePart(reply.effectiveText),
-            )
-        } else {
-            lang.minecraft.messageMeta.reply.formatLang(
-                "sender" to reply.senderName,
-                "text" to trimTextForMessagePart(reply.effectiveText),
-            )
-        }
-        components.add(Component.text(formattedReply, NamedTextColor.BLUE))
-    }
-
-    val forwardFromName = this.forwardFrom?.let { _ ->
-        (this.forwardFrom.firstName + " " + (this.forwardFrom.lastName ?: "")).trim()
-    } ?: this.forwardFromChat?.let {
-        this.forwardFromChat.title
-    }
-    forwardFromName?.let {
-        components.add(
-            Component.text(
-                lang.minecraft.messageMeta.forward.formatLang("from" to it),
-                NamedTextColor.GRAY
-            )
-        )
-    }
-
+private fun TgMessageMedia.mediaToText(): String? {
     listOf(
         this.animation to lang.minecraft.messageMeta.gif,
         this.document to lang.minecraft.messageMeta.document,
@@ -108,24 +60,101 @@ fun TgMessage.toMinecraft(botId: Long): Component {
         this.videoNote to lang.minecraft.messageMeta.videoMessage,
         this.voice to lang.minecraft.messageMeta.voiceMessage,
     ).forEach {
-        if (it.first == this.document && this.animation != null) {
-            return@forEach
-        }
         if (it.first != null) {
-            components.add(Component.text(it.second, NamedTextColor.GREEN))
+            return it.second
         }
     }
 
     this.poll?.let {
+        return lang.minecraft.messageMeta.poll.formatLang("title" to it.question)
+    }
+
+    return null
+}
+
+private data class ReplyInfo(
+    var isReplyToMinecraft: Boolean,
+    var senderName: String,
+    var media: String?,
+    var text: String?,
+)
+
+private fun TgMessage.replyToText(botId: Long): String? {
+    var info: ReplyInfo? = null
+    this.replyToMessage?.let { reply ->
+        if (
+        // Telegram sends reply message when message is pinned
+            this.pinnedMessage != null
+            // All messages to a topic are sent as replies to a service message
+            || reply.messageId == config.topicId
+        ) {
+            return@let
+        }
+        info = ReplyInfo(
+            isReplyToMinecraft = reply.from?.id == botId,
+            senderName = reply.senderName,
+            media = reply.mediaToText(),
+            text = reply.effectiveText
+        )
+    }
+    this.externalReply?.let { reply ->
+        info = ReplyInfo(
+            isReplyToMinecraft = false,
+            senderName = reply.senderName,
+            media = reply.mediaToText(),
+            text = null,
+        )
+    }
+    this.quote?.let {
+        info?.text = it.text
+    }
+
+    return info?.let {
+        val fullText = "${it.media ?: ""} ${trimReplyMessageText(it.text ?: "")}".trim()
+        if (it.isReplyToMinecraft) {
+            lang.minecraft.messageMeta.replyToMinecraft.formatLang("text" to fullText)
+        } else {
+            lang.minecraft.messageMeta.reply.formatLang(
+                "sender" to it.senderName,
+                "text" to fullText,
+            )
+        }
+    }
+}
+
+private fun TgMessage.forwardFromToText(): String? {
+    val forwardFromName = this.forwardFrom?.let { _ ->
+        (this.forwardFrom.firstName + " " + (this.forwardFrom.lastName ?: "")).trim()
+    } ?: this.forwardFromChat?.let {
+        this.forwardFromChat.title
+    }
+    return forwardFromName?.let {
+        lang.minecraft.messageMeta.forward.formatLang("from" to it)
+    }
+}
+
+fun TgMessage.toMinecraft(botId: Long): Component {
+    val components = mutableListOf<Component>()
+
+    components.add(Component.text("<${this.senderName}>", NamedTextColor.AQUA))
+
+    this.pinnedMessage?.let { pinnedMsg ->
+        val pinnedMessageText = mutableListOf<String>()
+        pinnedMsg.forwardFromToText()?.let { pinnedMessageText.add(it) }
+        pinnedMsg.mediaToText()?.let { pinnedMessageText.add(it) }
+        pinnedMsg.effectiveText?.let { pinnedMessageText.add(it) }
         components.add(
             Component.text(
-                lang.minecraft.messageMeta.poll.formatLang("title" to it.question),
-                NamedTextColor.GREEN
+                lang.minecraft.messageMeta.pin.formatLang("text" to pinnedMessageText.joinToString(" ")),
+                NamedTextColor.DARK_AQUA
             )
         )
     }
 
-    components.add(Component.text(this.effectiveText))
+    forwardFromToText()?.let { components.add(Component.text(it, NamedTextColor.GRAY)) }
+    replyToText(botId)?.let { components.add(Component.text(it, NamedTextColor.BLUE)) }
+    mediaToText()?.let { components.add(Component.text(it, NamedTextColor.GREEN)) }
+    effectiveText?.let { components.add(Component.text(it)) }
 
     return components
         .flatMap { listOf(it, Component.text(" ")) }

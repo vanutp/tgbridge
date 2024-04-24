@@ -24,7 +24,7 @@ private data class OldConfig(
 class DefaultConfigUnchangedException : Exception("botToken or chatId is not set")
 
 object ConfigManager {
-    private val yaml = Yaml(configuration = YamlConfiguration())
+    private val yaml = Yaml(configuration = YamlConfiguration(strictMode = false))
     private lateinit var configDir: Path
     lateinit var config: Config
         private set

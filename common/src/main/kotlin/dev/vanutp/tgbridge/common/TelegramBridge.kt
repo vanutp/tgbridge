@@ -122,17 +122,23 @@ abstract class TelegramBridge {
         val currDate = Clock.systemUTC().instant()
 
         val lm = lastMessage
-        if (lm != null && lm.type == LastMessageType.TEXT && (lm.text + "\n" + currText).length <= 4000 && currDate.minus(
-                (config.messageMergeWindow ?: 0).toLong(),
-                ChronoUnit.SECONDS
-            ) < lm.date
+        if (
+            lm != null
+            && lm.type == LastMessageType.TEXT
+            && (lm.text + "\n" + currText).length <= 4000
+            && currDate.minus((config.messageMergeWindow ?: 0).toLong(), ChronoUnit.SECONDS) < lm.date
         ) {
             lm.text += "\n" + currText
             lm.date = currDate
             editMessageText(lm.id, lm.text!!)
         } else {
             val newMsg = sendMessage(currText)
-            lastMessage = LastMessage(LastMessageType.TEXT, newMsg.messageId, currDate, text = currText)
+            lastMessage = LastMessage(
+                LastMessageType.TEXT,
+                newMsg.messageId,
+                currDate,
+                text = currText
+            )
         }
     }
 
@@ -145,9 +151,11 @@ abstract class TelegramBridge {
     private fun onPlayerJoin(e: TBPlayerEventData) = withScopeAndLock {
         val lm = lastMessage
         val currDate = Clock.systemUTC().instant()
-        if (lm != null && lm.type == LastMessageType.LEAVE && lm.leftPlayer!! == e.username && currDate.minus(
-                (config.leaveJoinMergeWindow ?: 0).toLong(), ChronoUnit.SECONDS
-            ) < lm.date
+        if (
+            lm != null
+            && lm.type == LastMessageType.LEAVE
+            && lm.leftPlayer!! == e.username
+            && currDate.minus((config.leaveJoinMergeWindow ?: 0).toLong(), ChronoUnit.SECONDS) < lm.date
         ) {
             deleteMessage(lm.id)
         } else {
@@ -159,7 +167,10 @@ abstract class TelegramBridge {
     private fun onPlayerLeave(e: TBPlayerEventData) = withScopeAndLock {
         val newMsg = sendMessage(lang.telegram.playerLeft.formatLang("username" to e.username))
         lastMessage = LastMessage(
-            LastMessageType.LEAVE, newMsg.messageId, Clock.systemUTC().instant(), leftPlayer = e.username
+            LastMessageType.LEAVE,
+            newMsg.messageId,
+            Clock.systemUTC().instant(),
+            leftPlayer = e.username
         )
     }
 

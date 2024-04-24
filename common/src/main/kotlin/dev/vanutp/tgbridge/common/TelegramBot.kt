@@ -33,6 +33,56 @@ data class TgPoll(
     val question: String,
 )
 
+data class TgMessageOrigin(
+    @SerializedName("sender_user")
+    val senderUser: TgUser? = null,
+    @SerializedName("sender_user_name")
+    val senderUserName: String? = null,
+    @SerializedName("sender_chat")
+    val senderChat: TgChat? = null,
+    val chat: TgChat? = null,
+)
+
+interface TgMessageMedia {
+    val animation: TgAny?
+    val photo: List<TgAny>?
+    val audio: TgAny?
+    val document: TgAny?
+    val sticker: TgAny?
+    val video: TgAny?
+    val videoNote: TgAny?
+    val voice: TgAny?
+    val poll: TgPoll?
+}
+
+data class TgExternalReplyInfo(
+    val origin: TgMessageOrigin,
+    val chat: TgChat? = null,
+    override val animation: TgAny? = null,
+    override val photo: List<TgAny>? = null,
+    override val audio: TgAny? = null,
+    override val document: TgAny? = null,
+    override val sticker: TgAny? = null,
+    override val video: TgAny? = null,
+    @SerializedName("video_note")
+    override val videoNote: TgAny? = null,
+    override val voice: TgAny? = null,
+    override val poll: TgPoll? = null,
+) : TgMessageMedia {
+    val senderName
+        get() = origin.senderUser?.let {
+            (it.firstName + " " + (it.lastName ?: "")).trim()
+        }
+            ?: origin.senderUserName
+            ?: origin.senderChat?.title
+            ?: origin.chat?.title
+            ?: ""
+}
+
+data class TgTextQuote(
+    val text: String,
+)
+
 data class TgMessage(
     val chat: TgChat,
     @SerializedName("message_id")
@@ -46,33 +96,34 @@ data class TgMessage(
     val forwardFromChat: TgChat? = null,
     @SerializedName("reply_to_message")
     val replyToMessage: TgMessage? = null,
+    @SerializedName("external_reply")
+    val externalReply: TgExternalReplyInfo? = null,
+    val quote: TgTextQuote? = null,
     @SerializedName("message_thread_id")
     val messageThreadId: Int? = null,
     val text: String? = null,
     val caption: String? = null,
-    val animation: TgAny? = null,
-    val photo: List<TgAny>? = null,
-    val audio: TgAny? = null,
-    val document: TgAny? = null,
-    val sticker: TgAny? = null,
-    val video: TgAny? = null,
+    override val animation: TgAny? = null,
+    override val photo: List<TgAny>? = null,
+    override val audio: TgAny? = null,
+    override val document: TgAny? = null,
+    override val sticker: TgAny? = null,
+    override val video: TgAny? = null,
     @SerializedName("video_note")
-    val videoNote: TgAny? = null,
-    val voice: TgAny? = null,
-    val poll: TgPoll? = null,
+    override val videoNote: TgAny? = null,
+    override val voice: TgAny? = null,
+    override val poll: TgPoll? = null,
     @SerializedName("pinned_message")
     val pinnedMessage: TgMessage? = null,
-) {
-    val senderName: String
-        get() {
-            return from?.let { _ ->
-                (from.firstName + " " + (from.lastName ?: "")).trim()
-            } ?: senderChat?.title ?: ""
+) : TgMessageMedia {
+    val senderName
+        get() = from?.let {
+            (it.firstName + " " + (it.lastName ?: "")).trim()
         }
-    val effectiveText: String
-        get() {
-            return text ?: caption ?: ""
-        }
+            ?: senderChat?.title
+            ?: ""
+    val effectiveText
+        get() = text ?: caption
 }
 
 data class TgUpdate(
@@ -145,8 +196,8 @@ const val POLL_TIMEOUT_SECONDS = 60
 
 class TelegramBot(private val botToken: String, private val logger: AbstractLogger) {
     private val okhttpClient = OkHttpClient.Builder()
-            .readTimeout(Duration.ofSeconds((POLL_TIMEOUT_SECONDS + 10).toLong()))
-            .build()
+        .readTimeout(Duration.ofSeconds((POLL_TIMEOUT_SECONDS + 10).toLong()))
+        .build()
     private val client = Retrofit.Builder()
         .client(okhttpClient)
         .baseUrl("https://api.telegram.org/bot${botToken}/")
@@ -167,7 +218,7 @@ class TelegramBot(private val botToken: String, private val logger: AbstractLogg
     fun registerCommandHandler(command: String, handler: suspend (TgMessage) -> Unit) {
         val cmdRegex = Regex("^/$command(@${me.username})?(\\s|\$)", RegexOption.IGNORE_CASE)
         commandHandlers.add {
-            if (cmdRegex.matches(it.effectiveText)) {
+            if (cmdRegex.matches(it.effectiveText ?: "")) {
                 handler(it)
                 return@add true
             } else {
