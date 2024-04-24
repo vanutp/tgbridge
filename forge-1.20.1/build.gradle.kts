@@ -57,3 +57,12 @@ tasks {
         destinationDirectory.set(file("../build/release"))
     }
 }
+
+modrinth {
+    uploadFile.set(tasks.remapJar)
+    gameVersions.addAll("1.20.1")
+    loaders.addAll("forge", "neoforge")
+    dependencies {
+        required.project("kotlin-for-forge")
+    }
+}

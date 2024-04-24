@@ -38,3 +38,8 @@ tasks {
     }
 }
 
+modrinth {
+    uploadFile.set(tasks.reobfJar.get().outputJar)
+    gameVersions.addAll("1.19.2", "1.20.1", "1.20.4")
+    loaders.add("paper")
+}

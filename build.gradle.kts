@@ -9,6 +9,7 @@ plugins {
     id("io.papermc.paperweight.userdev") version "1.5.15" apply false
     id("xyz.jpenilla.run-paper") version "2.2.3" apply false
     id("dev.architectury.loom") version "1.5-SNAPSHOT" apply false
+    id("com.modrinth.minotaur") version "2.+"
 }
 
 group = "dev.vanutp"
@@ -19,6 +20,7 @@ subprojects {
         plugin("org.jetbrains.kotlin.jvm")
         plugin("org.jetbrains.kotlin.plugin.serialization")
         plugin("com.github.johnrengelman.shadow")
+        plugin("com.modrinth.minotaur")
     }
 
     group = rootProject.group
@@ -90,4 +92,19 @@ subprojects {
             relocate("com.charleskorn.kaml", "tgbridge.shaded.kaml")
         }
     }
+
+    modrinth {
+        token.set(System.getenv("MODRINTH_TOKEN"))
+        projectId.set("tgbridge")
+        versionType.set("release")
+    }
+}
+
+task("publishAll") {
+    group = "publishing"
+    dependsOn(":fabric-1.19.2:modrinth")
+    dependsOn(":fabric-1.20.1:modrinth")
+    dependsOn(":forge-1.19.2:modrinth")
+    dependsOn(":forge-1.20.1:modrinth")
+    dependsOn(":paper:modrinth")
 }
