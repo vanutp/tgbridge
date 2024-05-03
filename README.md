@@ -8,8 +8,7 @@ https://github.com/vanutp/tgbridge/assets/11143488/697a6d5d-1f2c-4156-bf8d-14044
 
 1. Download and install the latest release for your loader from the Modrinth page: https://modrinth.com/mod/tgbridge
 2. Start the server
-3. Follow the instructions in the generated config file located at config/tgbridge/config.yml (
-   plugins/tgbridge/config.yml for Paper)
+3. Follow the instructions in the generated config file located at `config/tgbridge/config.yml` (`plugins/tgbridge/config.yml` for Paper)
 4. Restart the server (currently restart is required when changing `botToken`)
 5. The bot should work now
 6. You can look through the config file and change the settings however you like.
@@ -18,6 +17,7 @@ https://github.com/vanutp/tgbridge/assets/11143488/697a6d5d-1f2c-4156-bf8d-14044
 ## Features
 
 - Supports most of Telegram messages
+- Supports achievements & death messages from any mod out of the box
 - Supports Telegram topics (bot will work only in its dedicated topic)
 - `/list` command in Telegram will print the list of currently online players
 - If you have BlueMap and Xaero's Minimap/World Map installed, you can set the `messages.bluemapUrl` option
@@ -38,12 +38,12 @@ This mod uses 2 language files: `lang.yml` for bot's own translation strings and
 for Minecraft translations. It's a bit hard to use another language due to the fact that the minecraft server installation
 only supports English language.
 
-You can download `lang.yml` for other languages from the 
+You can download `lang.yml` for other languages from the
 [translations](https://github.com/vanutp/tgbridge/blob/master/translations) directory of this repository.
 
 
 By default `minecraft_lang.json` doesn't exist and the bot will use the default English translations provided by the server.
-If you want to use another language, you need to install this mod on the client, change the language 
+If you want to use another language, you need to install this mod on the client, change the language
 to the desired one and execute the `/tgbridge dump_lang` command.
 It will create this file in the mod configuration directory. You can then copy it to the server.
 The generated file will include translations for all currently installed mods, so if you add a new mod, you'll need to
