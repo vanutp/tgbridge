@@ -3,12 +3,13 @@
 	"id": "tgbridge",
 	"version": "${version}",
 	"name": "Telegram Bridge",
-	"description": "",
+	"description": "Sync your game with Telegram",
 	"authors": [
 		"vanutp"
 	],
 	"contact": {
-		"homepage": "https://github.com/vanutp/tgbridge",
+		"homepage": "https://modrinth.com/plugin/tgbridge",
+		"issues": "https://github.com/vanutp/tgbridge",
 		"sources": "https://github.com/vanutp/tgbridge"
 	},
 	"license": "MIT",

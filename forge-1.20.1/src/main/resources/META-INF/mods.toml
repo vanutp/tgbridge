@@ -10,8 +10,10 @@ modId="tgbridge"
 version="${version}"
 displayName="Telegram Bridge"
 authors="vanutp"
-description='''
-'''
+description="Sync your game with Telegram"
+logoFile="icon.png"
+displayURL="https://github.com/vanutp/tgbridge"
+displayTest="IGNORE_ALL_VERSION"
 [[dependencies.tgbridge]]
     modId="forge"
     mandatory=true
