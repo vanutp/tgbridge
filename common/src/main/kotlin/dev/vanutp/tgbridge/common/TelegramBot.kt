@@ -190,6 +190,9 @@ interface TgApi {
         @Query("timeout") timeout: Int,
         @Query("allowed_updates") allowedUpdates: List<String> = listOf("message"),
     ): TgResponse<List<TgUpdate>>
+
+    @POST("deleteWebhook")
+    suspend fun deleteWebhook(): TgResponse<Boolean>
 }
 
 const val POLL_TIMEOUT_SECONDS = 60
@@ -228,6 +231,7 @@ class TelegramBot(private val botToken: String, private val logger: AbstractLogg
     }
 
     suspend fun init() {
+        call { client.deleteWebhook() }
         me = call { client.getMe() }
     }
 
