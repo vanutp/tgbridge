@@ -13,7 +13,7 @@ plugins {
 }
 
 group = "dev.vanutp"
-version = "0.3"
+version = "0.4"
 
 subprojects {
     apply {
@@ -99,6 +99,7 @@ subprojects {
         token.set(System.getenv("MODRINTH_TOKEN"))
         projectId.set("tgbridge")
         versionType.set("release")
+        changelog.set(file("$rootDir/CHANGELOG.md").readText())
     }
 }
 
