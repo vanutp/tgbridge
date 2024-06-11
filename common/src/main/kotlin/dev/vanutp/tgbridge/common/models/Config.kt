@@ -55,6 +55,10 @@ data class GameMessagesConfig(
 @Serializable
 data class AdvancementsConfig(
     val enable: Boolean = true,
+    @YamlComment("Configure forwarding of each advancement type")
+    val enableTask: Boolean = true,
+    val enableGoal: Boolean = true,
+    val enableChallenge: Boolean = true,
     @YamlComment("Include advancement descriptions in Telegram messages")
     val showDescription: Boolean = true,
 )

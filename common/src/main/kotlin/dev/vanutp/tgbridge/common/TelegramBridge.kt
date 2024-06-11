@@ -187,7 +187,8 @@ abstract class TelegramBridge {
     }
 
     private fun onPlayerAdvancement(e: TBPlayerEventData) = withScopeAndLock {
-        if (!config.events.advancementMessages.enable) {
+        val advancementsCfg = config.events.advancementMessages
+        if (!advancementsCfg.enable) {
             return@withScopeAndLock
         }
         val component = e.text as TranslatableComponent
@@ -195,7 +196,7 @@ abstract class TelegramBridge {
         val squareBracketsComponent = component.args()[1] as TranslatableComponent
         val advancementNameComponent = squareBracketsComponent.args()[0] as TranslatableComponent
         val advancementName = advancementNameComponent.translate()
-        val advancementDescription = if (config.events.advancementMessages.showDescription) {
+        val advancementDescription = if (advancementsCfg.showDescription) {
             advancementNameComponent.style().hoverEvent()?.let {
                 val advancementTooltipComponent = it.value() as TranslatableComponent
                 if (advancementTooltipComponent.children().size < 2) {
@@ -207,9 +208,21 @@ abstract class TelegramBridge {
             ""
         }
         val langKey = when (advancementTypeKey) {
-            "chat.type.advancement.task" -> lang.telegram.advancements.regular
-            "chat.type.advancement.goal" -> lang.telegram.advancements.goal
-            "chat.type.advancement.challenge" -> lang.telegram.advancements.challenge
+            "chat.type.advancement.task" -> {
+                if (!advancementsCfg.enableTask) return@withScopeAndLock
+                lang.telegram.advancements.regular
+            }
+
+            "chat.type.advancement.goal" -> {
+                if (!advancementsCfg.enableGoal) return@withScopeAndLock
+                lang.telegram.advancements.goal
+            }
+
+            "chat.type.advancement.challenge" -> {
+                if (!advancementsCfg.enableChallenge) return@withScopeAndLock
+                lang.telegram.advancements.challenge
+            }
+
             else -> throw TBAssertionFailed("Unknown advancement type $advancementTypeKey.")
         }
         sendMessage(
