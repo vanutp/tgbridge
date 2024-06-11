@@ -45,7 +45,7 @@ data class GameMessagesConfig(
     )
     val requirePrefixInMinecraft: String? = "",
     @YamlComment(
-        "Chat messages sent within the specified interval (in seconds) will be merged in one.",
+        "Chat messages sent within the specified interval will be merged in one.",
         "The value is specified in seconds",
         "Default value: 0 (disabled)",
     )
@@ -66,7 +66,7 @@ data class GameEventsConfig(
     val enableJoinMessages: Boolean = true,
     val enableLeaveMessages: Boolean = true,
     @YamlComment(
-        "If a player leaves and then joins within the specified time interval (in seconds),",
+        "If a player leaves and then joins within the specified time interval,",
         "the leave and join messages will be deleted.",
         "This is useful when players frequently re-join, for example because of connection problems.",
         "Only has effect when both enableJoinMessages and enableLeaveMessages are set to true",
