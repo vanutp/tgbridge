@@ -243,26 +243,27 @@ class TelegramBot(private val botToken: String, private val logger: AbstractLogg
             var offset = -1
             while (true) {
                 try {
-                    client.getUpdates(
-                        offset,
-                        timeout = POLL_TIMEOUT_SECONDS,
-                    ).result?.let { updates ->
-                        if (updates.isEmpty()) {
-                            return@let
+                    val updates = call {
+                        client.getUpdates(
+                            offset,
+                            timeout = POLL_TIMEOUT_SECONDS,
+                        )
+                    }
+                    if (updates.isEmpty()) {
+                        return@launch
+                    }
+                    offset = updates.last().updateId + 1
+                    updates.forEach { update ->
+                        if (update.message == null) {
+                            return@forEach
                         }
-                        offset = updates.last().updateId + 1
-                        updates.forEach { update ->
-                            if (update.message == null) {
+                        for (handler in commandHandlers) {
+                            if (handler.invoke(update.message)) {
                                 return@forEach
                             }
-                            for (handler in commandHandlers) {
-                                if (handler.invoke(update.message)) {
-                                    return@forEach
-                                }
-                            }
-                            messageHandlers.forEach {
-                                it.invoke(update.message)
-                            }
+                        }
+                        messageHandlers.forEach {
+                            it.invoke(update.message)
                         }
                     }
                 } catch (e: Exception) {
