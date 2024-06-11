@@ -42,7 +42,11 @@ class ForgePlatform : Platform() {
 
     override fun registerPlayerAdvancementListener(handler: (TBPlayerEventData) -> Unit) {
         FORGE_BUS.addListener { e: AdvancementEvent.AdvancementEarnEvent ->
-            val advancementTypeKey = "chat.type.advancement." + (e.advancement.display?.frame?.id ?: return@addListener)
+            val display = e.advancement.display
+            if (display == null || !display.shouldAnnounceToChat()) {
+                return@addListener
+            }
+            val advancementTypeKey = "chat.type.advancement." + (display.frame?.id ?: return@addListener)
             val advancementText =
                 Text.translatable(advancementTypeKey, e.entity.displayName, e.advancement.toHoverableText())
             handler(
