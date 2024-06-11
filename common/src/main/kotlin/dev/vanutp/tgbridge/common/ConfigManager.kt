@@ -11,16 +11,6 @@ import kotlinx.serialization.json.Json
 import java.nio.file.Path
 import kotlin.io.path.*
 
-@Serializable
-private data class OldConfig(
-    val botToken: String = "your bot token",
-    val chatId: Long = 0,
-    val threadId: Int? = null,
-    val bluemapHost: String? = null,
-    val requirePrefixInMinecraft: String? = null,
-    val messageMergeWindowSeconds: Int? = null,
-)
-
 class DefaultConfigUnchangedException : Exception("botToken or chatId is not set")
 
 object ConfigManager {
