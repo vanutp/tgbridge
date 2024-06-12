@@ -8,7 +8,7 @@ plugins {
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("io.papermc.paperweight.userdev") version "1.5.15" apply false
     id("xyz.jpenilla.run-paper") version "2.2.3" apply false
-    id("dev.architectury.loom") version "1.5-SNAPSHOT" apply false
+    id("dev.architectury.loom") version "1.6-SNAPSHOT" apply false
     id("com.modrinth.minotaur") version "2.+"
 }
 
@@ -40,6 +40,7 @@ subprojects {
     dependencies {
         val kotlinxCoroutinesVersion = "1.7.3"
         val kotlinxSerializationVersion = "1.6.2"
+        val adventureVersion = "4.17.0"
         if (project.name == "paper") {
             // I didn't find a good kotlin for paper library
             implementation("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
@@ -47,18 +48,22 @@ subprojects {
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${kotlinxCoroutinesVersion}")
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${kotlinxSerializationVersion}")
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${kotlinxSerializationVersion}")
+
+            compileOnly("net.kyori:adventure-api:${adventureVersion}")
+            compileOnly("net.kyori:adventure-text-serializer-gson:${adventureVersion}") {
+                exclude(module = "gson")
+            }
         } else {
             compileOnly("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
             compileOnly("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
             compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:${kotlinxCoroutinesVersion}")
             compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-core:${kotlinxSerializationVersion}")
             compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:${kotlinxSerializationVersion}")
-        }
 
-        val adventureVersion = "4.15.0"
-        compileOnly("net.kyori:adventure-api:${adventureVersion}")
-        compileOnly("net.kyori:adventure-text-serializer-gson:${adventureVersion}") {
-            exclude(module = "gson")
+            shadow("net.kyori:adventure-api:${adventureVersion}")
+            shadow("net.kyori:adventure-text-serializer-gson:${adventureVersion}") {
+                exclude(module = "gson")
+            }
         }
 
         // gson is available in all loaders at runtime
@@ -68,7 +73,7 @@ subprojects {
     java {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-        toolchain.languageVersion = JavaLanguageVersion.of(17)
+        toolchain.languageVersion = JavaLanguageVersion.of(21)
     }
 
     tasks {
@@ -106,7 +111,8 @@ subprojects {
 task("publishAll") {
     group = "publishing"
     dependsOn(":fabric-1.19.2:modrinth")
-    dependsOn(":fabric-1.20.1:modrinth")
+    dependsOn(":fabric-1.20.1-1.20.4:modrinth")
+    dependsOn(":fabric-1.20.6:modrinth")
     dependsOn(":forge-1.19.2:modrinth")
     dependsOn(":forge-1.20.1:modrinth")
     dependsOn(":paper:modrinth")

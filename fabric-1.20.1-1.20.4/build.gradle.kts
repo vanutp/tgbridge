@@ -21,8 +21,6 @@ dependencies {
 	modImplementation("net.fabricmc.fabric-api:fabric-api:${fabricApiVersion}")
 	modImplementation("net.fabricmc:fabric-language-kotlin:${fabricKotlinVersion}")
 
-	modImplementation(include("net.kyori:adventure-platform-fabric:${adventureFabricVersion}")!!)
-
 	implementation(project(":common"))
 	shadow(project(":common"))
 }
@@ -65,7 +63,7 @@ tasks {
 
 modrinth {
 	uploadFile.set(tasks.remapJar)
-	gameVersions.addAll("1.20.1")
+	gameVersions.addAll("1.20.1", "1.20.2", "1.20.4")
 	loaders.add("fabric")
 	dependencies {
 		required.project("fabric-api")

@@ -63,7 +63,7 @@ tasks {
 
 modrinth {
 	uploadFile.set(tasks.remapJar)
-	gameVersions.addAll("1.19.2")
+	gameVersions.addAll("1.20.6")
 	loaders.add("fabric")
 	dependencies {
 		required.project("fabric-api")

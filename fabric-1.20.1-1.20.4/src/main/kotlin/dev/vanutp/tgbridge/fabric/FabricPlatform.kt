@@ -5,9 +5,9 @@ import dev.vanutp.tgbridge.common.models.TBCommandContext
 import dev.vanutp.tgbridge.common.models.TBPlayerEventData
 import net.fabricmc.fabric.api.message.v1.ServerMessageEvents
 import net.fabricmc.loader.api.FabricLoader
-import net.kyori.adventure.chat.SignedMessage
-import net.kyori.adventure.platform.fabric.FabricServerAudiences
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
+import net.minecraft.network.message.SignedMessage
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.command.CommandManager
 import net.minecraft.text.Text
@@ -19,12 +19,20 @@ class FabricPlatform(private val server: MinecraftServer) : Platform() {
     override val name = "fabric"
     override val configDir = FabricLoader.getInstance().configDir.resolve(FabricTelegramBridge.MOD_ID)
 
+    private fun adventureToMinecraft(adventure: Component): Text {
+        return Text.Serialization.fromJsonTree(GsonComponentSerializer.gson().serializeToTree(adventure))!!
+    }
+
+    private fun minecraftToAdventure(minecraft: Text): Component {
+        return GsonComponentSerializer.gson().deserializeFromTree(Text.Serialization.toJsonTree(minecraft))
+    }
+
     override fun registerChatMessageListener(handler: (TBPlayerEventData) -> Unit) {
         ServerMessageEvents.CHAT_MESSAGE.register { message: SignedMessage, sender, _ ->
             handler.invoke(
                 TBPlayerEventData(
-                    sender.displayName.string,
-                    message.unsignedContent() ?: Component.text(message.message()),
+                    sender.displayName?.string ?: return@register,
+                    minecraftToAdventure(message.content),
                 )
             )
         }
@@ -38,7 +46,7 @@ class FabricPlatform(private val server: MinecraftServer) : Platform() {
             val content = text.content
             if (content is TranslatableTextContent && filter(content)) {
                 handler(
-                    TBPlayerEventData((content.args[0] as Text).string, text.asComponent())
+                    TBPlayerEventData((content.args[0] as Text).string, minecraftToAdventure(text))
                 )
             }
         }
@@ -83,7 +91,7 @@ class FabricPlatform(private val server: MinecraftServer) : Platform() {
     }
 
     override fun broadcastMessage(text: Component) {
-        FabricServerAudiences.of(server).all().sendMessage(text)
+        server.playerManager.broadcast(adventureToMinecraft(text), false)
     }
 
     override fun getOnlinePlayerNames(): Array<String> {

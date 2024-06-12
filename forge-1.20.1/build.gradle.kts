@@ -26,12 +26,6 @@ dependencies {
 
     implementation("thedarkcolour:kotlinforforge:${forgeKotlinVersion}")
 
-    val adventureVersion = "4.15.0"
-    shadow("net.kyori:adventure-api:${adventureVersion}")
-    shadow("net.kyori:adventure-text-serializer-gson:${adventureVersion}") {
-        exclude(module = "gson")
-    }
-
     implementation(project(":common"))
     shadow(project(":common"))
 }

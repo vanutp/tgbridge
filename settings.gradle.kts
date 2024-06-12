@@ -18,5 +18,6 @@ include(
     "forge-1.19.2",
     "forge-1.20.1",
     "fabric-1.19.2",
-    "fabric-1.20.1",
+    "fabric-1.20.1-1.20.4",
+    "fabric-1.20.6",
 )

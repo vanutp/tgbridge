@@ -8,6 +8,8 @@ import net.fabricmc.loader.api.FabricLoader
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 import net.minecraft.network.message.SignedMessage
+import net.minecraft.registry.DynamicRegistryManager
+import net.minecraft.registry.Registries
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.command.CommandManager
 import net.minecraft.text.Text
@@ -20,18 +22,24 @@ class FabricPlatform(private val server: MinecraftServer) : Platform() {
     override val configDir = FabricLoader.getInstance().configDir.resolve(FabricTelegramBridge.MOD_ID)
 
     private fun adventureToMinecraft(adventure: Component): Text {
-        return Text.Serializer.fromJson(GsonComponentSerializer.gson().serializeToTree(adventure))!!
+        return Text.Serialization.fromJsonTree(
+            GsonComponentSerializer.gson().serializeToTree(adventure),
+            DynamicRegistryManager.of(Registries.REGISTRIES)
+        )!!
     }
 
     private fun minecraftToAdventure(minecraft: Text): Component {
-        return GsonComponentSerializer.gson().deserializeFromTree(Text.Serializer.toJsonTree(minecraft))
+        return GsonComponentSerializer.gson().deserialize(Text.Serialization.toJsonString(
+            minecraft,
+            DynamicRegistryManager.of(Registries.REGISTRIES)
+        ))
     }
 
     override fun registerChatMessageListener(handler: (TBPlayerEventData) -> Unit) {
         ServerMessageEvents.CHAT_MESSAGE.register { message: SignedMessage, sender, _ ->
             handler.invoke(
                 TBPlayerEventData(
-                    sender.displayName.string,
+                    sender.displayName?.string ?: return@register,
                     minecraftToAdventure(message.content),
                 )
             )
@@ -74,7 +82,7 @@ class FabricPlatform(private val server: MinecraftServer) : Platform() {
                 newArg.executes { ctx ->
                     val res = handler(TBCommandContext(
                         reply = { text ->
-                            ctx.source.sendFeedback(Text.literal(text), false)
+                            ctx.source.sendFeedback({ Text.literal(text) }, false)
                         }
                     ))
                     return@executes if (res) 1 else -1
