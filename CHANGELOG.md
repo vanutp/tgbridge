@@ -1,3 +1,8 @@
+### 0.4.1
+
+- Fix telegram -> minecraft forwarding
+- Add support for fabric 1.20.2-1.20.6
+
 ### 0.4
 
 - forge: Fix using the mod alongside other mods using adventure
