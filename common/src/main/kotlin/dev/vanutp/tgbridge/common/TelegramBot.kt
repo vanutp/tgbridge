@@ -250,7 +250,7 @@ class TelegramBot(private val botToken: String, private val logger: AbstractLogg
                         )
                     }
                     if (updates.isEmpty()) {
-                        return@launch
+                        continue
                     }
                     offset = updates.last().updateId + 1
                     updates.forEach { update ->
