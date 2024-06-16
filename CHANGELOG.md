@@ -1,3 +1,8 @@
+### 0.4.2
+
+- Fix mod crash when players get certain advancements
+- Attempt to fix the mod after a crash when calling `/tgbridge reload`
+
 ### 0.4.1
 
 - Fix telegram -> minecraft forwarding
