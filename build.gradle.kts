@@ -40,7 +40,6 @@ subprojects {
     dependencies {
         val kotlinxCoroutinesVersion = "1.7.3"
         val kotlinxSerializationVersion = "1.6.2"
-        val adventureVersion = "4.17.0"
         if (project.name == "paper") {
             // I didn't find a good kotlin for paper library
             implementation("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
@@ -48,22 +47,25 @@ subprojects {
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${kotlinxCoroutinesVersion}")
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${kotlinxSerializationVersion}")
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${kotlinxSerializationVersion}")
-
-            compileOnly("net.kyori:adventure-api:${adventureVersion}")
-            compileOnly("net.kyori:adventure-text-serializer-gson:${adventureVersion}") {
-                exclude(module = "gson")
-            }
         } else {
             compileOnly("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
             compileOnly("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
             compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:${kotlinxCoroutinesVersion}")
             compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-core:${kotlinxSerializationVersion}")
             compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:${kotlinxSerializationVersion}")
+        }
 
-            shadow("net.kyori:adventure-api:${adventureVersion}")
-            shadow("net.kyori:adventure-text-serializer-gson:${adventureVersion}") {
+        val adventureVersion = "4.17.0"
+        if (project.name == "paper" || project.name == "common") {
+            compileOnly("net.kyori:adventure-api:${adventureVersion}")
+            compileOnly("net.kyori:adventure-text-serializer-gson:${adventureVersion}") {
                 exclude(module = "gson")
             }
+        } else {
+            shadow(implementation("net.kyori:adventure-api:${adventureVersion}")!!)
+            shadow(implementation("net.kyori:adventure-text-serializer-gson:${adventureVersion}") {
+                exclude(module = "gson")
+            })
         }
 
         // gson is available in all loaders at runtime
