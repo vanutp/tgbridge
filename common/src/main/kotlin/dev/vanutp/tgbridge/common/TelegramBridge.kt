@@ -107,6 +107,12 @@ abstract class TelegramBridge {
             ctx.reply("Error reloading config: " + (e.message ?: e.javaClass.name))
             return false
         }
+        runBlocking {
+            bot.recoverPolling(coroutineScope)
+            if (lastMessageLock.isLocked) {
+                lastMessageLock.unlock()
+            }
+        }
         ctx.reply("Config reloaded. Note that the bot token can't be changed without a restart")
         return true
     }

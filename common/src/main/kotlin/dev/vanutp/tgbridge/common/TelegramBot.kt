@@ -276,7 +276,19 @@ class TelegramBot(private val botToken: String, private val logger: AbstractLogg
                     }
                 }
             }
+            logger.info("pollTask finished")
         }
+    }
+
+    suspend fun recoverPolling(scope: CoroutineScope) {
+        val task = pollTask
+        if (task != null) {
+            if (!task.isCompleted) {
+                task.cancelAndJoin()
+            }
+            pollTask = null
+        }
+        startPolling(scope)
     }
 
     suspend fun shutdown() {
