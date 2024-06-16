@@ -2,6 +2,7 @@ package dev.vanutp.tgbridge.paper
 
 import dev.vanutp.tgbridge.common.AbstractLogger
 import org.bukkit.plugin.java.JavaPlugin
+import java.util.logging.Level
 
 class PaperLogger(private val plugin: JavaPlugin) : AbstractLogger() {
     override fun info(message: Any) {
@@ -14,5 +15,9 @@ class PaperLogger(private val plugin: JavaPlugin) : AbstractLogger() {
 
     override fun error(message: Any) {
         plugin.logger.severe(message.toString())
+    }
+
+    override fun error(message: Any, exc: Exception) {
+        plugin.logger.log(Level.SEVERE, message.toString(), exc)
     }
 }

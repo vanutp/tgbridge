@@ -16,4 +16,8 @@ class FabricLogger : AbstractLogger() {
     override fun error(message: Any) {
         fabricLogger.error(message.toString())
     }
+
+    override fun error(message: Any, exc: Exception) {
+        fabricLogger.error(message.toString(), exc)
+    }
 }

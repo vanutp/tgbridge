@@ -16,4 +16,8 @@ class ForgeLogger : AbstractLogger() {
     override fun error(message: Any) {
         forgeLogger.error(message)
     }
+
+    override fun error(message: Any, exc: Exception) {
+        forgeLogger.error(message, exc)
+    }
 }

@@ -270,7 +270,7 @@ class TelegramBot(private val botToken: String, private val logger: AbstractLogg
                     when (e) {
                         is CancellationException -> break
                         else -> {
-                            logger.error(e.message.toString())
+                            logger.error(e.message.toString(), e)
                             delay(1000)
                         }
                     }
