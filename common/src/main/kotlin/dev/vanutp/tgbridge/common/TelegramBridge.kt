@@ -9,6 +9,7 @@ import dev.vanutp.tgbridge.common.models.TBPlayerEventData
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.TranslatableComponent
 import java.time.Clock
@@ -194,15 +195,15 @@ abstract class TelegramBridge {
         val component = e.text as TranslatableComponent
         val advancementTypeKey = component.key()
         val squareBracketsComponent = component.args()[1] as TranslatableComponent
-        val advancementNameComponent = squareBracketsComponent.args()[0] as TranslatableComponent
+        val advancementNameComponent = squareBracketsComponent.args()[0]
         val advancementName = advancementNameComponent.translate()
         val advancementDescription = if (advancementsCfg.showDescription) {
             advancementNameComponent.style().hoverEvent()?.let {
-                val advancementTooltipComponent = it.value() as TranslatableComponent
+                val advancementTooltipComponent = it.value() as Component
                 if (advancementTooltipComponent.children().size < 2) {
                     return@let null
                 }
-                (advancementTooltipComponent.children()[1] as TranslatableComponent).translate()
+                advancementTooltipComponent.children()[1].translate()
             } ?: ""
         } else {
             ""

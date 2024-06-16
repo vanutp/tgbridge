@@ -13,23 +13,30 @@ fun String.escapeHTML(): String = this
     .replace(">", "&gt;")
     .replace("<", "&lt;")
 
-fun TranslatableComponent.translate(): String {
-    var res = getMinecraftLangKey(this.key()) ?: this.key()
-    // We're using older versions of kyori on some platforms, so using deprecated args() is ok
-    this.args().forEachIndexed { i, x ->
-        val child = when (x) {
-            is TranslatableComponent -> x.translate()
-            is TextComponent -> x.content() + x.children()
-                .joinToString("") { if (it is TextComponent) it.content() else it.toString() }
+fun Component.translate(): String {
+    return when (this) {
+        is TranslatableComponent -> {
+            var res = getMinecraftLangKey(this.key()) ?: this.key()
+            // We're using older versions of kyori on some platforms, so using deprecated args() is ok
+            this.args().forEachIndexed { i, x ->
+                val child = x.translate()
+                if (i == 0) {
+                    res = res.replace("%s", child)
+                }
+                res = res.replace("%${i + 1}\$s", child)
+            }
+            res
+        }
 
-            else -> x.toString()
+        is TextComponent -> {
+            val children = this.children().joinToString("") {
+                if (it is TextComponent) it.content() else it.toString()
+            }
+            this.content() + children
         }
-        if (i == 0) {
-            res = res.replace("%s", child)
-        }
-        res = res.replace("%${i + 1}\$s", child)
+
+        else -> this.toString()
     }
-    return res
 }
 
 fun String.formatLang(vararg args: Pair<String, String>): String {
