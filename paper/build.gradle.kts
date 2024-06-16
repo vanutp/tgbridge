@@ -40,6 +40,6 @@ tasks {
 
 modrinth {
     uploadFile.set(tasks.reobfJar.get().outputJar)
-    gameVersions.addAll("1.19.2", "1.20.1", "1.20.4")
+    gameVersions.addAll("1.19.2", "1.20.1", "1.20.4", "1.20.6")
     loaders.add("paper")
 }
