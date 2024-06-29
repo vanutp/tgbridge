@@ -13,7 +13,7 @@ plugins {
 }
 
 group = "dev.vanutp"
-version = "0.4.2"
+version = "0.4.3"
 
 subprojects {
     apply {
@@ -81,11 +81,11 @@ subprojects {
     tasks {
         withType<JavaCompile> {
             options.encoding = "UTF-8"
-            options.release = 17
+            options.release = 21
         }
 
         named<KotlinJvmCompile>("compileKotlin") {
-            kotlinOptions.jvmTarget = "17"
+            kotlinOptions.jvmTarget = "21"
         }
 
         named<ShadowJar>("shadowJar") {
@@ -115,6 +115,7 @@ task("publishAll") {
     dependsOn(":fabric-1.19.2:modrinth")
     dependsOn(":fabric-1.20.1-1.20.4:modrinth")
     dependsOn(":fabric-1.20.6:modrinth")
+    dependsOn(":fabric-1.21:modrinth")
     dependsOn(":forge-1.19.2:modrinth")
     dependsOn(":forge-1.20.1:modrinth")
     dependsOn(":paper:modrinth")
