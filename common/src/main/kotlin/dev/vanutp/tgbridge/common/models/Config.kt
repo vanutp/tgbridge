@@ -26,6 +26,11 @@ data class GeneralConfig(
         "Default value: null (disabled)",
     )
     val topicId: Int? = null,
+    @YamlComment(
+        "Max online on server",
+        "Default value: 20",
+    )
+    val maxOnline: Int? = 20,
 )
 
 @Serializable

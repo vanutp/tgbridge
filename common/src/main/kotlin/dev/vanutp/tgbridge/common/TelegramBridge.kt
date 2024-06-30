@@ -69,12 +69,18 @@ abstract class TelegramBridge {
         if (onlinePlayerNames.isNotEmpty()) {
             sendMessage(
                 lang.telegram.playerList.formatLang(
-                    "count" to onlinePlayerNames.size.toString(),
+                    "current" to onlinePlayerNames.size.toString(),
+                    "max" to config.general.maxOnline.toString(),
                     "usernames" to onlinePlayerNames.joinToString(),
                 )
             )
         } else {
-            sendMessage(lang.telegram.playerListZeroOnline)
+            sendMessage(
+                lang.telegram.playerListZeroOnline.formatLang(
+                    "current" to onlinePlayerNames.size.toString(),
+                    "max" to config.general.maxOnline.toString(),
+                )
+            )
         }
     }
 
@@ -157,7 +163,12 @@ abstract class TelegramBridge {
             return@withScopeAndLock
         }
         val component = e.text as TranslatableComponent
-        sendMessage(lang.telegram.playerDied.formatLang("deathMessage" to component.translate().escapeHTML()))
+        sendMessage(
+            lang.telegram.playerDied.formatLang(
+                "username" to e.username,
+                "text" to component.translate().escapeHTML().replace(e.username + " ", ""),
+            )
+        )
         lastMessage = null
     }
 
