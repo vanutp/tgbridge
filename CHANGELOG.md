@@ -1,3 +1,7 @@
+### 0.4.3
+
+- Add fabric 1.21 support
+
 ### 0.4.2
 
 - Fix mod crash when players get certain advancements

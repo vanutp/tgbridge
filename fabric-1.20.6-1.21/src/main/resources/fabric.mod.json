@@ -33,7 +33,7 @@
 	"mixins": [],
 	"depends": {
 		"fabricloader": ">=0.15.2",
-		"minecraft": "1.20.6",
+		"minecraft": ">=1.20.6 <=1.21",
 		"java": ">=17",
 		"fabric-api": "*",
 		"fabric-language-kotlin": ">=1.9.0"

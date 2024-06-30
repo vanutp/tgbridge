@@ -13,7 +13,7 @@ plugins {
 }
 
 group = "dev.vanutp"
-version = "0.4.2"
+version = "0.4.3"
 
 subprojects {
     apply {
@@ -101,7 +101,7 @@ subprojects {
     }
 
     modrinth {
-        val loader = project.name.replace("-", " ").replaceFirstChar { it.uppercaseChar() }
+        val loader = project.name.replaceFirst("-", " ").replaceFirstChar { it.uppercaseChar() }
         versionName = "${project.version} ($loader)"
         token.set(System.getenv("MODRINTH_TOKEN"))
         projectId.set("tgbridge")
