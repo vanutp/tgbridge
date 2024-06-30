@@ -17,7 +17,7 @@ import java.time.temporal.ChronoUnit
 
 
 abstract class TelegramBridge {
-    private val coroutineScope = CoroutineScope(Dispatchers.IO)
+    private val coroutineScope = CoroutineScope(Dispatchers.IO).plus(SupervisorJob())
     protected abstract val logger: AbstractLogger
     protected abstract val platform: Platform
     private var initialized: Boolean = false
