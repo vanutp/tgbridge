@@ -30,7 +30,7 @@ fun Component.translate(): String {
 
         is TextComponent -> {
             val children = this.children().joinToString("") {
-                if (it is TextComponent) it.content() else it.toString()
+                it.translate()
             }
             this.content() + children
         }
