@@ -101,6 +101,8 @@ data class TgMessage(
     val quote: TgTextQuote? = null,
     @SerializedName("message_thread_id")
     val messageThreadId: Int? = null,
+    @SerializedName("author_signature")
+    val authorSignature: String? = null,
     val text: String? = null,
     val caption: String? = null,
     override val animation: TgAny? = null,
@@ -117,10 +119,11 @@ data class TgMessage(
     val pinnedMessage: TgMessage? = null,
 ) : TgMessageMedia {
     val senderName
-        get() = from?.let {
-            (it.firstName + " " + (it.lastName ?: "")).trim()
-        }
+        get() = authorSignature
             ?: senderChat?.title
+            ?: from?.let {
+                (it.firstName + " " + (it.lastName ?: "")).trim()
+            }
             ?: ""
     val effectiveText
         get() = text ?: caption
