@@ -1,3 +1,10 @@
+### 0.4.4
+
+- Fix random crashes
+- Fix chat message when a player is killed with an item which name contains translatable components
+- Fix anonymous admin names in minecraft chat
+- Support xaero waypoints without height
+
 ### 0.4.3
 
 - Add fabric 1.21 support

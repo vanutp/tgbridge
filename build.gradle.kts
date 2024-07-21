@@ -13,7 +13,7 @@ plugins {
 }
 
 group = "dev.vanutp"
-version = "0.4.3"
+version = "0.4.4"
 
 subprojects {
     apply {
@@ -114,7 +114,7 @@ task("publishAll") {
     group = "publishing"
     dependsOn(":fabric-1.19.2:modrinth")
     dependsOn(":fabric-1.20.1-1.20.4:modrinth")
-    dependsOn(":fabric-1.20.6:modrinth")
+    dependsOn(":fabric-1.20.6-1.21:modrinth")
     dependsOn(":forge-1.19.2:modrinth")
     dependsOn(":forge-1.20.1:modrinth")
     dependsOn(":paper:modrinth")
