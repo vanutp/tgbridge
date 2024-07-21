@@ -117,5 +117,6 @@ task("publishAll") {
     dependsOn(":fabric-1.20.6-1.21:modrinth")
     dependsOn(":forge-1.19.2:modrinth")
     dependsOn(":forge-1.20.1:modrinth")
+    dependsOn(":neoforge-1.21:modrinth")
     dependsOn(":paper:modrinth")
 }
