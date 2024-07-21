@@ -171,7 +171,7 @@ fun TgMessage.toMinecraft(botId: Long): Component {
 
 
 val XAERO_WAYPOINT_RGX =
-    Regex("""xaero-waypoint:([^:]+):[^:]:([-\d]+):([-\d]+):([-\d]+):\d+:(?:false|true):\d+:Internal-(?:the-)?(overworld|nether|end)-waypoints""")
+    Regex("""xaero-waypoint:([^:]+):[^:]:([-\d]+):([-\d]+|~):([-\d]+):\d+:(?:false|true):\d+:Internal-(?:the-)?(overworld|nether|end)-waypoints""")
 
 fun String.asBluemapLinkOrNone(): String? {
     XAERO_WAYPOINT_RGX.matchEntire(this)?.let {
@@ -181,7 +181,8 @@ fun String.asBluemapLinkOrNone(): String? {
                 waypointName = Component.translatable(waypointName).translate()
             }
             val x = Integer.parseInt(it.groupValues[2])
-            val y = Integer.parseInt(it.groupValues[3])
+            val yRaw = it.groupValues[3]
+            val y = Integer.parseInt(if (yRaw == "~") "100" else yRaw)
             val z = Integer.parseInt(it.groupValues[4])
             val worldName = it.groupValues[5]
 
