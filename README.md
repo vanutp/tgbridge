@@ -54,6 +54,10 @@ generate the language again.
 This mod will only work on dedicated server. When installed on the client, the main logic won't load. However, it will
 provide a `/tgbridge dump_lang` command to dump minecraft translations to the current language.
 
+## Known incompatibilities
+
+Currently the Fabric release is incompatible with some mods that change how chat messages look, notably Styled Chat. This will be fixed in a future release
+
 ## Contributions
 
 Feel free to open an issue if you think something is missing/can be done better.
