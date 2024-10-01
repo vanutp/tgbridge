@@ -29,12 +29,6 @@ subprojects {
 
     repositories {
         mavenCentral()
-        maven {
-            url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
-            content {
-                includeGroup("com.squareup.retrofit2")
-            }
-        }
     }
 
     dependencies {
