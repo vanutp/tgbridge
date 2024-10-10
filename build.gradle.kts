@@ -100,7 +100,12 @@ subprojects {
         token.set(System.getenv("MODRINTH_TOKEN"))
         projectId.set("tgbridge")
         versionType.set("release")
-        changelog.set(file("$rootDir/CHANGELOG.md").readText())
+        changelog.set(
+            file("$rootDir/CHANGELOG.md")
+                .readText()
+                .split("###")[1]
+                .let { x -> "###$x" }
+        )
     }
 }
 
