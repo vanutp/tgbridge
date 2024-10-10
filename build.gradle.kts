@@ -108,7 +108,7 @@ task("publishAll") {
     group = "publishing"
     dependsOn(":fabric-1.19.2:modrinth")
     dependsOn(":fabric-1.20.1-1.20.4:modrinth")
-    dependsOn(":fabric-1.20.6-1.21:modrinth")
+    dependsOn(":fabric-1.20.6-1.21.1:modrinth")
     dependsOn(":forge-1.19.2:modrinth")
     dependsOn(":forge-1.20.1:modrinth")
     dependsOn(":neoforge-1.21:modrinth")

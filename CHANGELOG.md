@@ -1,3 +1,7 @@
+### 0.4.5
+
+- Fabric 1.21.1 support
+
 ### 0.4.4
 
 - Fix random crashes
