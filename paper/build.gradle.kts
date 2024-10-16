@@ -45,5 +45,5 @@ modrinth {
         "1.20", "1.20.1", "1.20.2", "1.20.3", "1.20.4",
         "1.20.5", "1.20.6", "1.21"
     )
-    loaders.add("paper")
+    loaders.addAll("paper", "folia", "purpur")
 }
