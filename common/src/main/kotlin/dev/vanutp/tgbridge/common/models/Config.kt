@@ -50,6 +50,7 @@ data class GameMessagesConfig(
         "Default value: 0 (disabled)",
     )
     val mergeWindow: Int? = 0,
+    val replyInDifferentLine: Boolean = false,
 )
 
 @Serializable

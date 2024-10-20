@@ -6,6 +6,7 @@ import dev.vanutp.tgbridge.common.ConfigManager.lang
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.TranslatableComponent
+import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.format.NamedTextColor
 
 fun String.escapeHTML(): String = this
@@ -140,10 +141,10 @@ private fun TgMessage.forwardFromToText(): String? {
     }
 }
 
-fun TgMessage.toMinecraft(botId: Long): Component {
+fun TgMessage.toMinecraft(botId: Long, platform: Platform): Component {
     val components = mutableListOf<Component>()
 
-    components.add(Component.text("<${this.senderName}>", NamedTextColor.AQUA))
+//    components.add(Component.text("<${this.senderName}>", NamedTextColor.AQUA))
 
     this.pinnedMessage?.let { pinnedMsg ->
         val pinnedMessageText = mutableListOf<String>()
@@ -151,22 +152,40 @@ fun TgMessage.toMinecraft(botId: Long): Component {
         pinnedMsg.mediaToText()?.let { pinnedMessageText.add(it) }
         pinnedMsg.effectiveText?.let { pinnedMessageText.add(it) }
         components.add(
-            Component.text(
-                lang.minecraft.messageMeta.pin + " " + pinnedMessageText.joinToString(" "),
-                NamedTextColor.DARK_AQUA
+            addChatLink(
+                Component.text(
+                    lang.minecraft.messageMeta.pin + " " + pinnedMessageText.joinToString(" "),
+                    NamedTextColor.DARK_AQUA
+                )
             )
         )
     }
 
-    forwardFromToText()?.let { components.add(Component.text(it, NamedTextColor.GRAY)) }
-    replyToText(botId)?.let { components.add(Component.text(it, NamedTextColor.BLUE)) }
-    mediaToText()?.let { components.add(Component.text(it, NamedTextColor.GREEN)) }
+    forwardFromToText()?.let { components.add(addChatLink(Component.text(it, NamedTextColor.GRAY))) }
+    replyToText(botId)?.let {
+        val replyText = Component.text(it, NamedTextColor.GRAY)
+        if (!config.messages.replyInDifferentLine) components.add(replyText)
+        else platform.broadcastMessage(replyText)
+    }
+    mediaToText()?.let { components.add(addChatLink(Component.text(it, NamedTextColor.GREEN))) }
     effectiveText?.let { components.add(Component.text(it)) }
 
-    return components
-        .flatMap { listOf(it, Component.text(" ")) }
-        .fold(Component.text()) { acc, component -> acc.append(component) }
-        .build()
+    return Component.text(lang.minecraft.messageMeta.messageFormat)
+        .replaceText {it.matchLiteral("{sender}")
+            .replacement(
+                Component.text(this.senderName)
+                    .clickEvent(ClickEvent.suggestCommand("@${this.senderUserName}"))
+                    .hoverEvent(Component.text(lang.minecraft.messageMeta.hoverTagToReply).asHoverEvent())
+            )}
+        .replaceText { it.matchLiteral("{text}").replacement(components
+            .flatMap { component -> listOf(component, Component.text(" ")) }
+            .fold(Component.text()) { acc, component -> acc.append(component) }
+            .build()) }
+}
+
+fun TgMessage.addChatLink(component: Component): Component {
+    return component.clickEvent(ClickEvent.openUrl("https://t.me/c/${-this.chat.id-1000000000000}/" + (if (this.messageThreadId!=null) "${this.messageThreadId}/" else "") + "${this.messageId}"))
+        .hoverEvent(Component.text(lang.minecraft.messageMeta.hoverOpenInTelegram).asHoverEvent())
 }
 
 

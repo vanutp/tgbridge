@@ -125,6 +125,10 @@ data class TgMessage(
                 (it.firstName + " " + (it.lastName ?: "")).trim()
             }
             ?: ""
+    val senderUserName
+        get() = from?.username
+            ?: senderChat?.username
+            ?: ""
     val effectiveText
         get() = text ?: caption
 }

@@ -29,6 +29,9 @@ data class LangTelegram(
 
 @Serializable
 data class MessageMeta(
+    val messageFormat: String = "§b<{sender}> §r{text}",
+    val hoverOpenInTelegram: String = "Open in Telegram",
+    val hoverTagToReply: String = "Tag him/her",
     val reply: String = "[R {sender}: {text}]",
     val replyToMinecraft: String = "[R {text}]",
     val forward: String = "[F {from}]",
