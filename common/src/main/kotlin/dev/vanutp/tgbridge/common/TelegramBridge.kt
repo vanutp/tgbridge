@@ -26,8 +26,11 @@ abstract class TelegramBridge {
     private var lastMessage: LastMessage? = null
     private val lastMessageLock = Mutex()
 
+    open fun platformInit() {}
+
     fun init() {
         logger.info("tgbridge starting on ${platform.name}")
+        platformInit()
         try {
             ConfigManager.init(platform.configDir, platform::getLanguageKey)
         } catch (_: DefaultConfigUnchangedException) {

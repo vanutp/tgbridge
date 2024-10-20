@@ -9,7 +9,7 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.11.0") {
         exclude(module = "gson")
     }
-    implementation("com.charleskorn.kaml:kaml:0.56.0") {
+    implementation("com.charleskorn.kaml:kaml:${rootProject.properties["kamlVersion"]}") {
         exclude(module = "kotlin-stdlib")
         exclude(module = "kotlinx-serialization-core")
     }

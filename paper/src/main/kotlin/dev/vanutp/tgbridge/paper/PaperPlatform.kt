@@ -1,5 +1,6 @@
 package dev.vanutp.tgbridge.paper
 
+import dev.vanutp.tgbridge.common.PaperConfigManager
 import dev.vanutp.tgbridge.common.Platform
 import dev.vanutp.tgbridge.common.models.TBCommandContext
 import dev.vanutp.tgbridge.common.models.TBPlayerEventData
@@ -16,19 +17,46 @@ import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.plugin.java.JavaPlugin
 import kotlin.io.path.absolute
 import net.minecraft.locale.Language
+import org.bukkit.Bukkit
+import org.bukkit.event.EventPriority
+import org.bukkit.event.player.AsyncPlayerChatEvent
 
 class PaperPlatform(private val plugin: JavaPlugin) : Platform() {
     override val name = "paper"
     override val configDir = plugin.dataFolder.toPath().absolute()
 
-    override fun registerChatMessageListener(handler: (TBPlayerEventData) -> Unit) {
+    private fun registerPaperChatListener(handler: (TBPlayerEventData) -> Unit) {
         plugin.server.pluginManager.registerEvents(object : Listener {
-            @EventHandler
+            @EventHandler(priority = EventPriority.LOWEST)
             fun onMessage(e: AsyncChatEvent) {
                 val username = (e.player.displayName() as TextComponent).translate()
                 handler.invoke(TBPlayerEventData(username, e.message()))
             }
         }, plugin)
+    }
+
+    private fun registerLegacyChatListener(handler: (TBPlayerEventData) -> Unit) {
+        plugin.logger.info("Using legacy chat event")
+        plugin.server.pluginManager.registerEvents(object : Listener {
+            @EventHandler(priority = EventPriority.LOWEST)
+            fun onMessage(e: AsyncPlayerChatEvent) {
+                val username = (e.player.displayName() as TextComponent).translate()
+                handler.invoke(TBPlayerEventData(username, Component.text(e.message)))
+            }
+        }, plugin)
+    }
+
+    private fun shouldUseLegacyChatListener(): Boolean {
+        return PaperConfigManager.config.compat.useLegacyChatListener
+            ?: Bukkit.getPluginManager().isPluginEnabled("Chatty")
+    }
+
+    override fun registerChatMessageListener(handler: (TBPlayerEventData) -> Unit) {
+        if (shouldUseLegacyChatListener()) {
+            registerLegacyChatListener(handler)
+        } else {
+            registerPaperChatListener(handler)
+        }
     }
 
     override fun registerPlayerAdvancementListener(handler: (TBPlayerEventData) -> Unit) {
