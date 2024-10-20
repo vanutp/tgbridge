@@ -45,6 +45,10 @@ data class GameMessagesConfig(
     )
     val requirePrefixInMinecraft: String? = "",
     @YamlComment(
+        "Set to true to keep the prefix specified in the above setting in the message"
+    )
+    val keepPrefix: Boolean = false,
+    @YamlComment(
         "Chat messages sent within the specified interval will be merged in one.",
         "The value is specified in seconds",
         "Default value: 0 (disabled)",

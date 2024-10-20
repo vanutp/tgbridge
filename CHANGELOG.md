@@ -1,3 +1,7 @@
+### 0.4.6
+
+- Remove prefix from messages by default, add an option to keep it
+
 ### 0.4.5
 
 - fabric: 1.21.1 support
