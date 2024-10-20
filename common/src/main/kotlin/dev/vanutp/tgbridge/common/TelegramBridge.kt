@@ -1,5 +1,7 @@
 package dev.vanutp.tgbridge.common
 
+import dev.vanutp.tgbridge.common.dataclass.*
+import dev.vanutp.tgbridge.common.interf.*
 import dev.vanutp.tgbridge.common.ConfigManager.config
 import dev.vanutp.tgbridge.common.ConfigManager.lang
 import dev.vanutp.tgbridge.common.models.LastMessage
@@ -12,6 +14,7 @@ import kotlinx.coroutines.sync.withLock
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.TranslatableComponent
+import java.io.Console
 import java.time.Clock
 import java.time.temporal.ChronoUnit
 

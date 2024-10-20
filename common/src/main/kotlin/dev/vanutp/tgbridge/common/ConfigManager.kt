@@ -11,8 +11,6 @@ import kotlinx.serialization.json.Json
 import java.nio.file.Path
 import kotlin.io.path.*
 
-class DefaultConfigUnchangedException : Exception("botToken or chatId is not set")
-
 object ConfigManager {
     private val yaml = Yaml(configuration = YamlConfiguration(strictMode = false))
     private lateinit var configDir: Path

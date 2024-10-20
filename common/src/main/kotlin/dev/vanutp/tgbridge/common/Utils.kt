@@ -1,8 +1,10 @@
 package dev.vanutp.tgbridge.common
 
+import dev.vanutp.tgbridge.common.dataclass.*
 import dev.vanutp.tgbridge.common.ConfigManager.config
 import dev.vanutp.tgbridge.common.ConfigManager.getMinecraftLangKey
 import dev.vanutp.tgbridge.common.ConfigManager.lang
+import dev.vanutp.tgbridge.common.models.TgMessageMedia
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.TranslatableComponent
