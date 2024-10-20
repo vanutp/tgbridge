@@ -1,6 +1,9 @@
 ### 0.4.5
 
-- Fabric 1.21.1 support
+- fabric: 1.21.1 support
+- paper: Fix compatibility with plugins that change displayName
+- paper: Fix compatibility with Chatty
+- paper: Add Folia support
 
 ### 0.4.4
 
