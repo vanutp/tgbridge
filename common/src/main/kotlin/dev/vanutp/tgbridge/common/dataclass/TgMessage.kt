@@ -24,6 +24,7 @@ data class TgMessage(
     @SerializedName("author_signature")
     val authorSignature: String? = null,
     val text: String? = null,
+    val entities: List<TgEntity>? = null,
     val caption: String? = null,
     override val animation: TgAny? = null,
     override val photo: List<TgAny>? = null,
