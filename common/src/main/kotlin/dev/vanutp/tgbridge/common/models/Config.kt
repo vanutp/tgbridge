@@ -51,6 +51,10 @@ data class GameMessagesConfig(
     )
     val mergeWindow: Int? = 0,
     val replyInDifferentLine: Boolean = false,
+    val styledTelegramMessagesInMinecraft: Boolean = true,
+    val styledMinecraftMessagesInMinecraft: Boolean = true,
+    val styledMinecraftMessagesInTelegram: Boolean = true,
+    val stylingPrefixInMinecraft: String? = "",
 )
 
 @Serializable

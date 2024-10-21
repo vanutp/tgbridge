@@ -15,6 +15,7 @@ val adventureFabricVersion: String by project
 
 dependencies {
 	minecraft("com.mojang:minecraft:${minecraftVersion}")
+//	mappings (loom.officialMojangMappings())
 	mappings("net.fabricmc:yarn:${yarnMappings}:v2")
 	modImplementation("net.fabricmc:fabric-loader:${fabricLoaderVersion}")
 
@@ -23,6 +24,9 @@ dependencies {
 
 	implementation(project(":common"))
 	shadow(project(":common"))
+
+	// PlaceholderAPI
+	modImplementation("eu.pb4:placeholder-api:2.4.1+1.21")
 }
 
 loom {

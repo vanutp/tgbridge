@@ -29,25 +29,17 @@ subprojects {
 
     repositories {
         mavenCentral()
+        maven("https://maven.nucleoid.xyz/") { name = "Nucleoid" }
     }
 
     dependencies {
         val kotlinxCoroutinesVersion = "1.7.3"
         val kotlinxSerializationVersion = "1.6.2"
-        if (project.name == "paper") {
-            // I didn't find a good kotlin for paper library
-            implementation("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
-            implementation("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
-            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${kotlinxCoroutinesVersion}")
-            implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${kotlinxSerializationVersion}")
-            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${kotlinxSerializationVersion}")
-        } else {
-            compileOnly("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
-            compileOnly("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
-            compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:${kotlinxCoroutinesVersion}")
-            compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-core:${kotlinxSerializationVersion}")
-            compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:${kotlinxSerializationVersion}")
-        }
+        compileOnly("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
+        compileOnly("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+        compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:${kotlinxCoroutinesVersion}")
+        compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-core:${kotlinxSerializationVersion}")
+        compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:${kotlinxSerializationVersion}")
 
         val adventureVersion = "4.17.0"
         if (project.name == "paper" || project.name == "common") {

@@ -8,6 +8,7 @@ import java.nio.file.Path
 abstract class Platform {
     abstract val name: String
     abstract val configDir: Path
+    abstract val placeholderAPIInstance: PlaceholderAPI?
 
     abstract fun registerChatMessageListener(handler: (TBPlayerEventData) -> Unit)
     abstract fun registerPlayerAdvancementListener(handler: (TBPlayerEventData) -> Unit)

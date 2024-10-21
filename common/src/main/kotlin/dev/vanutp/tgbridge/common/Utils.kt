@@ -16,6 +16,20 @@ fun String.escapeHTML(): String = this
     .replace(">", "&gt;")
     .replace("<", "&lt;")
 
+//fun String.parseBaseMarkdown() : String = this
+//    .replaceMarkdownToHTML("**", "b")
+//    .replaceMarkdownToHTML("*", "i")
+//    .replaceMarkdownToHTML("_", "i")
+//    .replaceMarkdownToHTML("_", "i")
+//
+//private fun String.replaceMarkdownToHTML(markdownCode: String, htmlCode: String) : String {
+//    while (contains(markdownCode) && indexOf(markdownCode) != lastIndexOf(markdownCode)) {
+//        substring(0, indexOf(markdownCode)-1) + "<${htmlCode}>" + this.substring(indexOf(markdownCode)+2)
+//        substring(0, indexOf(markdownCode)-1) + "</${htmlCode}>" + this.substring(indexOf(markdownCode)+2)
+//    }
+//    return this;
+//}
+
 fun Component.translate(): String {
     return when (this) {
         is TranslatableComponent -> {
@@ -152,7 +166,8 @@ fun TgMessage.toMinecraft(botId: Long, platform: Platform): Component {
         val pinnedMessageText = mutableListOf<String>()
         pinnedMsg.forwardFromToText()?.let { pinnedMessageText.add(it) }
         pinnedMsg.mediaToText()?.let { pinnedMessageText.add(it) }
-        pinnedMsg.effectiveText?.let { pinnedMessageText.add(it) }
+//        pinnedMsg.effectiveText?.let { pinnedMessageText.add(it) }
+        effectiveText?.let { pinnedMessageText.add((if (config.messages.styledTelegramMessagesInMinecraft) parsePlaceholdersOrGetString(it, platform) else it)) }
         components.add(
             addChatLink(
                 Component.text(
@@ -170,7 +185,8 @@ fun TgMessage.toMinecraft(botId: Long, platform: Platform): Component {
         else platform.broadcastMessage(replyText)
     }
     mediaToText()?.let { components.add(addChatLink(Component.text(it, NamedTextColor.GREEN))) }
-    effectiveText?.let { components.add(Component.text(it)) }
+//    effectiveText?.let { components.add(Component.text(it)) }
+    effectiveText?.let { components.add((if (config.messages.styledTelegramMessagesInMinecraft) parsePlaceholdersOrGetComponent(it, platform) else Component.text(it))) }
 
     return Component.text(lang.minecraft.messageMeta.messageFormat)
         .replaceText {it.matchLiteral("{sender}")
@@ -188,6 +204,11 @@ fun TgMessage.toMinecraft(botId: Long, platform: Platform): Component {
 fun TgMessage.addChatLink(component: Component): Component {
     return component.clickEvent(ClickEvent.openUrl("https://t.me/c/${-this.chat.id-1000000000000}/" + (if (this.messageThreadId!=null) "${this.messageThreadId}/" else "") + "${this.messageId}"))
         .hoverEvent(Component.text(lang.minecraft.messageMeta.hoverOpenInTelegram).asHoverEvent())
+}
+fun TgMessage.parsePlaceholdersOrGetComponent(text: String, platform: Platform): Component = platform.placeholderAPIInstance?.parse(text, platform) ?: Component.text(text)
+fun TgMessage.parsePlaceholdersOrGetString(text: String, platform: Platform): String {
+    val parsed = platform.placeholderAPIInstance?.parse(text, platform).toString()
+    return parsed.ifEmpty { text }
 }
 
 

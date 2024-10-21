@@ -1,5 +1,6 @@
 package dev.vanutp.tgbridge.fabric
 
+import dev.vanutp.tgbridge.common.PlaceholderAPI
 import dev.vanutp.tgbridge.common.Platform
 import dev.vanutp.tgbridge.common.models.TBCommandContext
 import dev.vanutp.tgbridge.common.models.TBPlayerEventData
@@ -17,18 +18,19 @@ import net.minecraft.text.TranslatableTextContent
 import net.minecraft.util.Language
 
 
-class FabricPlatform(private val server: MinecraftServer) : Platform() {
+class FabricPlatform(val server: MinecraftServer) : Platform() {
     override val name = "fabric"
     override val configDir = FabricLoader.getInstance().configDir.resolve(FabricTelegramBridge.MOD_ID)
+    override val placeholderAPIInstance: PlaceholderAPI? = if (FabricLoader.getInstance().isModLoaded("placeholder-api")) FabricPlaceholderAPI else null
 
-    private fun adventureToMinecraft(adventure: Component): Text {
+    fun adventureToMinecraft(adventure: Component): Text {
         return Text.Serialization.fromJsonTree(
             GsonComponentSerializer.gson().serializeToTree(adventure),
             DynamicRegistryManager.of(Registries.REGISTRIES)
         )!!
     }
 
-    private fun minecraftToAdventure(minecraft: Text): Component {
+    fun minecraftToAdventure(minecraft: Text): Component {
         return GsonComponentSerializer.gson().deserialize(Text.Serialization.toJsonString(
             minecraft,
             DynamicRegistryManager.of(Registries.REGISTRIES)
