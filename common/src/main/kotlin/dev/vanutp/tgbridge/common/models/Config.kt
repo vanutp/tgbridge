@@ -52,8 +52,11 @@ data class GameMessagesConfig(
     val mergeWindow: Int? = 0,
     val replyInDifferentLine: Boolean = false,
     val styledTelegramMessagesInMinecraft: Boolean = true,
+    // TODO: add support for styled messages in Minecraft
     val styledMinecraftMessagesInMinecraft: Boolean = true,
+    // TODO: add support for markdown parsing on POST
     val styledMinecraftMessagesInTelegram: Boolean = true,
+    // TODO: add support for html styling
     val stylingPrefixInMinecraft: String? = "",
 )
 

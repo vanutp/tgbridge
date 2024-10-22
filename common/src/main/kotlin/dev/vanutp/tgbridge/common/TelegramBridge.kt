@@ -120,7 +120,9 @@ abstract class TelegramBridge {
 
     private fun onChatMessage(e: TBPlayerEventData) = withScopeAndLock {
         val rawMinecraftText = (e.text as TextComponent).content()
-        val escapedText = rawMinecraftText.escapeHTML()
+        val escapedText = rawMinecraftText.escapeHTML().let { if (config.messages.styledMinecraftMessagesInTelegram) it.parseMarkdownToHTML()
+            .replace("<p>", "").replace("</p>", "") else it }
+        logger.info(escapedText)
         val bluemapLink = rawMinecraftText.asBluemapLinkOrNone()
         if (bluemapLink == null && !rawMinecraftText.startsWith(config.messages.requirePrefixInMinecraft ?: "")) {
             return@withScopeAndLock

@@ -13,5 +13,6 @@ dependencies {
         exclude(module = "kotlin-stdlib")
         exclude(module = "kotlinx-serialization-core")
     }
+    implementation("org.commonmark:commonmark:0.17.2")
     compileOnly("com.google.code.gson:gson:2.10.1")
 }

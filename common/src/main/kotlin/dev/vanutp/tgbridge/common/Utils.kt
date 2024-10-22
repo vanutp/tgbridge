@@ -11,11 +11,14 @@ import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
+import org.commonmark.parser.Parser as CommonMarkParser;
+import org.commonmark.renderer.html.HtmlRenderer as CommonMarkHtmlRenderer;
 
 fun String.escapeHTML(): String = this
     .replace("&", "&amp;")
     .replace(">", "&gt;")
     .replace("<", "&lt;")
+fun String.parseMarkdownToHTML(): String = CommonMarkHtmlRenderer.builder().build().render(CommonMarkParser.builder().build().parse(this))
 
 //fun String.parseBaseMarkdown() : String = this
 //    .replaceMarkdownToHTML("**", "b")
@@ -168,7 +171,7 @@ fun TgMessage.toMinecraft(botId: Long, platform: Platform): Component {
         pinnedMsg.forwardFromToText()?.let { pinnedMessageText.add(it) }
         pinnedMsg.mediaToText()?.let { pinnedMessageText.add(it) }
 //        pinnedMsg.effectiveText?.let { pinnedMessageText.add(it) }
-        effectiveText?.let { pinnedMessageText.add((if (config.messages.styledTelegramMessagesInMinecraft) parsePlaceholdersOrGetString(it, platform) else it)) }
+        effectiveText?.let { pinnedMessageText.add(it) }
         components.add(
             addChatLink(
                 Component.text(
@@ -181,12 +184,11 @@ fun TgMessage.toMinecraft(botId: Long, platform: Platform): Component {
 
     forwardFromToText()?.let { components.add(addChatLink(Component.text(it, NamedTextColor.GRAY))) }
     replyToText(botId)?.let {
-        val replyText = Component.text(it, NamedTextColor.GRAY)
+        val replyText = Component.text(it).color(NamedTextColor.GRAY)
         if (!config.messages.replyInDifferentLine) components.add(replyText)
         else platform.broadcastMessage(replyText)
     }
     mediaToText()?.let { components.add(addChatLink(Component.text(it, NamedTextColor.GREEN))) }
-//    effectiveText?.let { components.add(Component.text(it)) }
     effectiveText?.let { components.add((if (config.messages.styledTelegramMessagesInMinecraft) formatTgEntity(it, this.entities) else Component.text(it))) }
 
     return Component.text(lang.minecraft.messageMeta.messageFormat)
