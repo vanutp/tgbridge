@@ -1,3 +1,7 @@
+### 0.4.7
+
+- 1.21.3 support
+
 ### 0.4.6
 
 - Remove prefix from messages by default, add an option to keep it

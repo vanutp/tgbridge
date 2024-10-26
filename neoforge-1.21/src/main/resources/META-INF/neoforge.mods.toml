@@ -22,6 +22,6 @@ side = "BOTH"
 [[dependencies.tgbridge]]
 modId = "minecraft"
 type = "required"
-versionRange = "[1.21]"
+versionRange = "[1.21,1.21.3]"
 ordering = "NONE"
 side = "BOTH"
