@@ -43,8 +43,6 @@ tasks {
         finalizedBy("remapJar")
 
         configurations = listOf(project.configurations.shadow.get())
-        relocate("net.kyori", "tgbridge.shaded.kyori")
-        exclude("META-INF/services/net.kyori.adventure.text.serializer.json.JSONComponentSerializer\$Provider")
     }
     named<RemapJarTask>("remapJar") {
         inputFile = shadowJar.get().archiveFile

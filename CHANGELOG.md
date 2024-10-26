@@ -1,6 +1,7 @@
 ### 0.4.7
 
 - 1.21.3 support
+- Fix compatibility with some mods bundling adventure
 
 ### 0.4.6
 

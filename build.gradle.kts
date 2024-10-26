@@ -91,6 +91,14 @@ subprojects {
             relocate("retrofit2", "tgbridge.shaded.retrofit2")
             relocate("org.snakeyaml", "tgbridge.shaded.snakeyaml")
             relocate("com.charleskorn.kaml", "tgbridge.shaded.kaml")
+
+            if (project.name != "paper") {
+                // shadowJar is never ran for common
+                relocate("net.kyori", "tgbridge.shaded.kyori")
+            }
+            // Renames files in META-INF/services to relocated names
+            // fixes "Modules net.kyori.... and tgbridge export package net.kyori..." in forge
+            mergeServiceFiles()
         }
     }
 
