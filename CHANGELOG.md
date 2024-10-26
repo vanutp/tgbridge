@@ -1,3 +1,7 @@
+### 0.5.0
+
+- Merge all fabric versions in one jar
+
 ### 0.4.7
 
 - 1.21.3 support

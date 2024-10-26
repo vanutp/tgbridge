@@ -1,5 +1,6 @@
 package dev.vanutp.tgbridge.fabric
 
+import com.google.gson.JsonElement
 import dev.vanutp.tgbridge.common.Platform
 import dev.vanutp.tgbridge.common.models.TBCommandContext
 import dev.vanutp.tgbridge.common.models.TBPlayerEventData
@@ -8,6 +9,8 @@ import net.fabricmc.loader.api.FabricLoader
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 import net.minecraft.network.message.SignedMessage
+import net.minecraft.registry.DynamicRegistryManager
+import net.minecraft.registry.Registries
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.command.CommandManager
 import net.minecraft.text.Text
@@ -18,21 +21,70 @@ import net.minecraft.util.Language
 class FabricPlatform(private val server: MinecraftServer) : Platform() {
     override val name = "fabric"
     override val configDir = FabricLoader.getInstance().configDir.resolve(FabricTelegramBridge.MOD_ID)
+    private val IS_192 = arrayOf("1.19", "1.19.1", "1.19.2").contains(server.version)
+    private val IS_19 = arrayOf("1.19", "1.19.1", "1.19.2", "1.19.3", "1.19.4").contains(server.version)
+    private val IS_19_204 = arrayOf(
+        "1.19",
+        "1.19.1",
+        "1.19.2",
+        "1.19.3",
+        "1.19.4",
+        "1.20",
+        "1.20.1",
+        "1.20.2",
+        "1.20.3",
+        "1.20.4"
+    ).contains(server.version)
 
     private fun adventureToMinecraft(adventure: Component): Text {
-        return Text.Serialization.fromJsonTree(GsonComponentSerializer.gson().serializeToTree(adventure))!!
+        val serializedTree = GsonComponentSerializer.gson().serializeToTree(adventure)
+
+        return if (IS_19_204) {
+            // net.minecraft.text.Text$Serializer
+            val textCls = Class.forName("net.minecraft.class_2561\$class_2562")
+            // called fromJson on older versions
+            val fromJsonTree = textCls.getMethod("method_10872", JsonElement::class.java)
+            fromJsonTree.invoke(null, serializedTree) as Text
+        } else {
+            // 1.20.5+
+            Text.Serialization.fromJsonTree(
+                serializedTree,
+                DynamicRegistryManager.of(Registries.REGISTRIES)
+            )!!
+        }
     }
 
     private fun minecraftToAdventure(minecraft: Text): Component {
-        return GsonComponentSerializer.gson().deserializeFromTree(Text.Serialization.toJsonTree(minecraft))
+        val jsonString = if (IS_19_204) {
+            // net.minecraft.text.Text$Serializer
+            val textCls = Class.forName("net.minecraft.class_2561\$class_2562")
+            // called toJson on older versions
+            val toJsonString = textCls.getMethod("method_10867", Text::class.java)
+            toJsonString.invoke(null, minecraft) as String
+        } else {
+            // 1.20.5+
+            Text.Serialization.toJsonString(
+                minecraft,
+                DynamicRegistryManager.of(Registries.REGISTRIES)
+            )
+        }
+
+        return GsonComponentSerializer.gson().deserialize(jsonString)
     }
 
     override fun registerChatMessageListener(handler: (TBPlayerEventData) -> Unit) {
         ServerMessageEvents.CHAT_MESSAGE.register { message: SignedMessage, sender, _ ->
+            val messageContent = if (IS_192) {
+                val cls = message.javaClass
+                val getContent = cls.getMethod("method_44125")
+                getContent.invoke(message) as Text
+            } else {
+                message.content
+            }
             handler.invoke(
                 TBPlayerEventData(
                     sender.displayName?.string ?: return@register,
-                    minecraftToAdventure(message.content),
+                    minecraftToAdventure(messageContent),
                 )
             )
         }
@@ -74,7 +126,18 @@ class FabricPlatform(private val server: MinecraftServer) : Platform() {
                 newArg.executes { ctx ->
                     val res = handler(TBCommandContext(
                         reply = { text ->
-                            ctx.source.sendFeedback({ Text.literal(text) }, false)
+                            val textComponent = Text.literal(text)
+                            if (IS_19) {
+                                val cls = ctx.source.javaClass
+                                val sendFeedback = cls.getMethod(
+                                    "method_9226",
+                                    Text::class.java,
+                                    Boolean::class.javaPrimitiveType
+                                )
+                                sendFeedback.invoke(ctx.source, textComponent, false)
+                            } else {
+                                ctx.source.sendFeedback({ textComponent }, false)
+                            }
                         }
                     ))
                     return@executes if (res) 1 else -1
@@ -100,7 +163,15 @@ class FabricPlatform(private val server: MinecraftServer) : Platform() {
 
     override fun getLanguageKey(key: String) = with(Language.getInstance()) {
         if (hasTranslation(key)) {
-            get(key)
+            if (IS_192) {
+                // this::class.java is net.minecraft.util.Language$1 and calling get on it
+                // fails with IllegalAccessException for some reason
+                val cls = Class.forName("net.minecraft.class_2477")  // net.minecraft.util.Language
+                val get = cls.getMethod("method_4679", String::class.javaObjectType)
+                get.invoke(this, key) as String
+            } else {
+                get(key)
+            }
         } else {
             null
         }
