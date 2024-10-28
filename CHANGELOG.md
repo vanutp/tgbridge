@@ -1,6 +1,7 @@
 ### 0.5.0
 
 - Merge all fabric versions in one jar
+- Allow changing the Bot API URL in the config
 
 ### 0.4.7
 

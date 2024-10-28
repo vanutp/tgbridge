@@ -85,6 +85,11 @@ data class GameEventsConfig(
 )
 
 @Serializable
+data class AdvancedConfig(
+    val botApiUrl: String = "https://api.telegram.org",
+)
+
+@Serializable
 data class Config(
     @YamlComment(
         "It's enough to set botToken and chatId for the plugin to work.",
@@ -93,4 +98,5 @@ data class Config(
     val general: GeneralConfig = GeneralConfig(),
     val messages: GameMessagesConfig = GameMessagesConfig(),
     val events: GameEventsConfig = GameEventsConfig(),
+    val advanced: AdvancedConfig = AdvancedConfig(),
 )

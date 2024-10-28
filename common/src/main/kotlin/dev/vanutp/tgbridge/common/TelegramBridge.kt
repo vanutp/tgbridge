@@ -37,7 +37,7 @@ abstract class TelegramBridge {
             logger.error("Can't start with default config values: please fill in botToken and chatId")
             return
         }
-        bot = TelegramBot(config.general.botToken, logger)
+        bot = TelegramBot(config.advanced.botApiUrl, config.general.botToken, logger)
 
         runBlocking {
             bot.init()

@@ -200,13 +200,13 @@ interface TgApi {
 
 const val POLL_TIMEOUT_SECONDS = 60
 
-class TelegramBot(private val botToken: String, private val logger: AbstractLogger) {
+class TelegramBot(botApiUrl: String, botToken: String, private val logger: AbstractLogger) {
     private val okhttpClient = OkHttpClient.Builder()
         .readTimeout(Duration.ofSeconds((POLL_TIMEOUT_SECONDS + 10).toLong()))
         .build()
     private val client = Retrofit.Builder()
         .client(okhttpClient)
-        .baseUrl("https://api.telegram.org/bot${botToken}/")
+        .baseUrl("$botApiUrl/bot$botToken/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
         .create(TgApi::class.java)
