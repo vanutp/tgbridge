@@ -39,7 +39,7 @@ abstract class TelegramBridge {
 
         runBlocking {
             bot.init()
-            sendMessage(lang.telegram.serverStarted)
+            sendMessageWithFormatting(lang.telegram.serverStarted)
         }
         registerTelegramHandlers()
         registerMinecraftHandlers()
@@ -54,7 +54,7 @@ abstract class TelegramBridge {
             return
         }
         runBlocking {
-            sendMessage(lang.telegram.serverStopped)
+            sendMessageWithFormatting(lang.telegram.serverStopped)
             bot.shutdown()
         }
         coroutineScope.cancel()
@@ -165,12 +165,7 @@ abstract class TelegramBridge {
             return@withScopeAndLock
         }
         val component = e.text as TranslatableComponent
-        val message = lang.telegram.playerDied.formatLang("deathMessage" to component.translate())
-        if (config.messages.styledMinecraftMessagesInTelegram) {
-            val parsedComponent = (platform.placeholderAPIInstance?.parse(message, platform))?:Component.text(message)
-            sendMessage(parsedComponent.translate(), FormattingParser.formatMinecraftComponent2TgEntity(parsedComponent))
-        }
-        else sendMessage(message)
+        sendMessageWithFormatting(lang.telegram.playerDied.formatLang("deathMessage" to component.translate()))
         lastMessage = null
     }
 
@@ -188,12 +183,7 @@ abstract class TelegramBridge {
         ) {
             deleteMessage(lm.id)
         } else {
-            val message = lang.telegram.playerJoined.formatLang("username" to e.username)
-            if (config.messages.styledMinecraftMessagesInTelegram) {
-                val parsedComponent = (platform.placeholderAPIInstance?.parse(message, platform))?:Component.text(message)
-                sendMessage(parsedComponent.translate(), FormattingParser.formatMinecraftComponent2TgEntity(parsedComponent))
-            }
-            else sendMessage(message)
+            sendMessageWithFormatting(lang.telegram.playerJoined.formatLang("username" to e.username))
         }
         lastMessage = null
     }
@@ -203,11 +193,7 @@ abstract class TelegramBridge {
             return@withScopeAndLock
         }
         val message = lang.telegram.playerLeft.formatLang("username" to e.username)
-        val newMsg =
-            if (config.messages.styledMinecraftMessagesInTelegram) {
-                val parsedComponent = (platform.placeholderAPIInstance?.parse(message, platform))?:Component.text(message)
-                sendMessage(parsedComponent.translate(), FormattingParser.formatMinecraftComponent2TgEntity(parsedComponent))
-            } else sendMessage(message)
+        val newMsg = sendMessageWithFormatting(message)
         lastMessage = LastMessage(
             LastMessageType.LEAVE,
             newMsg.messageId,
@@ -260,11 +246,7 @@ abstract class TelegramBridge {
             "title" to advancementName.escapeHTML(),
             "description" to advancementDescription.escapeHTML(),
         )
-        if (config.messages.styledMinecraftMessagesInTelegram) {
-            val parsedComponent = (platform.placeholderAPIInstance?.parse(message, platform))?:Component.text(message)
-            sendMessage(parsedComponent.translate(), FormattingParser.formatMinecraftComponent2TgEntity(parsedComponent))
-        }
-        else sendMessage(message)
+        sendMessageWithFormatting(message)
         lastMessage = null
     }
 
@@ -275,6 +257,12 @@ abstract class TelegramBridge {
             }
         }
     }
+
+    private suspend fun sendMessageWithFormatting(message: String) =
+        if (config.messages.styledMinecraftMessagesInTelegram) {
+            val parsedComponent = (platform.placeholderAPIInstance?.parse(message, platform))?:Component.text(message)
+            sendMessage(parsedComponent.translate(), FormattingParser.formatMinecraftComponent2TgEntity(parsedComponent))
+        } else sendMessage(message)
 
     private suspend fun sendMessage(text: String, entities: List<TgEntity>? = null): TgMessage {
         return bot.sendMessage(config.general.chatId, text, replyToMessageId = config.general.topicId, entities = entities)

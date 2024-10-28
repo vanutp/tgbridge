@@ -200,32 +200,42 @@ object FormattingParser {
 
     fun getAllOfChildren(component: Component): List<Component> {
         val output = ArrayList<Component>()
-        if (component.children().isNotEmpty()) component.children().forEach { output.addAll(
-            splitComponent(it)
-        ) }
+        if (component.children().isNotEmpty()) {
+            val split = splitComponent(component)
+            output.addAll(split.map { getAllOfChildren(it) } .fold(ArrayList()) { acc, list ->
+                acc.addAll(list)
+                acc
+            } )
+        }
+        else output.add(component)
         return output
     }
 
     fun splitComponent(component: Component): List<Component> {
         val output = ArrayList<Component>()
         val components = component.children()
-        var tempLine: String
-        var tempOffset: Int
-        var leftString: String = component.translate()
-        var i = 0
-        while (leftString.isNotEmpty()) {
-            tempOffset = if (i<components.size) leftString.indexOf(components[i].translate()) else leftString.length
-            if (tempOffset!=0) {
-                tempLine = leftString.substring(0, tempOffset)
-                output.add(crateComponentAndCopyFormatting(tempLine, component))
-                leftString = leftString.substring(tempOffset, leftString.length)
-            }
-            else if (i<components.size) {
-                output.add(components[i].mergeStyle(component))
-                leftString = leftString.substring(components[i].translate().length, leftString.length)
-                i++
-            }
+        if (components.isNotEmpty()) {
+            output.add(crateComponentAndCopyFormatting(component.translate().substring(0, component.translate().indexOf(components[0].translate())), component))
+            output.addAll(components.map { it.mergeStyle(component) })
         }
+        else output.add(component)
+//        var tempLine: String
+//        var tempOffset: Int
+//        var leftString: String = component.translate()
+//        var i = 0
+//        while (leftString.isNotEmpty()) {
+//            tempOffset = if (i<components.size) leftString.indexOf(components[i].translate()) else leftString.length
+//            if (tempOffset!=0) {
+//                tempLine = leftString.substring(0, tempOffset)
+//                output.add(crateComponentAndCopyFormatting(tempLine, component))
+//                leftString = leftString.substring(tempOffset, leftString.length)
+//            }
+//            else if (i<components.size) {
+//                output.add(components[i].mergeStyle(component))
+//                leftString = leftString.substring(components[i].translate().length, leftString.length)
+//                i++
+//            }
+//        }
         return output
     }
 

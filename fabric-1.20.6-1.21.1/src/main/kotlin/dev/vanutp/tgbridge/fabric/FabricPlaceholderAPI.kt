@@ -38,7 +38,9 @@ object FabricPlaceholderAPI: PlaceholderAPI() {
         if (registry.getTag("link") != null) form.add(MarkdownFormat.URL)
 
         val output = platform.minecraftToAdventure(NodeParser.builder()
-            .markdown(::SpoilerPlaceholderNode, MarkdownLiteParserV1::defaultQuoteFormatting, MarkdownLiteParserV1::defaultUrlFormatting, form).build()
+            .markdown(::SpoilerPlaceholderNode, MarkdownLiteParserV1::defaultQuoteFormatting, MarkdownLiteParserV1::defaultUrlFormatting, form)
+            .globalPlaceholders()
+            .build()
             .parseNode(text).toText(context))
         return output
     }
