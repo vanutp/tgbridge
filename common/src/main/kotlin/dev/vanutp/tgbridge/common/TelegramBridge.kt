@@ -120,7 +120,7 @@ abstract class TelegramBridge {
 
     private fun onChatMessage(e: TBPlayerEventData) = withScopeAndLock {
         val rawMinecraftText = (e.text as TextComponent).content()
-        val escapedText = rawMinecraftText.escapeHTML()
+//        val escapedText = rawMinecraftText.escapeHTML()
         val bluemapLink = rawMinecraftText.asBluemapLinkOrNone()
         if (bluemapLink == null && !rawMinecraftText.startsWith(config.messages.requirePrefixInMinecraft ?: "")) {
             return@withScopeAndLock
@@ -128,7 +128,7 @@ abstract class TelegramBridge {
 
         val currText = lang.telegram.chatMessage.formatLang(
             "username" to e.username,
-            "text" to (bluemapLink ?: escapedText),
+            "text" to (bluemapLink ?: rawMinecraftText),
         )
         val formattedComponent = if (config.messages.styledMinecraftMessagesInTelegram) platform.placeholderAPIInstance?.parse(currText, platform)?:Component.text(currText) else Component.text(currText)
         val finalText = formattedComponent.translate()
@@ -165,7 +165,12 @@ abstract class TelegramBridge {
             return@withScopeAndLock
         }
         val component = e.text as TranslatableComponent
-        sendMessage(lang.telegram.playerDied.formatLang("deathMessage" to component.translate().escapeHTML()))
+        val message = lang.telegram.playerDied.formatLang("deathMessage" to component.translate())
+        if (config.messages.styledMinecraftMessagesInTelegram) {
+            val parsedComponent = (platform.placeholderAPIInstance?.parse(message, platform))?:Component.text(message)
+            sendMessage(parsedComponent.translate(), FormattingParser.formatMinecraftComponent2TgEntity(parsedComponent))
+        }
+        else sendMessage(message)
         lastMessage = null
     }
 
@@ -183,7 +188,12 @@ abstract class TelegramBridge {
         ) {
             deleteMessage(lm.id)
         } else {
-            sendMessage(lang.telegram.playerJoined.formatLang("username" to e.username))
+            val message = lang.telegram.playerJoined.formatLang("username" to e.username)
+            if (config.messages.styledMinecraftMessagesInTelegram) {
+                val parsedComponent = (platform.placeholderAPIInstance?.parse(message, platform))?:Component.text(message)
+                sendMessage(parsedComponent.translate(), FormattingParser.formatMinecraftComponent2TgEntity(parsedComponent))
+            }
+            else sendMessage(message)
         }
         lastMessage = null
     }
@@ -192,7 +202,12 @@ abstract class TelegramBridge {
         if (!config.events.enableLeaveMessages) {
             return@withScopeAndLock
         }
-        val newMsg = sendMessage(lang.telegram.playerLeft.formatLang("username" to e.username))
+        val message = lang.telegram.playerLeft.formatLang("username" to e.username)
+        val newMsg =
+            if (config.messages.styledMinecraftMessagesInTelegram) {
+                val parsedComponent = (platform.placeholderAPIInstance?.parse(message, platform))?:Component.text(message)
+                sendMessage(parsedComponent.translate(), FormattingParser.formatMinecraftComponent2TgEntity(parsedComponent))
+            } else sendMessage(message)
         lastMessage = LastMessage(
             LastMessageType.LEAVE,
             newMsg.messageId,
@@ -240,13 +255,16 @@ abstract class TelegramBridge {
 
             else -> throw TBAssertionFailed("Unknown advancement type $advancementTypeKey.")
         }
-        sendMessage(
-            langKey.formatLang(
-                "username" to e.username,
-                "title" to advancementName.escapeHTML(),
-                "description" to advancementDescription.escapeHTML(),
-            )
+        val message = langKey.formatLang(
+            "username" to e.username,
+            "title" to advancementName.escapeHTML(),
+            "description" to advancementDescription.escapeHTML(),
         )
+        if (config.messages.styledMinecraftMessagesInTelegram) {
+            val parsedComponent = (platform.placeholderAPIInstance?.parse(message, platform))?:Component.text(message)
+            sendMessage(parsedComponent.translate(), FormattingParser.formatMinecraftComponent2TgEntity(parsedComponent))
+        }
+        else sendMessage(message)
         lastMessage = null
     }
 
