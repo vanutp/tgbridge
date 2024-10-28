@@ -2,6 +2,9 @@ package dev.vanutp.tgbridge.common.models
 
 import com.charleskorn.kaml.YamlComment
 import kotlinx.serialization.Serializable
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextDecoration
+import java.util.*
 
 @Serializable
 data class LangAdvancements(
@@ -48,8 +51,23 @@ data class MessageMeta(
 )
 
 @Serializable
+data class MessageFormatting(
+    val linkColor: Int = 0xffff55,
+    val linkFormatting: List<TextDecoration>? = Collections.singletonList(TextDecoration.UNDERLINED),
+    val mentionColor: Int = 0xffff55,
+    val mentionFormatting: List<TextDecoration>? = Collections.emptyList(),
+    val hashtagColor: Int = 0xffff55,
+    val hashtagFormatting: List<TextDecoration>? = Collections.emptyList(),
+    val codeColor: Int = 0xaaaaaa,
+    val codeFormatting: List<TextDecoration>? = Collections.emptyList(),
+    val spoilerReplaceWith: String? = "{text}",
+    val spoilerReplaceWithStyleFormatting: List<TextDecoration>? = Collections.singletonList(TextDecoration.OBFUSCATED),
+)
+
+@Serializable
 data class LangMinecraft(
     val messageMeta: MessageMeta = MessageMeta(),
+    val messageFormatting: MessageFormatting = MessageFormatting(),
 )
 
 @Serializable

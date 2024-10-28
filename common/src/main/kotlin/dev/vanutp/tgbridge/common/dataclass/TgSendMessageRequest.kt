@@ -10,7 +10,8 @@ data class TgSendMessageRequest(
     @SerializedName("reply_to_message_id")
     val replyToMessageId: Int? = null,
     @SerializedName("parse_mode")
-    val parseMode: String = "HTML",
+    val parseMode: String = "MarkdownV2",
     @SerializedName("disable_web_page_preview")
     val disableWebPagePreview: Boolean = true,
+    val entities: List<TgEntity>? = null,
 )

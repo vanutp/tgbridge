@@ -4,6 +4,7 @@ import dev.vanutp.tgbridge.common.dataclass.*
 import dev.vanutp.tgbridge.common.models.TgApi
 import kotlinx.coroutines.*
 import okhttp3.OkHttpClient
+import org.commonmark.internal.util.Html5Entities
 import retrofit2.HttpException
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -126,20 +127,22 @@ class TelegramBot(private val botToken: String, private val logger: AbstractLogg
         chatId: Long,
         text: String,
         replyToMessageId: Int? = null,
-        parseMode: String = "HTML",
+        parseMode: String = "None",
         disableWebPagePreview: Boolean = true,
+        entities: List<TgEntity>? = null,
     ): TgMessage = call {
-        client.sendMessage(TgSendMessageRequest(chatId, text, replyToMessageId, parseMode, disableWebPagePreview))
+        client.sendMessage(TgSendMessageRequest(chatId, text, replyToMessageId, parseMode, disableWebPagePreview, entities=entities))
     }
 
     suspend fun editMessageText(
         chatId: Long,
         messageId: Int,
         text: String,
-        parseMode: String = "HTML",
+        parseMode: String = "None",
         disableWebPagePreview: Boolean = true,
+        entities: List<TgEntity>? = null,
     ): TgMessage = call {
-        client.editMessageText(TgEditMessageRequest(chatId, messageId, text, parseMode, disableWebPagePreview))
+        client.editMessageText(TgEditMessageRequest(chatId, messageId, text, parseMode, disableWebPagePreview, entities=entities))
     }
 
     suspend fun deleteMessage(chatId: Long, messageId: Int) = call {

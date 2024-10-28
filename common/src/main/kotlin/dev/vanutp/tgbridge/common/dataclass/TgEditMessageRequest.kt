@@ -13,4 +13,5 @@ data class TgEditMessageRequest(
     val parseMode: String = "HTML",
     @SerializedName("disable_web_page_preview")
     val disableWebPagePreview: Boolean = true,
+    val entities: List<TgEntity>? = null,
 )

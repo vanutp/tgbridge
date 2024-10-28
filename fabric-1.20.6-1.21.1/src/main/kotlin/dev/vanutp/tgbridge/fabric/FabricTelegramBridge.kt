@@ -8,5 +8,5 @@ class FabricTelegramBridge(server: MinecraftServer) : TelegramBridge() {
         const val MOD_ID = "tgbridge"
     }
     override val logger = FabricLogger()
-    override val platform = FabricPlatform(server)
+    override val platform = FabricPlatform.setInstance(server)
 }

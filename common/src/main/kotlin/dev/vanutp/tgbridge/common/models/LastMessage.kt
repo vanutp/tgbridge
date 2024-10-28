@@ -1,5 +1,6 @@
 package dev.vanutp.tgbridge.common.models
 
+import dev.vanutp.tgbridge.common.dataclass.TgEntity
 import java.time.Instant
 
 enum class LastMessageType {
@@ -12,5 +13,6 @@ data class LastMessage(
     val id: Int,
     var date: Instant,
     var text: String? = null,
+    var entities: List<TgEntity>? = null,
     val leftPlayer: String? = null,
 )

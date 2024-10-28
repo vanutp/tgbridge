@@ -120,9 +120,7 @@ abstract class TelegramBridge {
 
     private fun onChatMessage(e: TBPlayerEventData) = withScopeAndLock {
         val rawMinecraftText = (e.text as TextComponent).content()
-        val escapedText = rawMinecraftText.escapeHTML().let { if (config.messages.styledMinecraftMessagesInTelegram) it.parseMarkdownToHTML()
-            .replace("<p>", "").replace("</p>", "") else it }
-        logger.info(escapedText)
+        val escapedText = rawMinecraftText.escapeHTML()
         val bluemapLink = rawMinecraftText.asBluemapLinkOrNone()
         if (bluemapLink == null && !rawMinecraftText.startsWith(config.messages.requirePrefixInMinecraft ?: "")) {
             return@withScopeAndLock
@@ -132,6 +130,9 @@ abstract class TelegramBridge {
             "username" to e.username,
             "text" to (bluemapLink ?: escapedText),
         )
+        val formattedComponent = if (config.messages.styledMinecraftMessagesInTelegram) platform.placeholderAPIInstance?.parse(currText, platform)?:Component.text(currText) else Component.text(currText)
+        val finalText = formattedComponent.translate()
+
         val currDate = Clock.systemUTC().instant()
 
         val lm = lastMessage
@@ -141,16 +142,20 @@ abstract class TelegramBridge {
             && (lm.text + "\n" + currText).length <= 4000
             && currDate.minus((config.messages.mergeWindow ?: 0).toLong(), ChronoUnit.SECONDS) < lm.date
         ) {
+            val entities = FormattingParser.formatMinecraftComponent2TgEntity(formattedComponent, lm.text!!.length)
+            lm.entities = if (lm.entities!=null) lm.entities!!.plus(entities) else entities
             lm.text += "\n" + currText
             lm.date = currDate
             editMessageText(lm.id, lm.text!!)
         } else {
-            val newMsg = sendMessage(currText)
+            val entities = FormattingParser.formatMinecraftComponent2TgEntity(formattedComponent)
+            val newMsg = sendMessage(finalText, entities)
             lastMessage = LastMessage(
                 LastMessageType.TEXT,
                 newMsg.messageId,
                 currDate,
-                text = currText
+                text = finalText,
+                entities = entities,
             )
         }
     }
@@ -253,12 +258,12 @@ abstract class TelegramBridge {
         }
     }
 
-    private suspend fun sendMessage(text: String): TgMessage {
-        return bot.sendMessage(config.general.chatId, text, replyToMessageId = config.general.topicId)
+    private suspend fun sendMessage(text: String, entities: List<TgEntity>? = null): TgMessage {
+        return bot.sendMessage(config.general.chatId, text, replyToMessageId = config.general.topicId, entities = entities)
     }
 
-    private suspend fun editMessageText(messageId: Int, text: String): TgMessage {
-        return bot.editMessageText(config.general.chatId, messageId, text)
+    private suspend fun editMessageText(messageId: Int, text: String, entities: List<TgEntity>? = null): TgMessage {
+        return bot.editMessageText(config.general.chatId, messageId, text, entities=entities)
     }
 
     private suspend fun deleteMessage(messageId: Int) {

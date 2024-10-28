@@ -11,14 +11,18 @@ import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
-import org.commonmark.parser.Parser as CommonMarkParser;
-import org.commonmark.renderer.html.HtmlRenderer as CommonMarkHtmlRenderer;
+import org.commonmark.parser.delimiter.DelimiterProcessor
+import org.commonmark.parser.Parser as CommonMarkParser
+import org.commonmark.renderer.html.HtmlRenderer as CommonMarkHtmlRenderer
+import dev.vanutp.tgbridge.common.FormattingParser
 
 fun String.escapeHTML(): String = this
     .replace("&", "&amp;")
     .replace(">", "&gt;")
     .replace("<", "&lt;")
-fun String.parseMarkdownToHTML(): String = CommonMarkHtmlRenderer.builder().build().render(CommonMarkParser.builder().build().parse(this))
+fun String.parseMarkdownToHTML(): String = CommonMarkHtmlRenderer.builder().sanitizeUrls(true)
+    .build().render(CommonMarkParser.builder()
+        .build().parse(this))
 
 //fun String.parseBaseMarkdown() : String = this
 //    .replaceMarkdownToHTML("**", "b")
@@ -173,7 +177,7 @@ fun TgMessage.toMinecraft(botId: Long, platform: Platform): Component {
 //        pinnedMsg.effectiveText?.let { pinnedMessageText.add(it) }
         effectiveText?.let { pinnedMessageText.add(it) }
         components.add(
-            addChatLink(
+            FormattingParser.addChatLink(this,
                 Component.text(
                     lang.minecraft.messageMeta.pin + " " + pinnedMessageText.joinToString(" "),
                     NamedTextColor.DARK_AQUA
@@ -182,14 +186,14 @@ fun TgMessage.toMinecraft(botId: Long, platform: Platform): Component {
         )
     }
 
-    forwardFromToText()?.let { components.add(addChatLink(Component.text(it, NamedTextColor.GRAY))) }
+    forwardFromToText()?.let { components.add(FormattingParser.addChatLink(this, Component.text(it, NamedTextColor.GRAY))) }
     replyToText(botId)?.let {
         val replyText = Component.text(it).color(NamedTextColor.GRAY)
         if (!config.messages.replyInDifferentLine) components.add(replyText)
         else platform.broadcastMessage(replyText)
     }
-    mediaToText()?.let { components.add(addChatLink(Component.text(it, NamedTextColor.GREEN))) }
-    effectiveText?.let { components.add((if (config.messages.styledTelegramMessagesInMinecraft) formatTgEntity(it, this.entities) else Component.text(it))) }
+    mediaToText()?.let { components.add(FormattingParser.addChatLink(this, Component.text(it, NamedTextColor.GREEN))) }
+    effectiveText?.let { components.add((if (config.messages.styledTelegramMessagesInMinecraft) FormattingParser.formatTgEntity2MinecraftComponent(this, it, this.entities) else Component.text(it))) }
 
     return Component.text(lang.minecraft.messageMeta.messageFormat)
         .replaceText {it.matchLiteral("{sender}")
@@ -204,78 +208,9 @@ fun TgMessage.toMinecraft(botId: Long, platform: Platform): Component {
             .build()) }
 }
 
-fun TgMessage.addChatLink(component: Component): Component {
-    return component.clickEvent(ClickEvent.openUrl("https://t.me/c/${-this.chat.id-1000000000000}/" + (if (this.messageThreadId!=null) "${this.messageThreadId}/" else "") + "${this.messageId}"))
-        .hoverEvent(Component.text(lang.minecraft.messageMeta.hoverOpenInTelegram).asHoverEvent())
-}
-fun TgMessage.parsePlaceholdersOrGetComponent(text: String, platform: Platform): Component = platform.placeholderAPIInstance?.parse(text, platform) ?: Component.text(text)
-fun TgMessage.parsePlaceholdersOrGetString(text: String, platform: Platform): String {
-    val parsed = platform.placeholderAPIInstance?.parse(text, platform).toString()
-    return parsed.ifEmpty { text }
-}
-fun TgMessage.formatTgEntity(text: String, entities: List<TgEntity>?): Component {
-    if (entities == null) return Component.text(text)
-    val components = mutableListOf<Component>()
-    val currentEntities = ArrayList<TgEntity>()
-    val nextEntities = ArrayList<TgEntity>()
-    var isLegacy = false
-    var isSpoiler = false
-    var tempText = ""
-    entities.forEach { if (it.offset == 0) {
-        currentEntities.add(it)
-        nextEntities.remove(it)
-    }}
-    for (i in text.indices) {
-        tempText += text[i]
-        entities.forEach {
-            if (it.offset!! + it.length!! == i+1) {
-                isLegacy = true
-                nextEntities.remove(it)
-            }
-            if (it.offset == i+1) {
-                isLegacy = true
-                nextEntities.add(it)
-            }
-        }
-        if (isLegacy || i == text.length-1) {
-            isLegacy = false
-            var tempComponent  = Component.text(tempText).toBuilder()
-            currentEntities.forEach {
-                when (it.type) {
-                    "bold" -> tempComponent.decoration(TextDecoration.BOLD, true)
-                    "italic" -> tempComponent.decoration(TextDecoration.ITALIC, true)
-                    "underline" -> tempComponent.decoration(TextDecoration.UNDERLINED, true)
-                    "strikethrough" -> tempComponent.decoration(TextDecoration.STRIKETHROUGH, true)
-                    "text_link" -> tempComponent.decoration(TextDecoration.UNDERLINED, true).color(NamedTextColor.YELLOW).clickEvent(ClickEvent.openUrl(it.url!!))
-                    "url" -> tempComponent.decoration(TextDecoration.UNDERLINED, true).color(NamedTextColor.YELLOW).clickEvent(ClickEvent.openUrl(tempText))
-                    "mention" -> tempComponent.color(NamedTextColor.YELLOW)
-                        .clickEvent(ClickEvent.suggestCommand(tempText))
-                        .hoverEvent(Component.text(lang.minecraft.messageMeta.hoverTagToReply).asHoverEvent())
-                    "hashtag", "cashtag" -> tempComponent.color(NamedTextColor.YELLOW)
-                        .clickEvent(ClickEvent.openUrl("https://t.me/c/${-this.chat.id-1000000000000}/" + (if (this.messageThreadId!=null) "${this.messageThreadId}/" else "") + "${this.messageId}"))
-                        .hoverEvent(Component.text(lang.minecraft.messageMeta.hoverOpenInTelegram).asHoverEvent())
-                    "spoiler" -> isSpoiler = true
-                    "code" -> tempComponent.color(NamedTextColor.GRAY).clickEvent(ClickEvent.copyToClipboard(tempText))
-                }
-            }
-            if (isSpoiler) {
-                if (components.last().hasDecoration(TextDecoration.OBFUSCATED)) {
-                    tempComponent = Component.text(components.last().translate()+tempText.replace(" ", "_")).decorate(TextDecoration.OBFUSCATED).hoverEvent(Component.text().append(components.last().hoverEvent()?.value() as TextComponent).append(tempComponent).build()).toBuilder()
-                    components.removeLast()
-                }
-                else tempComponent = Component.text(tempText.replace(" ", "_")).decorate(TextDecoration.OBFUSCATED).hoverEvent(tempComponent.build()).toBuilder()
-                components.add(tempComponent.build())
-            }
-            else components.add(tempComponent.build())
-            isSpoiler = false
-            tempText = ""
-            currentEntities.clear()
-            currentEntities.addAll(nextEntities)
-        }
-    }
-    return components.fold(Component.text()) { acc, component -> acc.append(component) } .build()
-}
-
+fun TgMessage.resolveMessageLink(): String = "https://t.me/c/${-this.chat.id-1000000000000}/" + (if (this.messageThreadId!=null) "${this.messageThreadId}/" else "") + "${this.messageId}"
+fun TextComponent.Builder.decorateAll(decorations: List<TextDecoration>?): TextComponent.Builder = this.apply { decorations?.forEach { this.decoration(it, true) } }
+fun TextComponent.decorateAll(decorations: List<TextDecoration>?): TextComponent = this.apply { decorations?.forEach { this.decoration(it, true) } }
 
 val XAERO_WAYPOINT_RGX =
     Regex("""xaero-waypoint:([^:]+):[^:]:([-\d]+):([-\d]+|~):([-\d]+):\d+:(?:false|true):\d+:Internal-(?:the-)?(overworld|nether|end)-waypoints""")

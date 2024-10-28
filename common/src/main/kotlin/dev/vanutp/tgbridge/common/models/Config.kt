@@ -2,6 +2,8 @@ package dev.vanutp.tgbridge.common.models
 
 import com.charleskorn.kaml.YamlComment
 import kotlinx.serialization.Serializable
+import net.kyori.adventure.text.format.TextDecoration
+import java.util.*
 
 @Serializable
 data class GeneralConfig(
@@ -56,8 +58,6 @@ data class GameMessagesConfig(
     val styledMinecraftMessagesInMinecraft: Boolean = true,
     // TODO: add support for markdown parsing on POST
     val styledMinecraftMessagesInTelegram: Boolean = true,
-    // TODO: add support for html styling
-    val stylingPrefixInMinecraft: String? = "",
 )
 
 @Serializable

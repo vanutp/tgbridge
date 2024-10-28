@@ -23,6 +23,13 @@ class FabricPlatform(val server: MinecraftServer) : Platform() {
     override val configDir = FabricLoader.getInstance().configDir.resolve(FabricTelegramBridge.MOD_ID)
     override val placeholderAPIInstance: PlaceholderAPI? = if (FabricLoader.getInstance().isModLoaded("placeholder-api")) FabricPlaceholderAPI else null
 
+    companion object {
+        var instance: FabricPlatform? = null
+        fun setInstance(server: MinecraftServer): FabricPlatform {
+            instance = FabricPlatform(server)
+            return instance!!
+        }
+    }
     fun adventureToMinecraft(adventure: Component): Text {
         return Text.Serialization.fromJsonTree(
             GsonComponentSerializer.gson().serializeToTree(adventure),
