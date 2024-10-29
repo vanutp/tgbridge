@@ -27,6 +27,12 @@ dependencies {
 
 	// PlaceholderAPI
 	modImplementation("eu.pb4:placeholder-api:2.4.1+1.21")
+
+	// Styled Chat
+	modImplementation("maven.modrinth:styled-chat:2.6.0+1.21")
+	modImplementation("eu.pb4:player-data-api:0.6.0+1.21")
+	modImplementation("me.lucko:fabric-permissions-api:0.3.1")
+	modImplementation("eu.pb4:predicate-api:0.5.2+1.21")
 }
 
 loom {

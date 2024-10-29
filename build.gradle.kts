@@ -30,6 +30,14 @@ subprojects {
     repositories {
         mavenCentral()
         maven("https://maven.nucleoid.xyz/") { name = "Nucleoid" }
+        exclusiveContent {
+            forRepository {
+                maven ("https://api.modrinth.com/maven") { name = "Modrinth" }
+            }
+            filter {
+                includeGroup("maven.modrinth")
+            }
+        }
     }
 
     dependencies {
@@ -59,19 +67,19 @@ subprojects {
     }
 
     java {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
         toolchain.languageVersion = JavaLanguageVersion.of(21)
     }
 
     tasks {
         withType<JavaCompile> {
             options.encoding = "UTF-8"
-            options.release = 17
+            options.release = 21
         }
 
         named<KotlinJvmCompile>("compileKotlin") {
-            kotlinOptions.jvmTarget = "17"
+            kotlinOptions.jvmTarget = "21"
         }
 
         named<ShadowJar>("shadowJar") {

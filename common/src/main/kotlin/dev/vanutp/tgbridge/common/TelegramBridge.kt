@@ -131,11 +131,11 @@ abstract class TelegramBridge {
             "text" to (bluemapLink ?: rawMinecraftText),
         )
         val formattedComponent = if (config.messages.styledMinecraftMessagesInTelegram) platform.placeholderAPIInstance?.parse(currText, platform)?:Component.text(currText) else Component.text(currText)
-        val finalText = formattedComponent.translate()
 
         val currDate = Clock.systemUTC().instant()
 
         val lm = lastMessage
+        if (formattedComponent == lm?.componentOfLastAppend) return@withScopeAndLock
         if (
             lm != null
             && lm.type == LastMessageType.TEXT
@@ -146,6 +146,7 @@ abstract class TelegramBridge {
             lm.entities = if (lm.entities!=null) lm.entities!!.plus(formatted.second) else formatted.second
             lm.text += "\n" + formatted.first
             lm.date = currDate
+            lm.componentOfLastAppend = formattedComponent
             editMessageText(lm.id, lm.text!!)
         } else {
             val formatted = FormattingParser.formatMinecraftComponent2TgEntity(formattedComponent)
@@ -156,6 +157,7 @@ abstract class TelegramBridge {
                 currDate,
                 text = formatted.first,
                 entities = formatted.second,
+                componentOfLastAppend = formattedComponent
             )
         }
     }
@@ -209,7 +211,8 @@ abstract class TelegramBridge {
         }
         val component = e.text as TranslatableComponent
         val advancementTypeKey = component.key()
-        val squareBracketsComponent = component.args()[1] as TranslatableComponent
+        val squareBracketsComponent = getFirstTranslatableComponentInTranslationArguments(component.arguments())
+            ?: return@withScopeAndLock
         val advancementNameComponent = squareBracketsComponent.args()[0]
         val advancementName = advancementNameComponent.translate()
         val advancementDescription = if (advancementsCfg.showDescription) {

@@ -2,6 +2,7 @@ package dev.vanutp.tgbridge.fabric
 
 import dev.vanutp.tgbridge.common.PlaceholderAPI
 import dev.vanutp.tgbridge.common.Platform
+import dev.vanutp.tgbridge.common.StyledChat
 import dev.vanutp.tgbridge.common.models.TBCommandContext
 import dev.vanutp.tgbridge.common.models.TBPlayerEventData
 import net.fabricmc.fabric.api.message.v1.ServerMessageEvents
@@ -22,6 +23,7 @@ class FabricPlatform(val server: MinecraftServer) : Platform() {
     override val name = "fabric"
     override val configDir = FabricLoader.getInstance().configDir.resolve(FabricTelegramBridge.MOD_ID)
     override val placeholderAPIInstance: PlaceholderAPI? = if (FabricLoader.getInstance().isModLoaded("placeholder-api")) FabricPlaceholderAPI else null
+    override val styledChatInstance: StyledChat? = if (FabricLoader.getInstance().isModLoaded("styledchat")) FabricStyledChat else null
 
     companion object {
         var instance: FabricPlatform? = null
@@ -45,7 +47,7 @@ class FabricPlatform(val server: MinecraftServer) : Platform() {
     }
 
     override fun registerChatMessageListener(handler: (TBPlayerEventData) -> Unit) {
-        ServerMessageEvents.CHAT_MESSAGE.register { message: SignedMessage, sender, _ ->
+        if (styledChatInstance == null) ServerMessageEvents.CHAT_MESSAGE.register { message: SignedMessage, sender, _ ->
             handler.invoke(
                 TBPlayerEventData(
                     sender.displayName?.string ?: return@register,
@@ -53,6 +55,7 @@ class FabricPlatform(val server: MinecraftServer) : Platform() {
                 )
             )
         }
+        else styledChatInstance.registerMessageEvent(handler)
     }
 
     private fun registerFilteredPlayerEvent(
@@ -60,11 +63,23 @@ class FabricPlatform(val server: MinecraftServer) : Platform() {
         filter: (TranslatableTextContent) -> Boolean
     ) {
         ServerMessageEvents.GAME_MESSAGE.register { _, text, _ ->
-            val content = text.content
-            if (content is TranslatableTextContent && filter(content)) {
-                handler(
-                    TBPlayerEventData((content.args[0] as Text).string, minecraftToAdventure(text))
-                )
+            if (text.siblings.isNotEmpty()) {
+                text.siblings.forEach {
+                    val content = it.content
+                    if (content is TranslatableTextContent && filter(content)) {
+                        handler(
+                            TBPlayerEventData((content.args[0] as Text).string, minecraftToAdventure(it))
+                        )
+                    }
+                }
+            }
+            else {
+                val content = text.content
+                if (content is TranslatableTextContent && filter(content)) {
+                    handler(
+                        TBPlayerEventData((content.args[0] as Text).string, minecraftToAdventure(text))
+                    )
+                }
             }
         }
     }

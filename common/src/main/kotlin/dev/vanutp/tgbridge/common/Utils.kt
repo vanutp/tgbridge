@@ -5,13 +5,10 @@ import dev.vanutp.tgbridge.common.ConfigManager.config
 import dev.vanutp.tgbridge.common.ConfigManager.getMinecraftLangKey
 import dev.vanutp.tgbridge.common.ConfigManager.lang
 import dev.vanutp.tgbridge.common.models.TgMessageMedia
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.TextComponent
-import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
-import dev.vanutp.tgbridge.common.FormattingParser
+import net.kyori.adventure.text.*
 
 fun String.escapeHTML(): String = this
     .replace("&", "&amp;")
@@ -56,6 +53,21 @@ fun Component.translate(): String {
 
         else -> this.toString()
     }
+}
+fun getFirstTranslatableComponentInTranslationArguments(components: List<TranslationArgument>): TranslatableComponent? {
+    var output: TranslatableComponent? = null
+    var temp: TranslationArgument?
+    var tempChild: TranslatableComponent?
+    val list = components.toMutableList()
+    while (list.isNotEmpty() && output == null) {
+        temp = list.removeFirstOrNull()
+        if (temp is TranslatableComponent) output = temp
+        else {
+            tempChild = temp?.asComponent()?.children()?.firstOrNull { it is TranslatableComponent } as TranslatableComponent?
+            if (tempChild != null) output = tempChild
+        }
+    }
+    return output
 }
 
 fun String.formatLang(vararg args: Pair<String, String>): String {

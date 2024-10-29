@@ -1,6 +1,7 @@
 package dev.vanutp.tgbridge.common.models
 
 import dev.vanutp.tgbridge.common.dataclass.TgEntity
+import net.kyori.adventure.text.Component
 import java.time.Instant
 
 enum class LastMessageType {
@@ -15,4 +16,5 @@ data class LastMessage(
     var text: String? = null,
     var entities: List<TgEntity>? = null,
     val leftPlayer: String? = null,
+    var componentOfLastAppend: Component? = null
 )

@@ -1,0 +1,32 @@
+package dev.vanutp.tgbridge.fabric
+
+import dev.vanutp.tgbridge.common.StyledChat
+import dev.vanutp.tgbridge.common.models.TBPlayerEventData
+import eu.pb4.placeholders.api.PlaceholderContext
+import eu.pb4.styledchat.StyledChatEvents
+import net.kyori.adventure.text.Component
+
+
+object FabricStyledChat: StyledChat() {
+
+    override fun registerOnPreMessage(onEvent: (String, Any) -> Unit) {
+        val onStyledChatEvent = StyledChatEvents.PreMessageEvent { msg, ctx ->
+            onEvent(msg, ctx)
+            msg
+        }
+        StyledChatEvents.PRE_MESSAGE_CONTENT.register(onStyledChatEvent)
+    }
+
+    override fun registerMessageEvent(handler: (TBPlayerEventData) -> Unit) {
+        registerOnPreMessage { message, context ->
+            context as PlaceholderContext
+            handler.invoke(
+                TBPlayerEventData(
+                    context.source().displayName?.string ?: return@registerOnPreMessage,
+                    Component.text(message),
+                )
+            )
+        }
+    }
+
+}

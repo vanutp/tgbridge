@@ -9,6 +9,7 @@ abstract class Platform {
     abstract val name: String
     abstract val configDir: Path
     abstract val placeholderAPIInstance: PlaceholderAPI?
+    abstract val styledChatInstance: StyledChat?
 
     abstract fun registerChatMessageListener(handler: (TBPlayerEventData) -> Unit)
     abstract fun registerPlayerAdvancementListener(handler: (TBPlayerEventData) -> Unit)
