@@ -210,7 +210,7 @@ fun TgMessage.toMinecraft(botId: Long, platform: Platform): Component {
 
 fun TgMessage.resolveMessageLink(): String = "https://t.me/c/${-this.chat.id-1000000000000}/" + (if (this.messageThreadId!=null) "${this.messageThreadId}/" else "") + "${this.messageId}"
 fun TextComponent.Builder.decorateAll(decorations: List<TextDecoration>?): TextComponent.Builder = this.apply { decorations?.forEach { this.decoration(it, true) } }
-fun TextComponent.decorateAll(decorations: List<TextDecoration>?): TextComponent = this.apply { decorations?.forEach { this.decoration(it, true) } }
+fun TextComponent.decorateAll(decorations: List<TextDecoration>?): TextComponent = this.toBuilder().decorateAll(decorations).build()
 
 val XAERO_WAYPOINT_RGX =
     Regex("""xaero-waypoint:([^:]+):[^:]:([-\d]+):([-\d]+|~):([-\d]+):\d+:(?:false|true):\d+:Internal-(?:the-)?(overworld|nether|end)-waypoints""")

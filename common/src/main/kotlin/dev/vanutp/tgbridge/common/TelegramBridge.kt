@@ -142,20 +142,20 @@ abstract class TelegramBridge {
             && (lm.text + "\n" + currText).length <= 4000
             && currDate.minus((config.messages.mergeWindow ?: 0).toLong(), ChronoUnit.SECONDS) < lm.date
         ) {
-            val entities = FormattingParser.formatMinecraftComponent2TgEntity(formattedComponent, lm.text!!.length)
-            lm.entities = if (lm.entities!=null) lm.entities!!.plus(entities) else entities
-            lm.text += "\n" + currText
+            val formatted = FormattingParser.formatMinecraftComponent2TgEntity(formattedComponent, lm.text!!.length)
+            lm.entities = if (lm.entities!=null) lm.entities!!.plus(formatted.second) else formatted.second
+            lm.text += "\n" + formatted.first
             lm.date = currDate
             editMessageText(lm.id, lm.text!!)
         } else {
-            val entities = FormattingParser.formatMinecraftComponent2TgEntity(formattedComponent)
-            val newMsg = sendMessage(finalText, entities)
+            val formatted = FormattingParser.formatMinecraftComponent2TgEntity(formattedComponent)
+            val newMsg = sendMessage(formatted.first, formatted.second)
             lastMessage = LastMessage(
                 LastMessageType.TEXT,
                 newMsg.messageId,
                 currDate,
-                text = finalText,
-                entities = entities,
+                text = formatted.first,
+                entities = formatted.second,
             )
         }
     }
@@ -261,7 +261,8 @@ abstract class TelegramBridge {
     private suspend fun sendMessageWithFormatting(message: String) =
         if (config.messages.styledMinecraftMessagesInTelegram) {
             val parsedComponent = (platform.placeholderAPIInstance?.parse(message, platform))?:Component.text(message)
-            sendMessage(parsedComponent.translate(), FormattingParser.formatMinecraftComponent2TgEntity(parsedComponent))
+            val formatted = FormattingParser.formatMinecraftComponent2TgEntity(parsedComponent)
+            sendMessage(formatted.first, formatted.second)
         } else sendMessage(message)
 
     private suspend fun sendMessage(text: String, entities: List<TgEntity>? = null): TgMessage {

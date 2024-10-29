@@ -34,6 +34,8 @@ data class LangTelegram(
 data class MessageMeta(
     val messageFormat: String = "§b<{sender}> §r{text}",
     val hoverOpenInTelegram: String = "Open in Telegram",
+    val hoverOpenInBrowser: String = "Open in Web Browser",
+    val hoverCopyToClipboard: String = "Copy to clipboard",
     val hoverTagToReply: String = "Tag him/her",
     val reply: String = "[R {sender}: {text}]",
     val replyToMinecraft: String = "[R {text}]",
@@ -60,8 +62,8 @@ data class MessageFormatting(
     val hashtagFormatting: List<TextDecoration>? = Collections.emptyList(),
     val codeColor: Int = 0xaaaaaa,
     val codeFormatting: List<TextDecoration>? = Collections.emptyList(),
-    val spoilerReplaceWith: String? = "{text}",
-    val spoilerReplaceWithStyleFormatting: List<TextDecoration>? = Collections.singletonList(TextDecoration.OBFUSCATED),
+    val spoilerReplaceWithChar: String? = "▌",
+    val spoilerReplaceWithStyleFormatting: List<TextDecoration>? = Collections.singletonList(TextDecoration.BOLD),
 )
 
 @Serializable
