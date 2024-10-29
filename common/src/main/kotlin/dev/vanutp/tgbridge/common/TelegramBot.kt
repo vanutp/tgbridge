@@ -4,7 +4,6 @@ import dev.vanutp.tgbridge.common.dataclass.*
 import dev.vanutp.tgbridge.common.models.TgApi
 import kotlinx.coroutines.*
 import okhttp3.OkHttpClient
-import org.commonmark.internal.util.Html5Entities
 import retrofit2.HttpException
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory

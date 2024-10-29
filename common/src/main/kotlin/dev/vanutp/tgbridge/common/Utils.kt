@@ -11,18 +11,12 @@ import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
-import org.commonmark.parser.delimiter.DelimiterProcessor
-import org.commonmark.parser.Parser as CommonMarkParser
-import org.commonmark.renderer.html.HtmlRenderer as CommonMarkHtmlRenderer
 import dev.vanutp.tgbridge.common.FormattingParser
 
 fun String.escapeHTML(): String = this
     .replace("&", "&amp;")
     .replace(">", "&gt;")
     .replace("<", "&lt;")
-fun String.parseMarkdownToHTML(): String = CommonMarkHtmlRenderer.builder().sanitizeUrls(true)
-    .build().render(CommonMarkParser.builder()
-        .build().parse(this))
 
 //fun String.parseBaseMarkdown() : String = this
 //    .replaceMarkdownToHTML("**", "b")
