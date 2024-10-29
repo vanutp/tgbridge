@@ -183,22 +183,41 @@ fun TgMessage.toMinecraft(botId: Long, platform: Platform): Component {
 //        pinnedMsg.effectiveText?.let { pinnedMessageText.add(it) }
         effectiveText?.let { pinnedMessageText.add(it) }
         components.add(
-            FormattingParser.addChatLink(this,
-                Component.text(
-                    lang.minecraft.messageMeta.pin + " " + pinnedMessageText.joinToString(" "),
-                    NamedTextColor.DARK_AQUA
-                )
+            FormattingParser.applyStyle(
+                component = Component.text(lang.minecraft.messageMeta.pin + " " + pinnedMessageText.joinToString(" ")),
+                color = lang.minecraft.messageFormatting.mediaColor,
+                decorations = lang.minecraft.messageFormatting.mediaFormatting,
+                hover = Component.text(lang.minecraft.messageMeta.hoverOpenInTelegram),
+                clickEvent = ClickEvent.openUrl(resolveMessageLink())
             )
         )
     }
 
-    forwardFromToText()?.let { components.add(FormattingParser.addChatLink(this, Component.text(it, NamedTextColor.GRAY))) }
+    forwardFromToText()?.let { components.add(FormattingParser.applyStyle(
+        component = Component.text(it),
+        color = lang.minecraft.messageFormatting.forwardColor,
+        decorations = lang.minecraft.messageFormatting.forwardFormatting,
+        hover = Component.text(lang.minecraft.messageMeta.hoverOpenInTelegram),
+        clickEvent = ClickEvent.openUrl(resolveMessageLink())
+    )) }
     replyToText(botId)?.let {
-        val replyText = Component.text(it).color(NamedTextColor.GRAY)
+        val replyText = FormattingParser.applyStyle(
+            component = Component.text(it),
+            color = lang.minecraft.messageFormatting.replyColor,
+            decorations = lang.minecraft.messageFormatting.replyFormatting,
+            hover = Component.text(lang.minecraft.messageMeta.hoverOpenInTelegram),
+            clickEvent = ClickEvent.openUrl(resolveMessageLink())
+        )
         if (!config.messages.replyInDifferentLine) components.add(replyText)
         else platform.broadcastMessage(replyText)
     }
-    mediaToText()?.let { components.add(FormattingParser.addChatLink(this, Component.text(it, NamedTextColor.GREEN))) }
+    mediaToText()?.let { components.add(FormattingParser.applyStyle(
+        component = Component.text(it),
+        color = lang.minecraft.messageFormatting.mediaColor,
+        decorations = lang.minecraft.messageFormatting.mediaFormatting,
+        hover = Component.text(lang.minecraft.messageMeta.hoverOpenInTelegram),
+        clickEvent = ClickEvent.openUrl(resolveMessageLink())
+    )) }
     effectiveText?.let { components.add((if (config.messages.styledTelegramMessagesInMinecraft) FormattingParser.formatTgEntity2MinecraftComponent(this, it, this.entities) else Component.text(it))) }
 
     return Component.text(lang.minecraft.messageMeta.messageFormat)

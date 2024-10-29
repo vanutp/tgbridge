@@ -4,6 +4,7 @@ import com.charleskorn.kaml.YamlComment
 import kotlinx.serialization.Serializable
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
+import net.kyori.adventure.util.RGBLike
 import java.util.*
 
 @Serializable
@@ -54,16 +55,25 @@ data class MessageMeta(
 
 @Serializable
 data class MessageFormatting(
-    val linkColor: Int = 0xffff55,
+    val linkColor: String = "#FFFF55",
     val linkFormatting: List<TextDecoration>? = Collections.singletonList(TextDecoration.UNDERLINED),
-    val mentionColor: Int = 0xffff55,
+    val mentionColor: String = "#FFFF55",
     val mentionFormatting: List<TextDecoration>? = Collections.emptyList(),
-    val hashtagColor: Int = 0xffff55,
+    val hashtagColor: String = "#FFFF55",
     val hashtagFormatting: List<TextDecoration>? = Collections.emptyList(),
-    val codeColor: Int = 0xaaaaaa,
+    val codeColor: String = "#AAAAAA",
     val codeFormatting: List<TextDecoration>? = Collections.emptyList(),
+    val spoilerColor: String = "#AAAAAA",
+    val spoilerFormatting: List<TextDecoration>? = Collections.singletonList(TextDecoration.OBFUSCATED),
     val spoilerReplaceWithChar: String? = "▌",
-    val spoilerReplaceWithStyleFormatting: List<TextDecoration>? = Collections.singletonList(TextDecoration.BOLD),
+    val replyColor: String = "#AAAAAA",
+    val replyFormatting: List<TextDecoration>? = Collections.singletonList(TextDecoration.BOLD),
+    val forwardColor: String = "#AAAAAA",
+    val forwardFormatting: List<TextDecoration>? = Collections.singletonList(TextDecoration.BOLD),
+    val mediaColor: String = "#FFFF55",
+    val mediaFormatting: List<TextDecoration>? = Collections.singletonList(TextDecoration.BOLD),
+    val pinnedMessageColor: String = "#AAAAAA",
+    val pinnedMessageFormatting: List<TextDecoration>? = Collections.singletonList(TextDecoration.BOLD),
 )
 
 @Serializable

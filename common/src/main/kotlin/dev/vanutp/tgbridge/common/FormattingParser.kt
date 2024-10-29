@@ -6,6 +6,8 @@ import dev.vanutp.tgbridge.common.dataclass.TgMessage
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.event.ClickEvent
+import net.kyori.adventure.text.event.HoverEvent
+import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.Style
 import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.format.TextDecoration
@@ -61,12 +63,12 @@ object FormattingParser {
                         "text_link" -> tempComponent = getAsLinkComponent(tempComponent.build(), it.url!!).toBuilder()
                         "url" -> tempComponent = getAsLinkComponent(tempComponent.build()).toBuilder()
                         "mention" -> tempComponent.decorateAll(lang.minecraft.messageFormatting.mentionFormatting).color(
-                            TextColor.color(lang.minecraft.messageFormatting.mentionColor))
+                            TextColor.fromHexString(lang.minecraft.messageFormatting.mentionColor))
                             .clickEvent(ClickEvent.suggestCommand(tempText))
                             .insertion(tempText)
                             .hoverEvent(Component.text(lang.minecraft.messageMeta.hoverTagToReply).asHoverEvent())
                         "hashtag", "cashtag" -> tempComponent.decorateAll(lang.minecraft.messageFormatting.hashtagFormatting).color(
-                            TextColor.color(lang.minecraft.messageFormatting.hashtagColor))
+                            TextColor.fromHexString(lang.minecraft.messageFormatting.hashtagColor))
                             .clickEvent(ClickEvent.openUrl("https://t.me/c/${-message.chat.id-1000000000000}/" + (if (message.messageThreadId!=null) "${message.messageThreadId}/" else "") + "${message.messageId}"))
                             .hoverEvent(Component.text(lang.minecraft.messageMeta.hoverOpenInTelegram).asHoverEvent())
                         "spoiler" -> isSpoiler = true
@@ -116,7 +118,7 @@ object FormattingParser {
             tempEntitiesKeys.addAll(getEntityNamesFromComponent(it).filter { it0 -> !ignoredEntityTags.contains(it0) })
             lengthModifier = it.content().length
             isItSpoiler = tempEntitiesKeys.contains("spoiler")
-            currentEntities.forEach { it1 -> if (!tempEntitiesKeys.contains(it1.type) && !(isItSpoiler && lang.minecraft.messageFormatting.spoilerReplaceWithStyleFormatting?.map { it2 -> it2.name } ?.contains(it1.type) == true)) {
+            currentEntities.forEach { it1 -> if (!tempEntitiesKeys.contains(it1.type) && !(isItSpoiler && lang.minecraft.messageFormatting.spoilerFormatting?.map { it2 -> it2.name } ?.contains(it1.type) == true)) {
                 entities.add(it1)
                 forRemoveFromCurrentEntities.add(it1)
             } else it1.length = it1.length?.plus(lengthModifier) }
@@ -147,13 +149,13 @@ object FormattingParser {
         if (isItTextLinkComponent(component)) output.add("text_link")
         if (isItUrlLinkComponent(component)) output.add("url")
         if (isDecorationsEquals(component, lang.minecraft.messageFormatting.mentionFormatting)
-                && component.color()?.value()?.equals(lang.minecraft.messageFormatting.mentionColor) == true
+                && component.color()?.asHexString()?.lowercase()?.equals(lang.minecraft.messageFormatting.mentionColor.lowercase()) == true
                 && component.translate().startsWith("@")) output.add("mention")
         if (isDecorationsEquals(component, lang.minecraft.messageFormatting.hashtagFormatting)
-                && component.color()?.value()?.equals(lang.minecraft.messageFormatting.hashtagColor) == true
+                && component.color()?.asHexString()?.lowercase()?.equals(lang.minecraft.messageFormatting.hashtagColor.lowercase()) == true
                 && component.translate().startsWith("#")) output.add("hashtag")
         if (isDecorationsEquals(component, lang.minecraft.messageFormatting.hashtagFormatting)
-                && component.color()?.value()?.equals(lang.minecraft.messageFormatting.hashtagColor) == true
+                && component.color()?.asHexString()?.lowercase()?.equals(lang.minecraft.messageFormatting.hashtagColor.lowercase()) == true
                 && component.translate().startsWith("$")) output.add("cashtag")
         if (isItSpoiler(component)) output.add("spoiler")
         if (isItCodeComponent(component)) output.add("code")
@@ -180,39 +182,52 @@ object FormattingParser {
     fun isItSpoiler(component: Component): Boolean = component.hoverEvent()?.value() is TextComponent &&
             lang.minecraft.messageFormatting.spoilerReplaceWithChar
                 ?.repeat(getFromSpoilerComponent(component).translate().length) == component.translate() &&
-            lang.minecraft.messageFormatting.spoilerReplaceWithStyleFormatting?.any { !component.hasDecoration(it) } == false
+            lang.minecraft.messageFormatting.spoilerFormatting?.any { !component.hasDecoration(it) } == false &&
+            component.color()?.asHexString()?.lowercase()?.equals(lang.minecraft.messageFormatting.spoilerColor.lowercase()) == true
 
     fun getFromSpoilerComponent(component: Component): TextComponent = component.hoverEvent()?.value() as TextComponent
 
     fun appendToSpoilerComponent(component: Component, spoilerText: String): TextComponent = appendToSpoilerComponent(component, Component.text(spoilerText))
     fun appendToSpoilerComponent(component: Component, spoilerComponent: TextComponent): TextComponent =
-        Component.text(lang.minecraft.messageFormatting.spoilerReplaceWithChar
-            ?.repeat(getFromSpoilerComponent(component).translate().length+spoilerComponent.translate().length).toString())
-            .hoverEvent(Component.text().append(getFromSpoilerComponent(component)).append(spoilerComponent).build())
-            .decorateAll(lang.minecraft.messageFormatting.spoilerReplaceWithStyleFormatting)
+        applyStyle(
+            component = Component.text(
+                lang.minecraft.messageFormatting.spoilerReplaceWithChar
+                    ?.repeat(getFromSpoilerComponent(component).translate().length + spoilerComponent.translate().length).toString()
+            ),
+            decorations = lang.minecraft.messageFormatting.spoilerFormatting,
+            hover = Component.text().append(getFromSpoilerComponent(component)).append(spoilerComponent).build(),
+            color = lang.minecraft.messageFormatting.spoilerColor
+        )
 
     fun getAsSpoilerComponent(spoilerText: String): TextComponent = getAsSpoilerComponent(Component.text(spoilerText))
-    fun getAsSpoilerComponent(spoilerComponent: TextComponent): TextComponent = Component.text(lang.minecraft.messageFormatting.spoilerReplaceWithChar
-        ?.repeat(spoilerComponent.translate().length).toString())
-        .hoverEvent(spoilerComponent).decorateAll(lang.minecraft.messageFormatting.spoilerReplaceWithStyleFormatting)
+    fun getAsSpoilerComponent(spoilerComponent: TextComponent): TextComponent =
+        applyStyle(
+            component = Component.text(
+                lang.minecraft.messageFormatting.spoilerReplaceWithChar
+                ?.repeat(spoilerComponent.translate().length).toString()
+            ),
+            decorations = lang.minecraft.messageFormatting.spoilerFormatting,
+            hover = spoilerComponent,
+            color = lang.minecraft.messageFormatting.spoilerColor
+        )
 
     fun isItCodeComponent(component: Component): Boolean =
         isDecorationsEquals(component, lang.minecraft.messageFormatting.codeFormatting) &&
-                component.color()?.value()?.equals(lang.minecraft.messageFormatting.codeColor) == true
+                component.color()?.asHexString()?.lowercase()?.equals(lang.minecraft.messageFormatting.codeColor.lowercase()) == true
     fun getAsCodeComponent(code: String): TextComponent = getAsCodeComponent(Component.text(code))
     fun getAsCodeComponent(component: TextComponent): TextComponent =
-        component.toBuilder()
-            .decorateAll(lang.minecraft.messageFormatting.codeFormatting)
-            .color(TextColor.color(lang.minecraft.messageFormatting.codeColor))
-            .clickEvent(ClickEvent.copyToClipboard(component.translate()))
-            .hoverEvent(Component.text(lang.minecraft.messageMeta.hoverCopyToClipboard).asHoverEvent())
-            .insertion(component.translate())
-            .build()
+        applyStyle(
+            component = component,
+            color = lang.minecraft.messageFormatting.codeColor,
+            clickEvent = ClickEvent.copyToClipboard(component.translate()),
+            hover = Component.text(lang.minecraft.messageMeta.hoverCopyToClipboard),
+            insert = component.translate()
+        )
 
     fun isItLinkComponent(component: Component): Boolean =
         isDecorationsEquals(component, lang.minecraft.messageFormatting.linkFormatting) &&
         component.clickEvent() != null &&
-        component.color()?.value()?.equals(lang.minecraft.messageFormatting.linkColor) == true
+        component.color()?.asHexString()?.lowercase()?.equals(lang.minecraft.messageFormatting.linkColor.lowercase()) == true
     fun isItUrlLinkComponent(component: Component): Boolean =
         isItLinkComponent(component) &&
         component.clickEvent()?.value() == component.translate()
@@ -223,16 +238,16 @@ object FormattingParser {
     fun getAsLinkComponent(linkComponent: TextComponent): TextComponent = getAsLinkComponent(linkComponent, linkComponent.translate())
     fun getAsLinkComponent(text: String, url: String): TextComponent = getAsLinkComponent(Component.text(text), url)
     fun getAsLinkComponent(component: TextComponent, url: String): TextComponent =
-        component.toBuilder()
-            .decorateAll(lang.minecraft.messageFormatting.linkFormatting)
-            .color(TextColor.color(lang.minecraft.messageFormatting.linkColor))
-            .clickEvent(ClickEvent.openUrl(url))
-            .hoverEvent(Component.text(lang.minecraft.messageMeta.hoverOpenInBrowser).asHoverEvent())
-            .build()
+        applyStyle(
+            component = component,
+            color = lang.minecraft.messageFormatting.linkColor,
+            clickEvent = ClickEvent.openUrl(url),
+            hover = Component.text(lang.minecraft.messageMeta.hoverOpenInBrowser)
+        )
     fun getUrlFromLinkComponent(component: TextComponent): String = (component.clickEvent()?.value()) ?: component.translate()
 
     fun isIt(component: Component, decorations: List<TextDecoration>, othersOfThis: List<String> = emptyList(), strictly:Boolean = true): Boolean = (if (strictly) isDecorationsEquals(component, decorations) else isDecorationsContains(component, decorations)) && !othersOfThis.any {
-        (it == "spoiler" && lang.minecraft.messageFormatting.spoilerReplaceWithStyleFormatting?.containsAll(decorations) == true) ||
+        (it == "spoiler" && lang.minecraft.messageFormatting.spoilerFormatting?.containsAll(decorations) == true) ||
         (it == "code" && lang.minecraft.messageFormatting.codeFormatting?.containsAll(decorations) == true) ||
         ((it == "hashtag" || it == "cashtag") && lang.minecraft.messageFormatting.hashtagFormatting?.containsAll(decorations) == true) ||
         (it == "mention" && lang.minecraft.messageFormatting.mentionFormatting?.containsAll(decorations) == true) ||
@@ -271,4 +286,29 @@ object FormattingParser {
 
     fun crateComponentAndCopyFormatting(text: String, component: TextComponent): TextComponent = Component.text(text)
             .style(component.style())
+
+    fun applyStyle(
+        component: TextComponent,
+        color: String? = "#FFFFFF",
+        decorations: List<TextDecoration>? = emptyList(),
+        hover: TextComponent? = null,
+        clickEvent: ClickEvent? = null,
+        insert: String? = null
+    ): TextComponent = applyStyle(component, TextColor.fromHexString(color ?: "#FFFFFF"), decorations, hover, clickEvent, insert)
+    fun applyStyle(
+        component: TextComponent,
+        color: TextColor? = NamedTextColor.WHITE,
+        decorations: List<TextDecoration>? = emptyList(),
+        hover: TextComponent? = null,
+        clickEvent: ClickEvent? = null,
+        insert: String? = null
+    ): TextComponent {
+        val builder = component.toBuilder()
+        if (color != null) builder.color(color)
+        if (decorations?.isNotEmpty() == true) builder.decorateAll(decorations)
+        if (hover != null) builder.hoverEvent(hover.asHoverEvent())
+        if (clickEvent != null) builder.clickEvent(clickEvent)
+        if (insert != null) builder.insertion(insert)
+        return builder.build()
+    }
 }
