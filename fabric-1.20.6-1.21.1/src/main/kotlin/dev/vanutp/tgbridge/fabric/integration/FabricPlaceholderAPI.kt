@@ -1,18 +1,14 @@
-package dev.vanutp.tgbridge.fabric
+package dev.vanutp.tgbridge.fabric.integration
 
 import dev.vanutp.tgbridge.common.FormattingParser
-import dev.vanutp.tgbridge.common.PlaceholderAPI
+import dev.vanutp.tgbridge.common.integration.PlaceholderAPI
 import dev.vanutp.tgbridge.common.Platform
+import dev.vanutp.tgbridge.fabric.FabricPlatform
 import eu.pb4.placeholders.api.PlaceholderContext
 import eu.pb4.placeholders.api.node.TextNode
-import eu.pb4.placeholders.api.node.parent.HoverNode
-import eu.pb4.placeholders.api.parsers.MarkdownLiteParserV1
 import eu.pb4.placeholders.api.parsers.MarkdownLiteParserV1.MarkdownFormat
 import eu.pb4.placeholders.api.parsers.NodeParser
 import eu.pb4.placeholders.api.parsers.TagLikeParser
-import eu.pb4.placeholders.api.parsers.TextParserV1
-import eu.pb4.placeholders.api.parsers.tag.TagRegistry
-import eu.pb4.placeholders.api.parsers.tag.TextTag
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
 

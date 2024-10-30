@@ -1,7 +1,7 @@
-package dev.vanutp.tgbridge.common
+package dev.vanutp.tgbridge.common.integration
 
+import dev.vanutp.tgbridge.common.Platform
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.TextComponent
 
 
 abstract class PlaceholderAPI {

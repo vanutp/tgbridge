@@ -33,6 +33,9 @@ dependencies {
 	modImplementation("eu.pb4:player-data-api:0.6.0+1.21")
 	modImplementation("me.lucko:fabric-permissions-api:0.3.1")
 	modImplementation("eu.pb4:predicate-api:0.5.2+1.21")
+
+	// Vanish
+	modImplementation("maven.modrinth:vanish:1.5.7+1.21.1")
 }
 
 loom {

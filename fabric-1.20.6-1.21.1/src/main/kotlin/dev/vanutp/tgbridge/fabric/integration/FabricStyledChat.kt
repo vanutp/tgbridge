@@ -1,6 +1,6 @@
-package dev.vanutp.tgbridge.fabric
+package dev.vanutp.tgbridge.fabric.integration
 
-import dev.vanutp.tgbridge.common.StyledChat
+import dev.vanutp.tgbridge.common.integration.StyledChat
 import dev.vanutp.tgbridge.common.models.TBPlayerEventData
 import eu.pb4.placeholders.api.PlaceholderContext
 import eu.pb4.styledchat.StyledChatEvents

@@ -9,26 +9,26 @@ import java.util.*
 
 @Serializable
 data class LangAdvancements(
-    val regular: String = "😼 <b>{username} has made the advancement {title}</b>\n\n<i>{description}</i>",
-    val goal: String = "🎯 <b>{username} has reached the goal {title}</b>\n\n<i>{description}</i>",
-    val challenge: String = "🏅 <b>{username} has completed the challenge {title}</b>\n\n<i>{description}</i>",
+    val regular: String = "😼 **{username} has made the advancement {title}**\n\n*{description}*",
+    val goal: String = "🎯 **{username} has reached the goal {title}**\n\n*{description}*",
+    val challenge: String = "🏅 **{username} has completed the challenge {title}**\n\n*{description}*",
 )
 
 @Serializable
 data class LangTelegram(
-    val serverStarted: String = "✅ <b>Server started!</b>",
-    val serverStopped: String = "❌ <b>Server stopped!</b>",
+    val serverStarted: String = "✅ **Server started!**",
+    val serverStopped: String = "❌ **Server stopped!**",
 
-    val playerJoined: String = "🥳 <b>{username} joined the game</b>",
-    val playerLeft: String = "😕 <b>{username} left the game</b>",
-    val playerDied: String = "☠️ <b>{deathMessage}</b>",
+    val playerJoined: String = "🥳 **{username} joined the game**",
+    val playerLeft: String = "😕 **{username} left the game**",
+    val playerDied: String = "☠️ **{deathMessage}**",
 
-    val chatMessage: String = "<b>[{username}]</b> {text}",
+    val chatMessage: String = "**[{username}]** {text}",
 
     val advancements: LangAdvancements = LangAdvancements(),
 
-    val playerList: String = "📝 <b>{count} players online:</b> {usernames}",
-    val playerListZeroOnline: String = "📝 <b>0 players online</b>",
+    val playerList: String = "📝 **{count} players online:** {usernames}",
+    val playerListZeroOnline: String = "📝 **0 players online**",
 )
 
 @Serializable
@@ -67,13 +67,13 @@ data class MessageFormatting(
     val spoilerFormatting: List<TextDecoration>? = Collections.singletonList(TextDecoration.OBFUSCATED),
     val spoilerReplaceWithChar: String? = "▌",
     val replyColor: String = "#AAAAAA",
-    val replyFormatting: List<TextDecoration>? = Collections.singletonList(TextDecoration.BOLD),
+    val replyFormatting: List<TextDecoration>? = Collections.emptyList(),
     val forwardColor: String = "#AAAAAA",
-    val forwardFormatting: List<TextDecoration>? = Collections.singletonList(TextDecoration.BOLD),
+    val forwardFormatting: List<TextDecoration>? = Collections.emptyList(),
     val mediaColor: String = "#FFFF55",
-    val mediaFormatting: List<TextDecoration>? = Collections.singletonList(TextDecoration.BOLD),
-    val pinnedMessageColor: String = "#AAAAAA",
-    val pinnedMessageFormatting: List<TextDecoration>? = Collections.singletonList(TextDecoration.BOLD),
+    val mediaFormatting: List<TextDecoration>? = Collections.emptyList(),
+    val pinnedMessageColor: String = "#FFFF55",
+    val pinnedMessageFormatting: List<TextDecoration>? = Collections.emptyList(),
 )
 
 @Serializable

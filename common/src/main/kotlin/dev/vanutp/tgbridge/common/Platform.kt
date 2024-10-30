@@ -1,5 +1,8 @@
 package dev.vanutp.tgbridge.common
 
+import dev.vanutp.tgbridge.common.integration.PlaceholderAPI
+import dev.vanutp.tgbridge.common.integration.StyledChat
+import dev.vanutp.tgbridge.common.integration.Vanish
 import dev.vanutp.tgbridge.common.models.TBCommandContext
 import dev.vanutp.tgbridge.common.models.TBPlayerEventData
 import net.kyori.adventure.text.Component
@@ -10,6 +13,7 @@ abstract class Platform {
     abstract val configDir: Path
     abstract val placeholderAPIInstance: PlaceholderAPI?
     abstract val styledChatInstance: StyledChat?
+    abstract val vanishInstance: Vanish?
 
     abstract fun registerChatMessageListener(handler: (TBPlayerEventData) -> Unit)
     abstract fun registerPlayerAdvancementListener(handler: (TBPlayerEventData) -> Unit)
