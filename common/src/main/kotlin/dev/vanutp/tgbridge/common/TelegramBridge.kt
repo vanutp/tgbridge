@@ -167,7 +167,7 @@ abstract class TelegramBridge {
             return@withScopeAndLock
         }
         val component = e.text as TranslatableComponent
-        sendMessageWithFormatting(lang.telegram.playerDied.formatLang("deathMessage" to component.translate()))
+        sendMessageWithFormatting(lang.telegram.playerDied.formatLang("deathMessage" to component.translate(), "username" to e.username))
         lastMessage = null
     }
 

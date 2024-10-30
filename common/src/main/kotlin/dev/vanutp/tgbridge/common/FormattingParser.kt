@@ -72,7 +72,7 @@ object FormattingParser {
                             .clickEvent(ClickEvent.openUrl("https://t.me/c/${-message.chat.id-1000000000000}/" + (if (message.messageThreadId!=null) "${message.messageThreadId}/" else "") + "${message.messageId}"))
                             .hoverEvent(Component.text(lang.minecraft.messageMeta.hoverOpenInTelegram).asHoverEvent())
                         "spoiler" -> isSpoiler = true
-                        "code" -> tempComponent = getAsCodeComponent(tempComponent.build()).toBuilder()
+                        "code", "pre" -> tempComponent = getAsCodeComponent(tempComponent.build()).toBuilder()
                     }
                 }
                 if (isSpoiler) {
