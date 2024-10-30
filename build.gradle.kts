@@ -1,7 +1,6 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
-val kotlinVersion = "1.9.23"
 plugins {
     id("org.jetbrains.kotlin.jvm") version "1.9.23"
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.23" apply false
@@ -13,7 +12,12 @@ plugins {
 }
 
 group = "dev.vanutp"
-version = "0.4.7"
+version = property("projectVersion") as String
+
+val kotlinVersion: String by project
+val kotlinxCoroutinesVersion: String by project
+val kotlinxSerializationVersion: String by project
+val adventureVersion: String by project
 
 subprojects {
     apply {
@@ -32,8 +36,6 @@ subprojects {
     }
 
     dependencies {
-        val kotlinxCoroutinesVersion = "1.7.3"
-        val kotlinxSerializationVersion = "1.6.2"
         if (project.name == "paper") {
             // I didn't find a good kotlin for paper library
             implementation("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
@@ -49,7 +51,6 @@ subprojects {
             compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:${kotlinxSerializationVersion}")
         }
 
-        val adventureVersion = "4.17.0"
         if (project.name == "paper" || project.name == "common") {
             compileOnly("net.kyori:adventure-api:${adventureVersion}")
             compileOnly("net.kyori:adventure-text-serializer-gson:${adventureVersion}") {
