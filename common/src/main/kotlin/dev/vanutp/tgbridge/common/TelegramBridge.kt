@@ -209,45 +209,48 @@ abstract class TelegramBridge {
         if (!advancementsCfg.enable) {
             return@withScopeAndLock
         }
-        val component = e.text as TranslatableComponent
-        val advancementTypeKey = component.key()
-        val squareBracketsComponent = getFirstTranslatableComponentInTranslationArguments(component.arguments())
-            ?: return@withScopeAndLock
-        val advancementNameComponent = squareBracketsComponent.args()[0]
-        val advancementName = advancementNameComponent.translate()
+        val componentTitle = e.text as TranslatableComponent
+//        val component = e.text as TextComponent
+//        val advancementTypeKey = component.key()
+//        val squareBracketsComponent = getFirstTranslatableComponentInTranslationArguments(component.arguments())
+//            ?: return@withScopeAndLock
+//        val advancementNameComponent = squareBracketsComponent.args()[0]
+//        val advancementName = advancementNameComponent.translate()
         val advancementDescription = if (advancementsCfg.showDescription) {
-            advancementNameComponent.style().hoverEvent()?.let {
-                val advancementTooltipComponent = it.value() as Component
-                if (advancementTooltipComponent.children().size < 2) {
-                    return@let null
-                }
-                advancementTooltipComponent.children()[1].translate()
-            } ?: ""
+            (e.additionalText as TranslatableComponent).translate()
+//            advancementNameComponent.style().hoverEvent()?.let {
+////            component.style().hoverEvent()?.let {
+//                val advancementTooltipComponent = it.value() as Component
+//                if (advancementTooltipComponent.children().size < 2) {
+//                    return@let null
+//                }
+//                advancementTooltipComponent.children()[1].translate()
+//            } ?: ""
         } else {
             ""
         }
-        val langKey = when (advancementTypeKey) {
-            "chat.type.advancement.task" -> {
+        val langKey = when (e.type) {
+            "TASK" -> {
                 if (!advancementsCfg.enableTask) return@withScopeAndLock
                 lang.telegram.advancements.regular
             }
 
-            "chat.type.advancement.goal" -> {
+            "GOAL" -> {
                 if (!advancementsCfg.enableGoal) return@withScopeAndLock
                 lang.telegram.advancements.goal
             }
 
-            "chat.type.advancement.challenge" -> {
+            "CHALLENGE" -> {
                 if (!advancementsCfg.enableChallenge) return@withScopeAndLock
                 lang.telegram.advancements.challenge
             }
 
-            else -> throw TBAssertionFailed("Unknown advancement type $advancementTypeKey.")
+            else -> throw TBAssertionFailed("Unknown advancement type ${e.type}.")
         }
         val message = langKey.formatLang(
             "username" to e.username,
-            "title" to advancementName.escapeHTML(),
-            "description" to advancementDescription.escapeHTML(),
+            "title" to componentTitle.translate(),
+            "description" to advancementDescription,
         )
         sendMessageWithFormatting(message)
         lastMessage = null

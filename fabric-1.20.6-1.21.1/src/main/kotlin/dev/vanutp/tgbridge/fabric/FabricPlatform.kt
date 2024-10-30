@@ -14,6 +14,7 @@ import net.fabricmc.fabric.api.message.v1.ServerMessageEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.fabricmc.loader.api.FabricLoader
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 import net.minecraft.network.message.SignedMessage
 import net.minecraft.registry.DynamicRegistryManager
@@ -24,6 +25,7 @@ import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.Text
 import net.minecraft.text.TranslatableTextContent
 import net.minecraft.util.Language
+import kotlin.jvm.optionals.getOrNull
 
 
 class FabricPlatform(val server: MinecraftServer) : Platform() {
@@ -56,7 +58,7 @@ class FabricPlatform(val server: MinecraftServer) : Platform() {
 
     override fun registerChatMessageListener(handler: (TBPlayerEventData) -> Unit) {
         if (styledChatInstance == null) ServerMessageEvents.CHAT_MESSAGE.register { message: SignedMessage, sender, _ ->
-            handler.invoke(
+            if (sender is ServerPlayerEntity && (vanishInstance == null || !vanishInstance.isVanished(sender))) handler.invoke(
                 TBPlayerEventData(
                     sender.displayName?.string ?: return@register,
                     minecraftToAdventure(message.content),
@@ -153,7 +155,18 @@ class FabricPlatform(val server: MinecraftServer) : Platform() {
     }
 
     override fun registerPlayerAdvancementListener(handler: (TBPlayerEventData) -> Unit) {
-        registerFilteredPlayerEvent(handler) { it.key.startsWith("chat.type.advancement.") }
+//        registerFilteredPlayerEvent(handler) { it.key.startsWith("chat.type.advancement.") }
+        MinecraftEvents.PLAYER_ADVANCEMENT.register { player, advancement, _ ->
+            if (vanishInstance == null || !vanishInstance.isVanished(player)) handler.invoke(
+                TBPlayerEventData(
+                    player.displayName?.literalString?:player.name.string,
+//                    Component.translatable(advancement.id.toTranslationKey()),
+                    minecraftToAdventure(advancement.value.display.getOrNull()?.title ?: return@register),
+                    minecraftToAdventure(advancement.value.display.getOrNull()?.description ?: return@register),
+                    advancement.value.display.getOrNull()?.frame?.name  ?: return@register
+                )
+            )
+        }
     }
 
     override fun broadcastMessage(text: Component) {

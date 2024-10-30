@@ -30,7 +30,9 @@
 			}
 		]
 	},
-	"mixins": [],
+	"mixins": [
+		"tgbridge.mixins.json"
+	],
 	"depends": {
 		"fabricloader": ">=0.15.2",
 		"minecraft": ">=1.20.6 <=1.21.1",

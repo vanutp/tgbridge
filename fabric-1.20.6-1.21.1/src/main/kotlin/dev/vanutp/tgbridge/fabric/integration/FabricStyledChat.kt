@@ -2,6 +2,7 @@ package dev.vanutp.tgbridge.fabric.integration
 
 import dev.vanutp.tgbridge.common.integration.StyledChat
 import dev.vanutp.tgbridge.common.models.TBPlayerEventData
+import dev.vanutp.tgbridge.fabric.FabricPlatform
 import eu.pb4.placeholders.api.PlaceholderContext
 import eu.pb4.styledchat.StyledChatEvents
 import net.kyori.adventure.text.Component
@@ -21,10 +22,12 @@ object FabricStyledChat: StyledChat() {
         registerOnPreMessage { message, context ->
             context as PlaceholderContext
             handler.invoke(
-                TBPlayerEventData(
-                    context.source().displayName?.string ?: return@registerOnPreMessage,
-                    Component.text(message),
-                )
+                if (FabricPlatform.instance?.vanishInstance == null || FabricPlatform.instance?.vanishInstance?.isVanished(context.source()?.player ?: return@registerOnPreMessage) == false)
+                    TBPlayerEventData(
+                        context.source().displayName?.string ?: return@registerOnPreMessage,
+                        Component.text(message),
+                    )
+                else return@registerOnPreMessage
             )
         }
     }
