@@ -2,11 +2,11 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 plugins {
-    id("org.jetbrains.kotlin.jvm") version "1.9.23"
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.9.23" apply false
+    id("org.jetbrains.kotlin.jvm") version "2.0.21"
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.0.21" apply false
     id("com.gradleup.shadow") version "8.3.4"
-    id("io.papermc.paperweight.userdev") version "1.5.15" apply false
-    id("xyz.jpenilla.run-paper") version "2.2.3" apply false
+    id("io.papermc.paperweight.userdev") version "1.7.4" apply false
+    id("xyz.jpenilla.run-paper") version "2.3.1" apply false
     id("dev.architectury.loom") version "1.6-SNAPSHOT" apply false
     id("com.modrinth.minotaur") version "2.+"
 }
@@ -90,7 +90,9 @@ subprojects {
             relocate("okio", "tgbridge.shaded.okio")
             relocate("okhttp3", "tgbridge.shaded.okhttp3")
             relocate("retrofit2", "tgbridge.shaded.retrofit2")
-            relocate("org.snakeyaml", "tgbridge.shaded.snakeyaml")
+
+            relocate("it.krzeminski.snakeyaml", "tgbridge.shaded.snakeyaml")
+            relocate("net.thauvin", "tgbridge.shaded.net.thauvin")
             relocate("com.charleskorn.kaml", "tgbridge.shaded.kaml")
 
             if (project.name != "paper") {
