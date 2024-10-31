@@ -4,6 +4,7 @@ import { Server } from './server.ts'
 import { TESTS } from './spec.ts'
 import { logNoNewline, makeServer } from './utils.ts'
 import { AssertionError } from './errors.ts'
+import { escape as escapeRegex } from '@std/regexp';
 
 interface PassedTest {
   test: string;
@@ -49,13 +50,21 @@ function formatStack(err: Error, indent: number) {
 async function main() {
   await buildIfRequired();
 
-  const testsToRun = Deno.args.filter((arg) => !arg.startsWith('--'))
+  const testsToRun = Deno.args
+    .filter((arg) => !arg.startsWith('--'))
+    .map(arg => {
+      if (arg.endsWith('*')) {
+        return new RegExp('^' + escapeRegex(arg.slice(0, -1)) + '.*$')
+      } else {
+        return new RegExp(`^${arg}$`)
+      }
+    })
 
   const servers: Server[] = [];
   for (const project of TEST_MATRIX) {
     for (const version of project.versions) {
       const key = `${project.server}-${version}`;
-      if (testsToRun.length > 0 && !testsToRun.includes(key)) {
+      if (testsToRun.length > 0 && testsToRun.every(pat => !pat.test(key))) {
         continue;
       }
       servers.push(makeServer(project.server, version, project.project));

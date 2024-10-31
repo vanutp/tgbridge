@@ -5,6 +5,7 @@
     "jsr:@std/async@^1.0.7": "1.0.7",
     "jsr:@std/fs@^1.0.5": "1.0.5",
     "jsr:@std/path@^1.0.7": "1.0.7",
+    "jsr:@std/regexp@1": "1.0.0",
     "npm:mineflayer@^4.23.0": "4.23.0_minecraft-data@3.78.0_prismarine-registry@1.10.0",
     "npm:nanoid@^5.0.8": "5.0.8",
     "npm:prismarine-chat@^1.10.1": "1.10.1",
@@ -25,6 +26,9 @@
     },
     "@std/path@1.0.7": {
       "integrity": "76a689e07f0e15dcc6002ec39d0866797e7156629212b28f27179b8a5c3b33a1"
+    },
+    "@std/regexp@1.0.0": {
+      "integrity": "158628d134c49a0858afe05017c4666f5f73d3a56602c346549ca42f3fab244a"
     }
   },
   "npm": {
@@ -559,6 +563,7 @@
       "jsr:@std/async@^1.0.7",
       "jsr:@std/fs@^1.0.5",
       "jsr:@std/path@^1.0.7",
+      "jsr:@std/regexp@1",
       "npm:mineflayer@^4.23.0",
       "npm:nanoid@^5.0.8",
       "npm:prismarine-chat@^1.10.1",

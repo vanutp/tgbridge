@@ -16,6 +16,7 @@ import net.minecraft.server.command.CommandManager
 import net.minecraft.text.Text
 import net.minecraft.text.TranslatableTextContent
 import net.minecraft.util.Language
+import kotlin.jvm.optionals.getOrNull
 
 
 class FabricPlatform(private val server: MinecraftServer) : Platform() {
@@ -90,30 +91,49 @@ class FabricPlatform(private val server: MinecraftServer) : Platform() {
         }
     }
 
-    private fun registerFilteredPlayerEvent(
-        handler: (TBPlayerEventData) -> Unit,
-        filter: (TranslatableTextContent) -> Boolean
-    ) {
-        ServerMessageEvents.GAME_MESSAGE.register { _, text, _ ->
-            val content = text.content
-            if (content is TranslatableTextContent && filter(content)) {
-                handler(
-                    TBPlayerEventData((content.args[0] as Text).string, minecraftToAdventure(text))
-                )
-            }
+    override fun registerPlayerDeathListener(handler: (TBPlayerEventData) -> Unit) {
+        CustomEvents.PLAYER_DEATH_EVENT.register { player, damageSource ->
+            val deathMessage = damageSource.getDeathMessage(player)
+            handler(TBPlayerEventData(
+                player.displayName?.string ?: return@register,
+                minecraftToAdventure(deathMessage),
+            ))
         }
     }
 
-    override fun registerPlayerDeathListener(handler: (TBPlayerEventData) -> Unit) {
-        registerFilteredPlayerEvent(handler) { it.key.startsWith("death.") }
-    }
-
     override fun registerPlayerJoinListener(handler: (TBPlayerEventData) -> Unit) {
-        registerFilteredPlayerEvent(handler) { it.key == "multiplayer.player.joined" }
+        CustomEvents.PLAYER_JOIN_EVENT.register { player ->
+            handler(TBPlayerEventData(
+                player.displayName?.string ?: return@register,
+                Component.text(""),
+            ))
+        }
     }
 
     override fun registerPlayerLeaveListener(handler: (TBPlayerEventData) -> Unit) {
-        registerFilteredPlayerEvent(handler) { it.key == "multiplayer.player.left" }
+        CustomEvents.PLAYER_LEAVE_EVENT.register { player ->
+            handler(TBPlayerEventData(
+                player.displayName?.string ?: return@register,
+                Component.text(""),
+            ))
+        }
+    }
+
+    override fun registerPlayerAdvancementListener(handler: (TBPlayerEventData) -> Unit) {
+        CustomEvents.ADVANCEMENT_EARN_EVENT.register { player, advancementType, advancementNameComponent ->
+            if (player.displayName == null) {
+                return@register
+            }
+            val advancementTypeKey = "chat.type.advancement.$advancementType"
+            val advancementText =
+                Text.translatable(advancementTypeKey, player.displayName, advancementNameComponent)
+            handler(
+                TBPlayerEventData(
+                    player.displayName!!.string,
+                    minecraftToAdventure(advancementText)
+                )
+            )
+        }
     }
 
     override fun registerCommand(command: Array<String>, handler: (TBCommandContext) -> Boolean) {
@@ -147,10 +167,6 @@ class FabricPlatform(private val server: MinecraftServer) : Platform() {
             lastArg = newArg
         }
         server.commandManager.dispatcher.register(builder)
-    }
-
-    override fun registerPlayerAdvancementListener(handler: (TBPlayerEventData) -> Unit) {
-        registerFilteredPlayerEvent(handler) { it.key.startsWith("chat.type.advancement.") }
     }
 
     override fun broadcastMessage(text: Component) {

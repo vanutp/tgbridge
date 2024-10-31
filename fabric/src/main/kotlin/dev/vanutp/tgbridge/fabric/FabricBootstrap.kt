@@ -2,6 +2,7 @@ package dev.vanutp.tgbridge.fabric
 
 import net.fabricmc.api.DedicatedServerModInitializer
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
+import net.minecraft.SharedConstants
 
 object FabricBootstrap : DedicatedServerModInitializer {
     private lateinit var bridge: FabricTelegramBridge

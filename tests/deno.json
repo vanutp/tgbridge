@@ -7,6 +7,7 @@
     "@std/async": "jsr:@std/async@^1.0.7",
     "@std/fs": "jsr:@std/fs@^1.0.5",
     "@std/path": "jsr:@std/path@^1.0.7",
+    "@std/regexp": "jsr:@std/regexp@^1.0.0",
     "mineflayer": "npm:mineflayer@^4.23.0",
     "nanoid": "npm:nanoid@^5.0.8",
     "prismarine-chat": "npm:prismarine-chat@^1.10.1",

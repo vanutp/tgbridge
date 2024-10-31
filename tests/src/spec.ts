@@ -17,7 +17,8 @@ async function telegramToMinecraft(server: Server) {
 }
 
 async function advancement(server: Server) {
-  await server.rcon.send(`advancement grant ${server.client.username} only minecraft:story/mine_stone`)
+  const resp = await server.rcon.send(`advancement grant ${server.client.username} only minecraft:story/mine_stone`)
+  assert(resp.includes('Granted'), `Bad RCON response: ${resp}`)
   await delay(50)
   const msg = server.tg.findMessage(msg => (msg.text ?? '').includes('Stone Age'))
   assert(msg)

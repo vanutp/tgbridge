@@ -1,0 +1,17 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.vanutp.tgbridge.fabric.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "PlayerAdvancementTrackerMixin_201",
+    "PlayerAdvancementTrackerMixin_modern",
+    "PlayerManagerMixin_201",
+    "PlayerManagerMixin_modern",
+    "ServerPlayerEntityMixin"
+  ],
+  "plugin": "dev.vanutp.tgbridge.fabric.TgbridgeMixinPlugin",
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
