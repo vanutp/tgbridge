@@ -4,9 +4,8 @@ import dev.vanutp.tgbridge.common.dataclass.*
 import dev.vanutp.tgbridge.common.ConfigManager.config
 import dev.vanutp.tgbridge.common.ConfigManager.getMinecraftLangKey
 import dev.vanutp.tgbridge.common.ConfigManager.lang
-import dev.vanutp.tgbridge.common.models.TgMessageMedia
+import dev.vanutp.tgbridge.common.dataclass.TgMessageMedia
 import net.kyori.adventure.text.event.ClickEvent
-import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.text.*
 
@@ -14,20 +13,6 @@ fun String.escapeHTML(): String = this
     .replace("&", "&amp;")
     .replace(">", "&gt;")
     .replace("<", "&lt;")
-
-//fun String.parseBaseMarkdown() : String = this
-//    .replaceMarkdownToHTML("**", "b")
-//    .replaceMarkdownToHTML("*", "i")
-//    .replaceMarkdownToHTML("_", "i")
-//    .replaceMarkdownToHTML("_", "i")
-//
-//private fun String.replaceMarkdownToHTML(markdownCode: String, htmlCode: String) : String {
-//    while (contains(markdownCode) && indexOf(markdownCode) != lastIndexOf(markdownCode)) {
-//        substring(0, indexOf(markdownCode)-1) + "<${htmlCode}>" + this.substring(indexOf(markdownCode)+2)
-//        substring(0, indexOf(markdownCode)-1) + "</${htmlCode}>" + this.substring(indexOf(markdownCode)+2)
-//    }
-//    return this;
-//}
 
 fun Component.translate(): String {
     return when (this) {
@@ -53,21 +38,6 @@ fun Component.translate(): String {
 
         else -> this.toString()
     }
-}
-fun getFirstTranslatableComponentInTranslationArguments(components: List<TranslationArgument>): TranslatableComponent? {
-    var output: TranslatableComponent? = null
-    var temp: TranslationArgument?
-    var tempChild: TranslatableComponent?
-    val list = components.toMutableList()
-    while (list.isNotEmpty() && output == null) {
-        temp = list.removeFirstOrNull()
-        if (temp is TranslatableComponent) output = temp
-        else {
-            tempChild = temp?.asComponent()?.children()?.firstOrNull { it is TranslatableComponent } as TranslatableComponent?
-            if (tempChild != null) output = tempChild
-        }
-    }
-    return output
 }
 
 fun String.formatLang(vararg args: Pair<String, String>): String {

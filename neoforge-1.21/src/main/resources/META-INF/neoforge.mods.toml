@@ -1,0 +1,27 @@
+modLoader = "kotlinforforge"
+loaderVersion = "[5.3,)"
+license = "MIT"
+
+[[mods]]
+modId = "tgbridge"
+version = "${version}"
+displayName = "Telegram Bridge"
+authors = "vanutp"
+description = "Sync your game with Telegram"
+logoFile = "icon.png"
+displayURL = "https://github.com/vanutp/tgbridge"
+displayTest = "IGNORE_ALL_VERSION"
+
+[[dependencies.tgbridge]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21.0,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.tgbridge]]
+modId = "minecraft"
+type = "required"
+versionRange = "[1.21,1.21.3]"
+ordering = "NONE"
+side = "BOTH"

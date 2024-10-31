@@ -6,12 +6,9 @@ import dev.vanutp.tgbridge.common.dataclass.TgMessage
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.event.ClickEvent
-import net.kyori.adventure.text.event.HoverEvent
 import net.kyori.adventure.text.format.NamedTextColor
-import net.kyori.adventure.text.format.Style
 import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.format.TextDecoration
-import retrofit2.http.Url
 import java.util.*
 import kotlin.collections.ArrayList
 

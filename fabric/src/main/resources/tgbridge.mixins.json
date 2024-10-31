@@ -1,0 +1,9 @@
+{
+  "required": true,
+  "package": "dev.vanutp.tgbridge.fabric.mixin",
+  "mixins": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -1,7 +1,6 @@
 package dev.vanutp.tgbridge.common.dataclass
 
 import com.google.gson.annotations.SerializedName
-import dev.vanutp.tgbridge.common.models.TgMessageMedia
 
 data class TgExternalReplyInfo(
     val origin: TgMessageOrigin,

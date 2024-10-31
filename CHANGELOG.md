@@ -1,6 +1,23 @@
+### 0.5.0
+
+- Merge all fabric versions in one jar
+- Allow changing the Bot API URL in the config
+
+### 0.4.7
+
+- 1.21.3 support
+- Fix compatibility with some mods bundling adventure
+
+### 0.4.6
+
+- Remove prefix from messages by default, add an option to keep it
+
 ### 0.4.5
 
-- Fabric 1.21.1 support
+- fabric: 1.21.1 support
+- paper: Fix compatibility with plugins that change displayName
+- paper: Fix compatibility with Chatty
+- paper: Add Folia support
 
 ### 0.4.4
 

@@ -14,5 +14,9 @@ pluginManagement {
 rootProject.name = "tgbridge"
 include(
     "common",
-    "fabric-1.20.6-1.21.1",
+    "paper",
+    "forge-1.19.2",
+    "forge-1.20.1",
+    "neoforge-1.21",
+    "fabric",
 )

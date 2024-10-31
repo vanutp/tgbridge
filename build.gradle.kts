@@ -1,7 +1,6 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
-val kotlinVersion = "1.9.23"
 plugins {
     id("org.jetbrains.kotlin.jvm") version "1.9.23"
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.23" apply false
@@ -13,7 +12,12 @@ plugins {
 }
 
 group = "dev.vanutp"
-version = "0.4.5"
+version = property("projectVersion") as String
+
+val kotlinVersion: String by project
+val kotlinxCoroutinesVersion: String by project
+val kotlinxSerializationVersion: String by project
+val adventureVersion: String by project
 
 subprojects {
     apply {
@@ -41,15 +45,21 @@ subprojects {
     }
 
     dependencies {
-        val kotlinxCoroutinesVersion = "1.7.3"
-        val kotlinxSerializationVersion = "1.6.2"
-        compileOnly("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
-        compileOnly("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
-        compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:${kotlinxCoroutinesVersion}")
-        compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-core:${kotlinxSerializationVersion}")
-        compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:${kotlinxSerializationVersion}")
+        if (project.name == "paper") {
+            // I didn't find a good kotlin for paper library
+            implementation("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
+            implementation("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${kotlinxCoroutinesVersion}")
+            implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${kotlinxSerializationVersion}")
+            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${kotlinxSerializationVersion}")
+        } else {
+            compileOnly("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
+            compileOnly("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+            compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:${kotlinxCoroutinesVersion}")
+            compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-core:${kotlinxSerializationVersion}")
+            compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:${kotlinxSerializationVersion}")
+        }
 
-        val adventureVersion = "4.17.0"
         if (project.name == "paper" || project.name == "common") {
             compileOnly("net.kyori:adventure-api:${adventureVersion}")
             compileOnly("net.kyori:adventure-text-serializer-gson:${adventureVersion}") {
@@ -67,19 +77,19 @@ subprojects {
     }
 
     java {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
         toolchain.languageVersion = JavaLanguageVersion.of(21)
     }
 
     tasks {
         withType<JavaCompile> {
             options.encoding = "UTF-8"
-            options.release = 21
+            options.release = 17
         }
 
         named<KotlinJvmCompile>("compileKotlin") {
-            kotlinOptions.jvmTarget = "21"
+            kotlinOptions.jvmTarget = "17"
         }
 
         named<ShadowJar>("shadowJar") {
@@ -91,6 +101,14 @@ subprojects {
             relocate("retrofit2", "tgbridge.shaded.retrofit2")
             relocate("org.snakeyaml", "tgbridge.shaded.snakeyaml")
             relocate("com.charleskorn.kaml", "tgbridge.shaded.kaml")
+
+            if (project.name != "paper") {
+                // shadowJar is never ran for common
+                relocate("net.kyori", "tgbridge.shaded.kyori")
+            }
+            // Renames files in META-INF/services to relocated names
+            // fixes "Modules net.kyori.... and tgbridge export package net.kyori..." in forge
+            mergeServiceFiles()
         }
     }
 
@@ -111,5 +129,11 @@ subprojects {
 
 task("publishAll") {
     group = "publishing"
-    dependsOn(":fabric-1.20.6-1.21.1:modrinth")
+    dependsOn(":fabric-1.19.2:modrinth")
+    dependsOn(":fabric-1.20.1-1.20.4:modrinth")
+    dependsOn(":fabric-1.20.6-1.21.3:modrinth")
+    dependsOn(":forge-1.19.2:modrinth")
+    dependsOn(":forge-1.20.1:modrinth")
+    dependsOn(":neoforge-1.21:modrinth")
+    dependsOn(":paper:modrinth")
 }

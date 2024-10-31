@@ -1,0 +1,10 @@
+name: tgbridge
+version: '${version}'
+main: dev.vanutp.tgbridge.paper.PaperBootstrap
+api-version: '1.19'
+folia-supported: true
+commands:
+  tgbridge:
+    description: Minecraft Telegram Bridge
+    usage: /<command>
+    permission: tgbridge.command

@@ -2,8 +2,6 @@ package dev.vanutp.tgbridge.common.models
 
 import com.charleskorn.kaml.YamlComment
 import kotlinx.serialization.Serializable
-import net.kyori.adventure.text.format.TextDecoration
-import java.util.*
 
 @Serializable
 data class GeneralConfig(
@@ -47,17 +45,33 @@ data class GameMessagesConfig(
     )
     val requirePrefixInMinecraft: String? = "",
     @YamlComment(
+        "Set to true to keep the prefix specified in the above setting in the message"
+    )
+    val keepPrefix: Boolean = false,
+    @YamlComment(
         "Chat messages sent within the specified interval will be merged in one.",
         "The value is specified in seconds",
         "Default value: 0 (disabled)",
     )
     val mergeWindow: Int? = 0,
+    @YamlComment(
+        "Set true to display reply text above message"
+    )
     val replyInDifferentLine: Boolean = false,
+    @YamlComment(
+        "Set true to format telegram entities (formatting) to minecraft components"
+    )
     val styledTelegramMessagesInMinecraft: Boolean = true,
-    // TODO: add support for styled messages in Minecraft
-    val styledMinecraftMessagesInMinecraft: Boolean = true,
-    // TODO: add support for markdown parsing on POST
+    @YamlComment(
+        "Set true to format minecraft markdown message to telegram entities.",
+        "Requires Text Placeholder API (Fabric only)!",
+        "HTML formatting will enabled only if this parameter is false!"
+    )
     val styledMinecraftMessagesInTelegram: Boolean = true,
+    @YamlComment(
+        "Don't send a message to telegram if the same message was sent as a previous message"
+    )
+    val doNotSendDuplicatedMessages: Boolean = false,
 )
 
 @Serializable
@@ -89,6 +103,11 @@ data class GameEventsConfig(
 )
 
 @Serializable
+data class AdvancedConfig(
+    val botApiUrl: String = "https://api.telegram.org",
+)
+
+@Serializable
 data class Config(
     @YamlComment(
         "It's enough to set botToken and chatId for the plugin to work.",
@@ -97,4 +116,5 @@ data class Config(
     val general: GeneralConfig = GeneralConfig(),
     val messages: GameMessagesConfig = GameMessagesConfig(),
     val events: GameEventsConfig = GameEventsConfig(),
+    val advanced: AdvancedConfig = AdvancedConfig(),
 )

@@ -27,15 +27,18 @@ abstract class TelegramBridge {
     private var lastMessage: LastMessage? = null
     private val lastMessageLock = Mutex()
 
+    open fun platformInit() {}
+
     fun init() {
         logger.info("tgbridge starting on ${platform.name}")
+        platformInit()
         try {
             ConfigManager.init(platform.configDir, platform::getLanguageKey)
         } catch (_: DefaultConfigUnchangedException) {
             logger.error("Can't start with default config values: please fill in botToken and chatId")
             return
         }
-        bot = TelegramBot(config.general.botToken, logger)
+        bot = TelegramBot(config.advanced.botApiUrl, config.general.botToken, logger)
 
         runBlocking {
             bot.init()
@@ -120,36 +123,60 @@ abstract class TelegramBridge {
 
     private fun onChatMessage(e: TBPlayerEventData) = withScopeAndLock {
         val rawMinecraftText = (e.text as TextComponent).content()
-//        val escapedText = rawMinecraftText.escapeHTML()
         val bluemapLink = rawMinecraftText.asBluemapLinkOrNone()
-        if (bluemapLink == null && !rawMinecraftText.startsWith(config.messages.requirePrefixInMinecraft ?: "")) {
+        val prefix = config.messages.requirePrefixInMinecraft ?: ""
+        if (bluemapLink == null && !rawMinecraftText.startsWith(prefix)) {
             return@withScopeAndLock
         }
 
+        val textWithoutPrefix = if (config.messages.keepPrefix) {
+            rawMinecraftText
+        } else {
+            rawMinecraftText.removePrefix(prefix)
+        }
+        val escapedText =
+            if (config.messages.styledMinecraftMessagesInTelegram)
+                textWithoutPrefix
+            else textWithoutPrefix.escapeHTML()
+
         val currText = lang.telegram.chatMessage.formatLang(
             "username" to e.username,
-            "text" to (bluemapLink ?: rawMinecraftText),
+            "text" to (bluemapLink ?: escapedText),
         )
-        val formattedComponent = if (config.messages.styledMinecraftMessagesInTelegram) platform.placeholderAPIInstance?.parse(currText, platform)?:Component.text(currText) else Component.text(currText)
+        val formattedComponent =
+            if (config.messages.styledMinecraftMessagesInTelegram && platform.placeholderAPIInstance!=null)
+                platform.placeholderAPIInstance!!.parse(currText, platform)
+            else Component.text(currText)
 
         val currDate = Clock.systemUTC().instant()
 
         val lm = lastMessage
-        if (formattedComponent == lm?.componentOfLastAppend) return@withScopeAndLock
+        if (config.messages.doNotSendDuplicatedMessages && formattedComponent == lm?.componentOfLastAppend)
+            return@withScopeAndLock
         if (
             lm != null
             && lm.type == LastMessageType.TEXT
             && (lm.text + "\n" + currText).length <= 4000
             && currDate.minus((config.messages.mergeWindow ?: 0).toLong(), ChronoUnit.SECONDS) < lm.date
         ) {
-            val formatted = FormattingParser.formatMinecraftComponent2TgEntity(formattedComponent, lm.text!!.length)
-            lm.entities = if (lm.entities!=null) lm.entities!!.plus(formatted.second) else formatted.second
+            val formatted: Pair<String, List<TgEntity>?> =
+                if (config.messages.styledMinecraftMessagesInTelegram)
+                    FormattingParser.formatMinecraftComponent2TgEntity(formattedComponent, lm.text!!.length)
+            else Pair(currText, null)
+            if (formatted.second!=null)
+                lm.entities =
+                    if (lm.entities!=null)
+                        lm.entities!!.plus(formatted.second!!)
+                    else formatted.second
             lm.text += "\n" + formatted.first
             lm.date = currDate
             lm.componentOfLastAppend = formattedComponent
-            editMessageText(lm.id, lm.text!!)
+            editMessageText(lm.id, lm.text!!, lm.entities)
         } else {
-            val formatted = FormattingParser.formatMinecraftComponent2TgEntity(formattedComponent)
+            val formatted: Pair<String, List<TgEntity>?> =
+                if (config.messages.styledMinecraftMessagesInTelegram)
+                    FormattingParser.formatMinecraftComponent2TgEntity(formattedComponent)
+                else Pair(currText, null)
             val newMsg = sendMessage(formatted.first, formatted.second)
             lastMessage = LastMessage(
                 LastMessageType.TEXT,
@@ -167,7 +194,14 @@ abstract class TelegramBridge {
             return@withScopeAndLock
         }
         val component = e.text as TranslatableComponent
-        sendMessageWithFormatting(lang.telegram.playerDied.formatLang("deathMessage" to component.translate(), "username" to e.username))
+        sendMessageWithFormatting(
+            lang.telegram.playerDied
+                .formatLang("deathMessage" to component.translate(), "username" to e.username)
+                .let {
+                    if (config.messages.styledMinecraftMessagesInTelegram) it
+                    else it.escapeHTML()
+                }
+        )
         lastMessage = null
     }
 
@@ -185,7 +219,14 @@ abstract class TelegramBridge {
         ) {
             deleteMessage(lm.id)
         } else {
-            sendMessageWithFormatting(lang.telegram.playerJoined.formatLang("username" to e.username))
+            sendMessageWithFormatting(
+                lang.telegram.playerJoined
+                    .formatLang("username" to e.username)
+                    .let {
+                        if (config.messages.styledMinecraftMessagesInTelegram) it
+                        else it.escapeHTML()
+                    }
+            )
         }
         lastMessage = null
     }
@@ -209,48 +250,50 @@ abstract class TelegramBridge {
         if (!advancementsCfg.enable) {
             return@withScopeAndLock
         }
-        val componentTitle = e.text as TranslatableComponent
-//        val component = e.text as TextComponent
-//        val advancementTypeKey = component.key()
-//        val squareBracketsComponent = getFirstTranslatableComponentInTranslationArguments(component.arguments())
-//            ?: return@withScopeAndLock
-//        val advancementNameComponent = squareBracketsComponent.args()[0]
-//        val advancementName = advancementNameComponent.translate()
+        val component = e.text as TranslatableComponent
+        val advancementTypeKey = component.key()
+        val squareBracketsComponent = component.args()[1] as TranslatableComponent
+        val advancementNameComponent = squareBracketsComponent.args()[0]
+        val advancementName = advancementNameComponent.translate()
         val advancementDescription = if (advancementsCfg.showDescription) {
-            (e.additionalText as TranslatableComponent).translate()
-//            advancementNameComponent.style().hoverEvent()?.let {
-////            component.style().hoverEvent()?.let {
-//                val advancementTooltipComponent = it.value() as Component
-//                if (advancementTooltipComponent.children().size < 2) {
-//                    return@let null
-//                }
-//                advancementTooltipComponent.children()[1].translate()
-//            } ?: ""
+            advancementNameComponent.style().hoverEvent()?.let {
+                val advancementTooltipComponent = it.value() as Component
+                if (advancementTooltipComponent.children().size < 2) {
+                    return@let null
+                }
+                advancementTooltipComponent.children()[1].translate()
+            } ?: ""
         } else {
             ""
         }
-        val langKey = when (e.type) {
-            "TASK" -> {
+        val langKey = when (advancementTypeKey) {
+            "chat.type.advancement.task" -> {
                 if (!advancementsCfg.enableTask) return@withScopeAndLock
                 lang.telegram.advancements.regular
             }
 
-            "GOAL" -> {
+            "chat.type.advancement.goal" -> {
                 if (!advancementsCfg.enableGoal) return@withScopeAndLock
                 lang.telegram.advancements.goal
             }
 
-            "CHALLENGE" -> {
+            "chat.type.advancement.challenge" -> {
                 if (!advancementsCfg.enableChallenge) return@withScopeAndLock
                 lang.telegram.advancements.challenge
             }
 
-            else -> throw TBAssertionFailed("Unknown advancement type ${e.type}.")
+            else -> throw TBAssertionFailed("Unknown advancement type $advancementTypeKey.")
         }
         val message = langKey.formatLang(
             "username" to e.username,
-            "title" to componentTitle.translate(),
-            "description" to advancementDescription,
+            "title" to
+                    if (config.messages.styledMinecraftMessagesInTelegram)
+                        advancementName
+                    else advancementName.escapeHTML(),
+            "description" to
+                    if (config.messages.styledMinecraftMessagesInTelegram)
+                        advancementDescription
+                    else advancementDescription.escapeHTML(),
         )
         sendMessageWithFormatting(message)
         lastMessage = null

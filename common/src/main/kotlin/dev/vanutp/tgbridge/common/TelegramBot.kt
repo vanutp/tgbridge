@@ -1,7 +1,7 @@
 package dev.vanutp.tgbridge.common
 
 import dev.vanutp.tgbridge.common.dataclass.*
-import dev.vanutp.tgbridge.common.models.TgApi
+import dev.vanutp.tgbridge.common.dataclass.TgApi
 import kotlinx.coroutines.*
 import okhttp3.OkHttpClient
 import retrofit2.HttpException
@@ -10,7 +10,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.time.Duration
 
 
-class TelegramBot(private val botToken: String, private val logger: AbstractLogger) {
+class TelegramBot(botApiUrl: String, botToken: String, private val logger: AbstractLogger) {
 
     private val POLL_TIMEOUT_SECONDS = 60
 
@@ -19,7 +19,7 @@ class TelegramBot(private val botToken: String, private val logger: AbstractLogg
         .build()
     private val client = Retrofit.Builder()
         .client(okhttpClient)
-        .baseUrl("https://api.telegram.org/bot${botToken}/")
+        .baseUrl("$botApiUrl/bot$botToken/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
         .create(TgApi::class.java)
@@ -126,7 +126,9 @@ class TelegramBot(private val botToken: String, private val logger: AbstractLogg
         chatId: Long,
         text: String,
         replyToMessageId: Int? = null,
-        parseMode: String = "None",
+        parseMode: String =
+            if (ConfigManager.config.messages.styledMinecraftMessagesInTelegram) "None"
+            else "HTML",
         disableWebPagePreview: Boolean = true,
         entities: List<TgEntity>? = null,
     ): TgMessage = call {
@@ -137,7 +139,9 @@ class TelegramBot(private val botToken: String, private val logger: AbstractLogg
         chatId: Long,
         messageId: Int,
         text: String,
-        parseMode: String = "None",
+        parseMode: String =
+            if (ConfigManager.config.messages.styledMinecraftMessagesInTelegram) "None"
+            else "HTML",
         disableWebPagePreview: Boolean = true,
         entities: List<TgEntity>? = null,
     ): TgMessage = call {
