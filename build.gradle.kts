@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 plugins {
     id("org.jetbrains.kotlin.jvm") version "1.9.23"
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.23" apply false
-    id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("com.gradleup.shadow") version "8.3.4"
     id("io.papermc.paperweight.userdev") version "1.5.15" apply false
     id("xyz.jpenilla.run-paper") version "2.2.3" apply false
     id("dev.architectury.loom") version "1.6-SNAPSHOT" apply false
@@ -23,7 +23,7 @@ subprojects {
     apply {
         plugin("org.jetbrains.kotlin.jvm")
         plugin("org.jetbrains.kotlin.plugin.serialization")
-        plugin("com.github.johnrengelman.shadow")
+        plugin("com.gradleup.shadow")
         plugin("com.modrinth.minotaur")
     }
 
@@ -107,6 +107,8 @@ subprojects {
                 relocate("org.jetbrains", "tgbridge.shaded.org.jetbrains")
                 relocate("org.intellij", "tgbridge.shaded.org.intellij")
             }
+
+            minimize()
         }
     }
 
