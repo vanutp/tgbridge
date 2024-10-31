@@ -41,7 +41,6 @@ only supports English language.
 You can download `lang.yml` for other languages from the
 [translations](https://github.com/vanutp/tgbridge/blob/master/translations) directory of this repository.
 
-
 By default `minecraft_lang.json` doesn't exist and the bot will use the default English translations provided by the server.
 If you want to use another language, you need to install this mod on the client, change the language
 to the desired one and execute the `/tgbridge dump_lang` command.
@@ -53,6 +52,15 @@ generate the language again.
 
 This mod will only work on dedicated server. When installed on the client, the main logic won't load. However, it will
 provide a `/tgbridge dump_lang` command to dump minecraft translations to the current language.
+
+## Troubleshooting
+
+#### Most/all messages aren't forwarded from Telegram to Minecraft, but everything else works
+Make sure you disabled group privacy setting in BotFather. After changing it, delete and re-add the bot to the group.
+Alternatively, make the bot a group admin.
+
+#### I get "Conflict: terminated by other getUpdates request; make sure that only one bot instance is running" error
+Make sure that there is only one server running with that bot token. You can't use one bot for multiple servers due to Bot API limitations
 
 ## Known incompatibilities
 
