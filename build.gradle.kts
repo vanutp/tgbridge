@@ -100,6 +100,13 @@ subprojects {
             // Renames files in META-INF/services to relocated names
             // fixes "Modules net.kyori.... and tgbridge export package net.kyori..." in forge
             mergeServiceFiles()
+
+            if (project.name == "paper") {
+                relocate("kotlin", "tgbridge.shaded.kotlin")
+                relocate("kotlinx", "tgbridge.shaded.kotlinx")
+                relocate("org.jetbrains", "tgbridge.shaded.org.jetbrains")
+                relocate("org.intellij", "tgbridge.shaded.org.intellij")
+            }
         }
     }
 
