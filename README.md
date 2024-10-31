@@ -62,10 +62,6 @@ Alternatively, make the bot a group admin.
 #### I get "Conflict: terminated by other getUpdates request; make sure that only one bot instance is running" error
 Make sure that there is only one server running with that bot token. You can't use one bot for multiple servers due to Bot API limitations
 
-## Known incompatibilities
-
-Currently the Fabric release is incompatible with some mods that change how chat messages look, notably Styled Chat. This will be fixed in a future release
-
 ## Contributions
 
 Feel free to open an issue if you think something is missing/can be done better.
