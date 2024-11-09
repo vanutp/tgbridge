@@ -1,7 +1,9 @@
 ### 0.5.0
 
-- Merge all fabric versions in one jar
+- fabric: Merge all fabric versions in one jar
 - Allow changing the Bot API URL in the config
+- fabric: Fix compatibility with mods changing chat messages rendering, notably StyledChat
+- paper: Relocate kotlin packages, providing better compatibility with other plugins
 
 ### 0.4.7
 
