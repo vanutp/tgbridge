@@ -10,7 +10,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.TranslatableComponent
 import java.time.Clock
 import java.time.temporal.ChronoUnit
@@ -121,7 +120,7 @@ abstract class TelegramBridge {
     }
 
     private fun onChatMessage(e: TBPlayerEventData) = withScopeAndLock {
-        val rawMinecraftText = (e.text as TextComponent).content()
+        val rawMinecraftText = e.text.asString()
         val bluemapLink = rawMinecraftText.asBluemapLinkOrNone()
         val prefix = config.messages.requirePrefixInMinecraft ?: ""
         if (bluemapLink == null && !rawMinecraftText.startsWith(prefix)) {
@@ -167,7 +166,7 @@ abstract class TelegramBridge {
             return@withScopeAndLock
         }
         val component = e.text as TranslatableComponent
-        sendMessage(lang.telegram.playerDied.formatLang("deathMessage" to component.translate().escapeHTML()))
+        sendMessage(lang.telegram.playerDied.formatLang("deathMessage" to component.asString().escapeHTML()))
         lastMessage = null
     }
 
@@ -212,14 +211,14 @@ abstract class TelegramBridge {
         val advancementTypeKey = component.key()
         val squareBracketsComponent = component.args()[1] as TranslatableComponent
         val advancementNameComponent = squareBracketsComponent.args()[0]
-        val advancementName = advancementNameComponent.translate()
+        val advancementName = advancementNameComponent.asString()
         val advancementDescription = if (advancementsCfg.showDescription) {
             advancementNameComponent.style().hoverEvent()?.let {
                 val advancementTooltipComponent = it.value() as Component
                 if (advancementTooltipComponent.children().size < 2) {
                     return@let null
                 }
-                advancementTooltipComponent.children()[1].translate()
+                advancementTooltipComponent.children()[1].asString()
             } ?: ""
         } else {
             ""

@@ -13,13 +13,14 @@ fun String.escapeHTML(): String = this
     .replace(">", "&gt;")
     .replace("<", "&lt;")
 
-fun Component.translate(): String {
+
+fun Component.asString(): String {
     return when (this) {
         is TranslatableComponent -> {
             var res = getMinecraftLangKey(this.key()) ?: this.key()
             // We're using older versions of kyori on some platforms, so using deprecated args() is ok
             this.args().forEachIndexed { i, x ->
-                val child = x.translate()
+                val child = x.asString()
                 if (i == 0) {
                     res = res.replace("%s", child)
                 }
@@ -30,7 +31,7 @@ fun Component.translate(): String {
 
         is TextComponent -> {
             val children = this.children().joinToString("") {
-                it.translate()
+                it.asString()
             }
             this.content() + children
         }
@@ -178,7 +179,7 @@ fun String.asBluemapLinkOrNone(): String? {
         try {
             var waypointName = it.groupValues[1]
             if (waypointName == "gui.xaero-deathpoint-old" || waypointName == "gui.xaero-deathpoint") {
-                waypointName = Component.translatable(waypointName).translate()
+                waypointName = Component.translatable(waypointName).asString()
             }
             val x = Integer.parseInt(it.groupValues[2])
             val yRaw = it.groupValues[3]

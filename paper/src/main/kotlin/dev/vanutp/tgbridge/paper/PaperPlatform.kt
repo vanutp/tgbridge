@@ -4,10 +4,9 @@ import dev.vanutp.tgbridge.common.PaperConfigManager
 import dev.vanutp.tgbridge.common.Platform
 import dev.vanutp.tgbridge.common.models.TBCommandContext
 import dev.vanutp.tgbridge.common.models.TBPlayerEventData
-import dev.vanutp.tgbridge.common.translate
+import dev.vanutp.tgbridge.common.asString
 import io.papermc.paper.event.player.AsyncChatEvent
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.TextComponent
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.PlayerDeathEvent
@@ -29,7 +28,7 @@ class PaperPlatform(private val plugin: JavaPlugin) : Platform() {
         plugin.server.pluginManager.registerEvents(object : Listener {
             @EventHandler(priority = EventPriority.LOWEST)
             fun onMessage(e: AsyncChatEvent) {
-                val username = (e.player.displayName() as TextComponent).translate()
+                val username = e.player.displayName().asString()
                 handler.invoke(TBPlayerEventData(username, e.message()))
             }
         }, plugin)
@@ -40,7 +39,7 @@ class PaperPlatform(private val plugin: JavaPlugin) : Platform() {
         plugin.server.pluginManager.registerEvents(object : Listener {
             @EventHandler(priority = EventPriority.LOWEST)
             fun onMessage(e: AsyncPlayerChatEvent) {
-                val username = (e.player.displayName() as TextComponent).translate()
+                val username = e.player.displayName().asString()
                 handler.invoke(TBPlayerEventData(username, Component.text(e.message)))
             }
         }, plugin)
@@ -63,7 +62,7 @@ class PaperPlatform(private val plugin: JavaPlugin) : Platform() {
         plugin.server.pluginManager.registerEvents(object : Listener {
             @EventHandler
             fun onMessage(e: PlayerAdvancementDoneEvent) {
-                val username = (e.player.displayName() as TextComponent).translate()
+                val username = e.player.displayName().asString()
                 val msg = e.message() ?: return
                 handler.invoke(TBPlayerEventData(username, msg))
             }
@@ -74,7 +73,7 @@ class PaperPlatform(private val plugin: JavaPlugin) : Platform() {
         plugin.server.pluginManager.registerEvents(object : Listener {
             @EventHandler
             fun onMessage(e: PlayerDeathEvent) {
-                val username = (e.player.displayName() as TextComponent).translate()
+                val username = e.player.displayName().asString()
                 val msg = e.deathMessage() ?: Component.translatable("death.attack.generic", Component.text(username))
                 handler.invoke(TBPlayerEventData(username, msg))
             }
@@ -85,7 +84,7 @@ class PaperPlatform(private val plugin: JavaPlugin) : Platform() {
         plugin.server.pluginManager.registerEvents(object : Listener {
             @EventHandler
             fun onMessage(e: PlayerJoinEvent) {
-                val username = (e.player.displayName() as TextComponent).translate()
+                val username = e.player.displayName().asString()
                 handler.invoke(TBPlayerEventData(username, e.joinMessage() ?: Component.text("")))
             }
         }, plugin)
@@ -95,7 +94,7 @@ class PaperPlatform(private val plugin: JavaPlugin) : Platform() {
         plugin.server.pluginManager.registerEvents(object : Listener {
             @EventHandler
             fun onMessage(e: PlayerQuitEvent) {
-                val username = (e.player.displayName() as TextComponent).translate()
+                val username = e.player.displayName().asString()
                 handler.invoke(TBPlayerEventData(username, e.quitMessage() ?: Component.text("")))
             }
         }, plugin)
