@@ -13,6 +13,10 @@ telegram:
   playerListZeroOnline: "📝 <b>Онлайн 0</b>"
 minecraft:
   messageMeta:
+    hoverOpenInTelegram: "Открыть в Telegram"
+    hoverOpenInBrowser: "Открыть в браузере"
+    hoverCopyToClipboard: "Копировать в буфер обмена"
+    hoverTagToReply: "Упомянуть"
     reply: "[О {sender}: {text}]"
     replyToMinecraft: "[О {text}]"
     forward: "[П {from}]"
@@ -26,3 +30,29 @@ minecraft:
     voiceMessage: "[Голосовое сообщение]"
     poll: "[Опрос: {title}]"
     pin: "[закрепляет сообщение]"
+  messageFormatting:
+    linkColor: "#FFFF55"
+    linkFormatting:
+      - "UNDERLINED"
+    mentionColor: "#FFFF55"
+    mentionFormatting: [ ]
+    hashtagColor: "#FFFF55"
+    hashtagFormatting: [ ]
+    codeColor: "#AAAAAA"
+    codeFormatting: [ ]
+    spoilerColor: "#AAAAAA"
+    spoilerFormatting:
+      - "OBFUSCATED"
+    spoilerReplaceWithChar: "▌"
+    replyColor: "#AAAAAA"
+    replyFormatting:
+      - "BOLD"
+    forwardColor: "#AAAAAA"
+    forwardFormatting:
+      - "BOLD"
+    mediaColor: "#FFFF55"
+    mediaFormatting:
+      - "BOLD"
+    pinnedMessageColor: "#AAAAAA"
+    pinnedMessageFormatting:
+      - "BOLD"

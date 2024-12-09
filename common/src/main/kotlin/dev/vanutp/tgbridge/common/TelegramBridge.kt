@@ -6,6 +6,7 @@ import dev.vanutp.tgbridge.common.models.LastMessage
 import dev.vanutp.tgbridge.common.models.LastMessageType
 import dev.vanutp.tgbridge.common.models.TBCommandContext
 import dev.vanutp.tgbridge.common.models.TBPlayerEventData
+import dev.vanutp.tgbridge.common.parser.Markdown2HTMLParser
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -133,10 +134,13 @@ abstract class TelegramBridge {
             rawMinecraftText.removePrefix(prefix)
         }
         val escapedText = textWithoutPrefix.escapeHTML()
+        val formattedText = if (config.messages.parseMarkdownInMinecraftToTelegramMessages)
+            Markdown2HTMLParser.parse(escapedText)
+        else escapedText
 
         val currText = lang.telegram.chatMessage.formatLang(
             "username" to e.username,
-            "text" to (bluemapLink ?: escapedText),
+            "text" to (bluemapLink ?: formattedText),
         )
         val currDate = Clock.systemUTC().instant()
 

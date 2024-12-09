@@ -2,6 +2,8 @@ package dev.vanutp.tgbridge.common.models
 
 import com.charleskorn.kaml.YamlComment
 import kotlinx.serialization.Serializable
+import net.kyori.adventure.text.format.TextDecoration
+import java.util.*
 
 @Serializable
 data class LangAdvancements(
@@ -29,6 +31,10 @@ data class LangTelegram(
 
 @Serializable
 data class MessageMeta(
+    val hoverOpenInTelegram: String = "Open in Telegram",
+    val hoverOpenInBrowser: String = "Open in Web Browser",
+    val hoverCopyToClipboard: String = "Copy to clipboard",
+    val hoverTagToReply: String = "Tag him/her",
     val reply: String = "[R {sender}: {text}]",
     val replyToMinecraft: String = "[R {text}]",
     val forward: String = "[F {from}]",
@@ -45,8 +51,32 @@ data class MessageMeta(
 )
 
 @Serializable
+data class MessageFormatting(
+    val linkColor: String = "#FFFF55",
+    val linkFormatting: List<TextDecoration>? = Collections.singletonList(TextDecoration.UNDERLINED),
+    val mentionColor: String = "#FFFF55",
+    val mentionFormatting: List<TextDecoration>? = Collections.emptyList(),
+    val hashtagColor: String = "#FFFF55",
+    val hashtagFormatting: List<TextDecoration>? = Collections.emptyList(),
+    val codeColor: String = "#AAAAAA",
+    val codeFormatting: List<TextDecoration>? = Collections.emptyList(),
+    val spoilerColor: String = "#AAAAAA",
+    val spoilerFormatting: List<TextDecoration>? = Collections.singletonList(TextDecoration.OBFUSCATED),
+    val spoilerReplaceWithChar: String? = "▌",
+    val replyColor: String = "#AAAAAA",
+    val replyFormatting: List<TextDecoration>? = Collections.emptyList(),
+    val forwardColor: String = "#AAAAAA",
+    val forwardFormatting: List<TextDecoration>? = Collections.emptyList(),
+    val mediaColor: String = "#FFFF55",
+    val mediaFormatting: List<TextDecoration>? = Collections.emptyList(),
+    val pinnedMessageColor: String = "#FFFF55",
+    val pinnedMessageFormatting: List<TextDecoration>? = Collections.emptyList(),
+)
+
+@Serializable
 data class LangMinecraft(
     val messageMeta: MessageMeta = MessageMeta(),
+    val messageFormatting: MessageFormatting = MessageFormatting(),
 )
 
 @Serializable
