@@ -104,6 +104,7 @@ data class TgMessage(
     @SerializedName("author_signature")
     val authorSignature: String? = null,
     val text: String? = null,
+    val entities: List<TgEntity>? = null,
     val caption: String? = null,
     override val animation: TgAny? = null,
     override val photo: List<TgAny>? = null,
@@ -128,6 +129,13 @@ data class TgMessage(
     val effectiveText
         get() = text ?: caption
 }
+
+data class TgEntity(
+    val offset: Int?,
+    var length: Int?,
+    val type: String?,
+    var url: String? = null,
+)
 
 data class TgUpdate(
     @SerializedName("update_id")

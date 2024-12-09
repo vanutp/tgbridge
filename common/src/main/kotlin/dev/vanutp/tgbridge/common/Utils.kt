@@ -3,9 +3,12 @@ package dev.vanutp.tgbridge.common
 import dev.vanutp.tgbridge.common.ConfigManager.config
 import dev.vanutp.tgbridge.common.ConfigManager.getMinecraftLangKey
 import dev.vanutp.tgbridge.common.ConfigManager.lang
+import dev.vanutp.tgbridge.common.parser.StyleManager
+import dev.vanutp.tgbridge.common.parser.TgEntities2TextComponentParser
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.TranslatableComponent
+import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.format.NamedTextColor
 
 fun String.escapeHTML(): String = this
@@ -152,23 +155,61 @@ fun TgMessage.toMinecraft(botId: Long): Component {
         pinnedMsg.mediaToText()?.let { pinnedMessageText.add(it) }
         pinnedMsg.effectiveText?.let { pinnedMessageText.add(it) }
         components.add(
-            Component.text(
-                lang.minecraft.messageMeta.pin + " " + pinnedMessageText.joinToString(" "),
-                NamedTextColor.DARK_AQUA
+            StyleManager.applyStyle(
+                component = Component.text(lang.minecraft.messageMeta.pin + " " + pinnedMessageText.joinToString(" ")),
+                color = lang.minecraft.messageFormatting.mediaColor,
+                decorations = lang.minecraft.messageFormatting.mediaFormatting,
+                hover = Component.text(lang.minecraft.messageMeta.hoverOpenInTelegram),
+                clickEvent = ClickEvent.openUrl(this.resolveMessageLink())
             )
         )
     }
 
-    forwardFromToText()?.let { components.add(Component.text(it, NamedTextColor.GRAY)) }
-    replyToText(botId)?.let { components.add(Component.text(it, NamedTextColor.BLUE)) }
-    mediaToText()?.let { components.add(Component.text(it, NamedTextColor.GREEN)) }
-    effectiveText?.let { components.add(Component.text(it)) }
+    this.forwardFromToText()?.let { components.add(
+        StyleManager.applyStyle(
+            component = Component.text(it),
+            color = lang.minecraft.messageFormatting.forwardColor,
+            decorations = lang.minecraft.messageFormatting.forwardFormatting,
+            hover = Component.text(lang.minecraft.messageMeta.hoverOpenInTelegram),
+            clickEvent = ClickEvent.openUrl(this.resolveMessageLink())
+        )
+    ) }
+    this.replyToText(botId)?.let { components.add(
+        StyleManager.applyStyle(
+            component = Component.text(it),
+            color = lang.minecraft.messageFormatting.replyColor,
+            decorations = lang.minecraft.messageFormatting.replyFormatting,
+            hover = Component.text(lang.minecraft.messageMeta.hoverOpenInTelegram),
+            clickEvent = ClickEvent.openUrl(this.resolveMessageLink())
+        )
+    ) }
+    this.mediaToText()?.let { components.add(
+        StyleManager.applyStyle(
+            component = Component.text(it),
+            color = lang.minecraft.messageFormatting.mediaColor,
+            decorations = lang.minecraft.messageFormatting.mediaFormatting,
+            hover = Component.text(lang.minecraft.messageMeta.hoverOpenInTelegram),
+            clickEvent = ClickEvent.openUrl(this.resolveMessageLink())
+        )
+    ) }
+    this.effectiveText?.let { components.add((
+            if (config.messages.styledTelegramMessagesInMinecraft)
+                TgEntities2TextComponentParser.parse(
+                    message = this,
+                    text = it,
+                    entities = this.entities,
+            ) else Component.text(it))
+    ) }
 
     return components
         .flatMap { listOf(it, Component.text(" ")) }
         .fold(Component.text()) { acc, component -> acc.append(component) }
         .build()
 }
+
+fun TgMessage.resolveMessageLink(): String =
+    "https://t.me/c/${-this.chat.id-1000000000000}/" +
+            (if (this.messageThreadId!=null) "${this.messageThreadId}/" else "") + "${this.messageId}"
 
 
 val XAERO_WAYPOINT_RGX =

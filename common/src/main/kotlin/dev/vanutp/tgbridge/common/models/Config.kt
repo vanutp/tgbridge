@@ -54,6 +54,14 @@ data class GameMessagesConfig(
         "Default value: 0 (disabled)",
     )
     val mergeWindow: Int? = 0,
+    @YamlComment(
+        "Set to true to enable parsing Telegram Entities (message formatting) to Minecraft chat messages.",
+    )
+    val styledTelegramMessagesInMinecraft: Boolean = true,
+    @YamlComment(
+        "Set to true to enable parsing Markdown to HTML in Minecraft to Telegram chat messages.",
+    )
+    val parseMarkdownInMinecraftToTelegramMessages: Boolean = true,
 )
 
 @Serializable
