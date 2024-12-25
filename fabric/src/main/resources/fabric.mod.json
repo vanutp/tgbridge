@@ -19,13 +19,13 @@
 	"entrypoints": {
 		"server": [
 			{
-				"value": "dev.vanutp.tgbridge.fabric.FabricBootstrap",
+				"value": "dev.vanutp.tgbridge.fabric.FabricTelegramBridge",
 				"adapter": "kotlin"
 			}
 		],
 		"client": [
 			{
-				"value": "dev.vanutp.tgbridge.fabric.FabricBootstrapClient",
+				"value": "FabricTelegramBridgeClient",
 				"adapter": "kotlin"
 			}
 		]

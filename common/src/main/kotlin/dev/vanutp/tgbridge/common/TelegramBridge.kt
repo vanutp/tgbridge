@@ -45,7 +45,6 @@ abstract class TelegramBridge {
             }
         }
         registerTelegramHandlers()
-        registerMinecraftHandlers()
         coroutineScope.launch {
             bot.startPolling(coroutineScope)
         }
@@ -97,16 +96,7 @@ abstract class TelegramBridge {
         platform.broadcastMessage(msg.toMinecraft(bot.me.id))
     }
 
-    private fun registerMinecraftHandlers() {
-        platform.registerCommand(arrayOf("tgbridge", "reload"), this::onReloadCommand)
-        platform.registerChatMessageListener(this::onChatMessage)
-        platform.registerPlayerDeathListener(this::onPlayerDeath)
-        platform.registerPlayerJoinListener(this::onPlayerJoin)
-        platform.registerPlayerLeaveListener(this::onPlayerLeave)
-        platform.registerPlayerAdvancementListener(this::onPlayerAdvancement)
-    }
-
-    private fun onReloadCommand(ctx: TBCommandContext): Boolean {
+    fun onReloadCommand(ctx: TBCommandContext): Boolean {
         try {
             ConfigManager.reload()
         } catch (e: Exception) {
@@ -123,7 +113,7 @@ abstract class TelegramBridge {
         return true
     }
 
-    private fun onChatMessage(e: TBPlayerEventData) = withScopeAndLock {
+    fun onChatMessage(e: TBPlayerEventData) = withScopeAndLock {
         val rawMinecraftText = e.text.asString()
         val bluemapLink = rawMinecraftText.asBluemapLinkOrNone()
         val prefix = config.messages.requirePrefixInMinecraft ?: ""
@@ -165,7 +155,7 @@ abstract class TelegramBridge {
         }
     }
 
-    private fun onPlayerDeath(e: TBPlayerEventData) = withScopeAndLock {
+    fun onPlayerDeath(e: TBPlayerEventData) = withScopeAndLock {
         if (!config.events.enableDeathMessages) {
             return@withScopeAndLock
         }
@@ -174,7 +164,7 @@ abstract class TelegramBridge {
         lastMessage = null
     }
 
-    private fun onPlayerJoin(e: TBPlayerEventData) = withScopeAndLock {
+    fun onPlayerJoin(username: String) = withScopeAndLock {
         if (!config.events.enableJoinMessages) {
             return@withScopeAndLock
         }
@@ -183,30 +173,30 @@ abstract class TelegramBridge {
         if (
             lm != null
             && lm.type == LastMessageType.LEAVE
-            && lm.leftPlayer!! == e.username
+            && lm.leftPlayer!! == username
             && currDate.minus((config.events.leaveJoinMergeWindow ?: 0).toLong(), ChronoUnit.SECONDS) < lm.date
         ) {
             deleteMessage(lm.id)
         } else {
-            sendMessage(lang.telegram.playerJoined.formatLang("username" to e.username))
+            sendMessage(lang.telegram.playerJoined.formatLang("username" to username))
         }
         lastMessage = null
     }
 
-    private fun onPlayerLeave(e: TBPlayerEventData) = withScopeAndLock {
+    fun onPlayerLeave(username: String) = withScopeAndLock {
         if (!config.events.enableLeaveMessages) {
             return@withScopeAndLock
         }
-        val newMsg = sendMessage(lang.telegram.playerLeft.formatLang("username" to e.username))
+        val newMsg = sendMessage(lang.telegram.playerLeft.formatLang("username" to username))
         lastMessage = LastMessage(
             LastMessageType.LEAVE,
             newMsg.messageId,
             Clock.systemUTC().instant(),
-            leftPlayer = e.username
+            leftPlayer = username
         )
     }
 
-    private fun onPlayerAdvancement(e: TBPlayerEventData) = withScopeAndLock {
+    fun onPlayerAdvancement(e: TBPlayerEventData) = withScopeAndLock {
         val advancementsCfg = config.events.advancementMessages
         if (!advancementsCfg.enable) {
             return@withScopeAndLock

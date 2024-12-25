@@ -13,7 +13,7 @@ import net.minecraft.util.Language
 import kotlin.io.path.createDirectories
 import kotlin.io.path.writeText
 
-object FabricBootstrapClient : ClientModInitializer {
+object FabricTelegramBridgeClient : ClientModInitializer {
     private fun onDumpLangCommand(ctx: CommandContext<FabricClientCommandSource>): Int {
         val configDir = FabricLoader.getInstance().configDir.resolve(FabricTelegramBridge.MOD_ID)
         configDir.createDirectories()

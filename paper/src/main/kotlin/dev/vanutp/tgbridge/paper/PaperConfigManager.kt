@@ -1,4 +1,4 @@
-package dev.vanutp.tgbridge.common
+package dev.vanutp.tgbridge.paper
 
 import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.YamlConfiguration
