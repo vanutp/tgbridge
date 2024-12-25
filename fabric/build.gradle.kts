@@ -12,6 +12,11 @@ val fabricLoaderVersion: String by project
 val fabricApiVersion: String by project
 val fabricKotlinVersion: String by project
 val adventureFabricVersion: String by project
+val vanishVersion: String by project
+
+repositories {
+	maven("https://api.modrinth.com/maven")
+}
 
 dependencies {
 	minecraft("com.mojang:minecraft:${minecraftVersion}")
@@ -23,6 +28,8 @@ dependencies {
 
 	implementation(project(":common"))
 	shadow(project(":common"))
+
+	modCompileOnly("maven.modrinth:vanish:$vanishVersion")
 }
 
 loom {
@@ -72,5 +79,6 @@ modrinth {
 	dependencies {
 		required.project("fabric-api")
 		required.project("fabric-language-kotlin")
+		optional.project("vanish")
 	}
 }

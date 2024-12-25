@@ -40,6 +40,9 @@ object EventManager {
 
     private fun registerPlayerDeathListener() {
         CustomEvents.PLAYER_DEATH_EVENT.register { player, damageSource ->
+            if (player.isVanished()) {
+                return@register
+            }
             val deathMessage = damageSource.getDeathMessage(player)
             FabricTelegramBridge.onPlayerDeath(
                 TBPlayerEventData(
@@ -52,6 +55,9 @@ object EventManager {
 
     private fun registerPlayerJoinListener() {
         CustomEvents.PLAYER_JOIN_EVENT.register { player ->
+            if (player.isVanished()) {
+                return@register
+            }
             FabricTelegramBridge.onPlayerJoin(
                 player.displayName?.string ?: return@register,
             )
@@ -60,6 +66,9 @@ object EventManager {
 
     private fun registerPlayerLeaveListener() {
         CustomEvents.PLAYER_LEAVE_EVENT.register { player ->
+            if (player.isVanished()) {
+                return@register
+            }
             FabricTelegramBridge.onPlayerLeave(
                 player.displayName?.string ?: return@register,
             )
@@ -68,7 +77,7 @@ object EventManager {
 
     private fun registerPlayerAdvancementListener() {
         CustomEvents.ADVANCEMENT_EARN_EVENT.register { player, advancementType, advancementNameComponent ->
-            if (player.displayName == null) {
+            if (player.displayName == null || player.isVanished()) {
                 return@register
             }
             val advancementTypeKey = "chat.type.advancement.$advancementType"

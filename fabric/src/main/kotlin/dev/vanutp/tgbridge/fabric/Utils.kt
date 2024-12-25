@@ -1,10 +1,12 @@
 package dev.vanutp.tgbridge.fabric
 
 import com.google.gson.JsonElement
+import dev.vanutp.tgbridge.fabric.compat.VanishCompat
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 import net.minecraft.registry.DynamicRegistryManager
 import net.minecraft.registry.Registries
+import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.Text
 
 
@@ -43,3 +45,11 @@ fun Text.toAdventure(): Component {
 
     return GsonComponentSerializer.gson().deserialize(jsonString)
 }
+
+fun ServerPlayerEntity.isVanished() =
+    FabricTelegramBridge.integrations
+        .find { it is VanishCompat }
+        ?.let {
+            (it as VanishCompat).isVanished(this)
+        }
+        ?: false
