@@ -82,6 +82,9 @@ data class GameEventsConfig(
         "Default value: 0 (disabled)",
     )
     val leaveJoinMergeWindow: Int? = 0,
+    @YamlComment("Whether to send a Telegram message when the server starts/stops")
+    val enableStartMessages: Boolean = true,
+    val enableStopMessages: Boolean = true,
 )
 
 @Serializable
