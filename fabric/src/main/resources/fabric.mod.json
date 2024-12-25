@@ -25,7 +25,7 @@
 		],
 		"client": [
 			{
-				"value": "FabricTelegramBridgeClient",
+				"value": "dev.vanutp.tgbridge.fabric.FabricTelegramBridgeClient",
 				"adapter": "kotlin"
 			}
 		]
