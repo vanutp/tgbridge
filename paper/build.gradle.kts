@@ -3,6 +3,9 @@ plugins {
     id("xyz.jpenilla.run-paper")
 }
 
+val superVanishVersion: String by project
+val essentialsXVersion: String by project
+
 repositories {
     maven {
         name = "papermc-repo"
@@ -12,6 +15,20 @@ repositories {
         name = "sonatype"
         url = uri("https://oss.sonatype.org/content/groups/public/")
     }
+    maven {
+        name = "jitpack"
+        url = uri("https://jitpack.io")
+        content {
+            includeGroup("com.github.LeonMangler")
+        }
+    }
+    maven {
+        name = "essentialsx"
+        url = uri("https://repo.essentialsx.net/releases/")
+        content {
+            includeGroup("net.essentialsx")
+        }
+    }
 }
 
 dependencies {
@@ -19,6 +36,9 @@ dependencies {
     implementation(project(":common"))
 
     compileOnly("com.charleskorn.kaml:kaml:${rootProject.properties["kamlVersion"]}")
+
+    compileOnly("com.github.LeonMangler:SuperVanish:$superVanishVersion")
+    compileOnly("net.essentialsx:EssentialsX:$essentialsXVersion")
 }
 
 
@@ -48,4 +68,7 @@ modrinth {
         "1.20.5", "1.20.6", "1.21", "1.21.1", "1.21.2", "1.21.3",
     )
     loaders.addAll("paper", "folia", "purpur")
+    dependencies {
+        optional.project("essentialsx")
+    }
 }

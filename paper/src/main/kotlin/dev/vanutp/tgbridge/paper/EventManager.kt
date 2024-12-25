@@ -58,6 +58,9 @@ class EventManager(private val plugin: PaperBootstrap) : Listener {
 
     @EventHandler
     fun onPlayerAdvancement(e: PlayerAdvancementDoneEvent) {
+        if (e.player.isVanished()) {
+            return
+        }
         val username = e.player.displayName().asString()
         val msg = e.message() ?: return
         plugin.tgbridge.onPlayerAdvancement(TBPlayerEventData(username, msg))
@@ -65,6 +68,9 @@ class EventManager(private val plugin: PaperBootstrap) : Listener {
 
     @EventHandler
     fun onPlayerDeath(e: PlayerDeathEvent) {
+        if (e.player.isVanished()) {
+            return
+        }
         val username = e.player.displayName().asString()
         val msg = e.deathMessage() ?: Component.translatable("death.attack.generic", Component.text(username))
         plugin.tgbridge.onPlayerDeath(TBPlayerEventData(username, msg))
@@ -72,11 +78,17 @@ class EventManager(private val plugin: PaperBootstrap) : Listener {
 
     @EventHandler
     fun onPlayerJoin(e: PlayerJoinEvent) {
+        if (e.player.isVanished()) {
+            return
+        }
         plugin.tgbridge.onPlayerJoin(e.player.displayName().asString())
     }
 
     @EventHandler
     fun onPlayerQuit(e: PlayerQuitEvent) {
+        if (e.player.isVanished()) {
+            return
+        }
         plugin.tgbridge.onPlayerLeave(e.player.displayName().asString())
     }
 
