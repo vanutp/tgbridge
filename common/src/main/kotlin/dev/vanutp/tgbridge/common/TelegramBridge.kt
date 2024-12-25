@@ -2,6 +2,7 @@ package dev.vanutp.tgbridge.common
 
 import dev.vanutp.tgbridge.common.ConfigManager.config
 import dev.vanutp.tgbridge.common.ConfigManager.lang
+import dev.vanutp.tgbridge.common.converters.TelegramToMinecraftConverter
 import dev.vanutp.tgbridge.common.models.LastMessage
 import dev.vanutp.tgbridge.common.models.LastMessageType
 import dev.vanutp.tgbridge.common.models.TBCommandContext
@@ -93,7 +94,7 @@ abstract class TelegramBridge {
         lastMessageLock.withLock {
             lastMessage = null
         }
-        platform.broadcastMessage(msg.toMinecraft(bot.me.id))
+        platform.broadcastMessage(TelegramToMinecraftConverter.convert(msg, bot.me.id))
     }
 
     fun onReloadCommand(ctx: TBCommandContext): Boolean {

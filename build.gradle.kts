@@ -56,11 +56,13 @@ subprojects {
             compileOnly("net.kyori:adventure-text-serializer-gson:${adventureVersion}") {
                 exclude(module = "gson")
             }
+            compileOnly("net.kyori:adventure-text-minimessage:${adventureVersion}")
         } else {
             shadow(implementation("net.kyori:adventure-api:${adventureVersion}")!!)
             shadow(implementation("net.kyori:adventure-text-serializer-gson:${adventureVersion}") {
                 exclude(module = "gson")
             })
+            shadow(implementation("net.kyori:adventure-text-minimessage:${adventureVersion}")!!)
         }
 
         // gson is available in all loaders at runtime

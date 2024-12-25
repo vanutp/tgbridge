@@ -1,3 +1,4 @@
+version: 2
 telegram:
   serverStarted: "✅ <b>Сервер запущен!</b>"
   serverStopped: "❌ <b>Сервер остановлен!</b>"
@@ -11,11 +12,17 @@ telegram:
     challenge: "🏅 <b>{username} завершил испытание {title}</b>\n\n<i>{description}</i>"
   playerList: "📝 <b>Онлайн {count}:</b> {usernames}"
   playerListZeroOnline: "📝 <b>Онлайн 0</b>"
+# This section uses MiniMessage formatting (in non-strict mode).
+# See https://docs.advntr.dev/minimessage/format.html for more information.
 minecraft:
   messageMeta:
-    reply: "[О {sender}: {text}]"
-    replyToMinecraft: "[О {text}]"
-    forward: "[П {from}]"
+    format: "<aqua>\\<<sender>></aqua> <text>"
+    reply: "<blue>[О <sender>: <text>]"
+    replyToMinecraft: "<blue>[О <text>]"
+    forward: "<gray>[П <from>]"
+    pin: "<dark_aqua>[закрепляет сообщение]</dark_aqua> <message>"
+    # Wrapper for all media types
+    mediaFormatting: "<green><media>"
     gif: "[GIF]"
     document: "[Файл]"
     photo: "[Фото]"
@@ -24,5 +31,4 @@ minecraft:
     video: "[Видео]"
     videoMessage: "[Видеосообщение]"
     voiceMessage: "[Голосовое сообщение]"
-    poll: "[Опрос: {title}]"
-    pin: "[закрепляет сообщение]"
+    poll: "[Опрос: <title>]"

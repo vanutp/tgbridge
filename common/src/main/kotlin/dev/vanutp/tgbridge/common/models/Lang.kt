@@ -29,9 +29,13 @@ data class LangTelegram(
 
 @Serializable
 data class MessageMeta(
-    val reply: String = "[R {sender}: {text}]",
-    val replyToMinecraft: String = "[R {text}]",
-    val forward: String = "[F {from}]",
+    val format: String = "<aqua>\\<<sender>></aqua> <text>",
+    val reply: String = "<blue>[R <sender>: <text>]",
+    val replyToMinecraft: String = "<blue>[R <text>]",
+    val forward: String = "<gray>[F <from>]",
+    val pin: String = "<dark_aqua>[pinned a message]",
+    @YamlComment("Wrapper for all media types")
+    val mediaFormatting: String = "<green><media>",
     val gif: String = "[GIF]",
     val document: String = "[Document]",
     val photo: String = "[Photo]",
@@ -40,8 +44,7 @@ data class MessageMeta(
     val video: String = "[Video]",
     val videoMessage: String = "[Video message]",
     val voiceMessage: String = "[Voice message]",
-    val poll: String = "[Poll: {title}]",
-    val pin: String = "[pinned a message]",
+    val poll: String = "[Poll: <title>]",
 )
 
 @Serializable
@@ -52,6 +55,11 @@ data class LangMinecraft(
 @Serializable
 data class Lang(
     @YamlComment("Translations to other languages can be downloaded from https://github.com/vanutp/tgbridge")
+    val version: Int = 1,
     val telegram: LangTelegram = LangTelegram(),
+    @YamlComment(
+        "This section uses MiniMessage formatting (in non-strict mode).",
+        "See https://docs.advntr.dev/minimessage/format.html for more information.",
+    )
     val minecraft: LangMinecraft = LangMinecraft(),
 )
