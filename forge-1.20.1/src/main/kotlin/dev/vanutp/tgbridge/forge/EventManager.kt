@@ -28,7 +28,7 @@ object EventManager {
         FORGE_BUS.addListener { e: ServerChatEvent ->
             ForgeTelegramBridge.onChatMessage(
                 TBPlayerEventData(
-                    e.player.displayName.string,
+                    getPlayerName(e.player).string,
                     e.message.toAdventure(),
                 )
             )
@@ -37,13 +37,14 @@ object EventManager {
 
     private fun registerPlayerDeathListener() {
         FORGE_BUS.addListener { e: LivingDeathEvent ->
-            if (e.entity !is PlayerEntity) {
+            val player = e.entity
+            if (player !is PlayerEntity) {
                 return@addListener
             }
-            val deathMessage = e.source.getDeathMessage(e.entity)
+            val deathMessage = e.source.getDeathMessage(player)
             ForgeTelegramBridge.onPlayerDeath(
                 TBPlayerEventData(
-                    e.entity.displayName.string,
+                    getPlayerName(player).string,
                     deathMessage.toAdventure(),
                 )
             )
@@ -52,13 +53,13 @@ object EventManager {
 
     private fun registerPlayerJoinListener() {
         FORGE_BUS.addListener { e: PlayerEvent.PlayerLoggedInEvent ->
-            ForgeTelegramBridge.onPlayerJoin(e.entity.displayName.string)
+            ForgeTelegramBridge.onPlayerJoin(getPlayerName(e.entity).string)
         }
     }
 
     private fun registerPlayerLeaveListener() {
         FORGE_BUS.addListener { e: PlayerEvent.PlayerLoggedOutEvent ->
-            ForgeTelegramBridge.onPlayerLeave(e.entity.displayName.string)
+            ForgeTelegramBridge.onPlayerLeave(getPlayerName(e.entity).string)
         }
     }
 
@@ -70,10 +71,10 @@ object EventManager {
             }
             val advancementTypeKey = "chat.type.advancement." + (display.frame?.id ?: return@addListener)
             val advancementText =
-                Text.translatable(advancementTypeKey, e.entity.displayName, e.advancement.toHoverableText())
+                Text.translatable(advancementTypeKey, getPlayerName(e.entity), e.advancement.toHoverableText())
             ForgeTelegramBridge.onPlayerAdvancement(
                 TBPlayerEventData(
-                    e.entity.displayName.string,
+                    getPlayerName(e.entity).string,
                     advancementText.toAdventure(),
                 )
             )

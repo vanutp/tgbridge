@@ -4,6 +4,7 @@ import de.myzelyam.api.vanish.PlayerHideEvent
 import de.myzelyam.api.vanish.PlayerShowEvent
 import dev.vanutp.tgbridge.common.asString
 import dev.vanutp.tgbridge.paper.PaperBootstrap
+import dev.vanutp.tgbridge.paper.getPlayerName
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 
@@ -16,11 +17,11 @@ class SuperVanishCompat(bootstrap: PaperBootstrap) : Listener, AbstractCompat(bo
 
     @EventHandler
     private fun onVanish(e: PlayerHideEvent) {
-        bootstrap.tgbridge.onPlayerLeave(e.player.displayName().asString())
+        bootstrap.tgbridge.onPlayerLeave(getPlayerName(e.player))
     }
 
     @EventHandler
     private fun onUnvanish(e: PlayerShowEvent) {
-        bootstrap.tgbridge.onPlayerJoin(e.player.displayName().asString())
+        bootstrap.tgbridge.onPlayerJoin(getPlayerName(e.player))
     }
 }

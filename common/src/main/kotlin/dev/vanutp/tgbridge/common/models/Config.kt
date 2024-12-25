@@ -54,6 +54,8 @@ data class GameMessagesConfig(
         "Default value: 0 (disabled)",
     )
     val mergeWindow: Int? = 0,
+    @YamlComment("Use real player username instead of display name in all Telegram messages")
+    val useRealUsername: Boolean = false,
 )
 
 @Serializable

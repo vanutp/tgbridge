@@ -29,7 +29,7 @@ object EventManager {
         FORGE_BUS.addListener { e: ServerChatEvent ->
             NeoForgeTelegramBridge.onChatMessage(
                 TBPlayerEventData(
-                    e.player.displayName?.string ?: return@addListener,
+                    getPlayerName(e.player).string,
                     e.message.toAdventure()
                 )
             )
@@ -38,13 +38,14 @@ object EventManager {
 
     private fun registerPlayerDeathListener() {
         FORGE_BUS.addListener { e: LivingDeathEvent ->
-            if (e.entity !is PlayerEntity) {
+            val player = e.entity
+            if (player !is PlayerEntity) {
                 return@addListener
             }
-            val deathMessage = e.source.getDeathMessage(e.entity)
+            val deathMessage = e.source.getDeathMessage(player)
             NeoForgeTelegramBridge.onPlayerDeath(
                 TBPlayerEventData(
-                    e.entity.displayName?.string ?: return@addListener,
+                    getPlayerName(player).string,
                     deathMessage.toAdventure(),
                 )
             )
@@ -54,7 +55,7 @@ object EventManager {
     private fun registerPlayerJoinListener() {
         FORGE_BUS.addListener { e: PlayerEvent.PlayerLoggedInEvent ->
             NeoForgeTelegramBridge.onPlayerJoin(
-                e.entity.displayName?.string ?: return@addListener
+                getPlayerName(e.entity).string,
             )
         }
     }
@@ -62,7 +63,7 @@ object EventManager {
     private fun registerPlayerLeaveListener() {
         FORGE_BUS.addListener { e: PlayerEvent.PlayerLoggedOutEvent ->
             NeoForgeTelegramBridge.onPlayerLeave(
-                e.entity.displayName?.string ?: return@addListener
+                getPlayerName(e.entity).string,
             )
         }
     }
@@ -71,15 +72,15 @@ object EventManager {
         FORGE_BUS.addListener { e: AdvancementEvent.AdvancementEarnEvent ->
             val advancement = e.advancement.value
             val display = advancement.display.getOrNull()
-            if (display == null || !display.shouldAnnounceToChat() || e.entity.displayName == null) {
+            if (display == null || !display.shouldAnnounceToChat()) {
                 return@addListener
             }
             val advancementTypeKey = "chat.type.advancement." + (display.frame?.name?.lowercase() ?: return@addListener)
             val advancementText =
-                Text.translatable(advancementTypeKey, e.entity.displayName, advancement.name.get())
+                Text.translatable(advancementTypeKey, getPlayerName(e.entity), advancement.name.get())
             NeoForgeTelegramBridge.onPlayerAdvancement(
                 TBPlayerEventData(
-                    e.entity.displayName!!.string,
+                    getPlayerName(e.entity).string,
                     advancementText.toAdventure(),
                 )
             )

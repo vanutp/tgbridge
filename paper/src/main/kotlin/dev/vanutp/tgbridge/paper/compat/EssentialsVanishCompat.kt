@@ -2,6 +2,7 @@ package dev.vanutp.tgbridge.paper.compat
 
 import dev.vanutp.tgbridge.common.asString
 import dev.vanutp.tgbridge.paper.PaperBootstrap
+import dev.vanutp.tgbridge.paper.getPlayerName
 import net.ess3.api.events.VanishStatusChangeEvent
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -16,7 +17,7 @@ class EssentialsVanishCompat(bootstrap: PaperBootstrap) : Listener, AbstractComp
 
     @EventHandler
     fun onVanishStatusChange(e: VanishStatusChangeEvent) {
-        val username = e.affected.base.displayName().asString()
+        val username = getPlayerName(e.affected.base)
         if (e.value) {
             bootstrap.tgbridge.onPlayerLeave(username)
         } else {

@@ -31,7 +31,7 @@ object EventManager {
             }
             FabricTelegramBridge.onChatMessage(
                 TBPlayerEventData(
-                    sender.displayName?.string ?: return@register,
+                    getPlayerName(sender).string,
                     messageContent.toAdventure(),
                 )
             )
@@ -46,7 +46,7 @@ object EventManager {
             val deathMessage = damageSource.getDeathMessage(player)
             FabricTelegramBridge.onPlayerDeath(
                 TBPlayerEventData(
-                    player.displayName?.string ?: return@register,
+                    getPlayerName(player).string,
                     deathMessage.toAdventure(),
                 )
             )
@@ -59,7 +59,7 @@ object EventManager {
                 return@register
             }
             FabricTelegramBridge.onPlayerJoin(
-                player.displayName?.string ?: return@register,
+                getPlayerName(player).string,
             )
         }
     }
@@ -70,22 +70,22 @@ object EventManager {
                 return@register
             }
             FabricTelegramBridge.onPlayerLeave(
-                player.displayName?.string ?: return@register,
+                getPlayerName(player).string,
             )
         }
     }
 
     private fun registerPlayerAdvancementListener() {
         CustomEvents.ADVANCEMENT_EARN_EVENT.register { player, advancementType, advancementNameComponent ->
-            if (player.displayName == null || player.isVanished()) {
+            if (player.isVanished()) {
                 return@register
             }
             val advancementTypeKey = "chat.type.advancement.$advancementType"
             val advancementText =
-                Text.translatable(advancementTypeKey, player.displayName, advancementNameComponent)
+                Text.translatable(advancementTypeKey, getPlayerName(player), advancementNameComponent)
             FabricTelegramBridge.onPlayerAdvancement(
                 TBPlayerEventData(
-                    player.displayName!!.string,
+                    getPlayerName(player).string,
                     advancementText.toAdventure()
                 )
             )

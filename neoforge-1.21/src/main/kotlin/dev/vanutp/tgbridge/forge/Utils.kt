@@ -1,7 +1,9 @@
 package dev.vanutp.tgbridge.forge
 
+import dev.vanutp.tgbridge.common.ConfigManager
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
+import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.registry.DynamicRegistryManager
 import net.minecraft.registry.Registries
 import net.minecraft.text.Text
@@ -22,3 +24,10 @@ fun Text.toAdventure(): Component {
         )
     )
 }
+
+fun getPlayerName(player: PlayerEntity): Text =
+    if (ConfigManager.config.messages.useRealUsername) {
+        player.name
+    } else {
+        player.displayName ?: player.name
+    }

@@ -1,6 +1,7 @@
 package dev.vanutp.tgbridge.fabric
 
 import com.google.gson.JsonElement
+import dev.vanutp.tgbridge.common.ConfigManager
 import dev.vanutp.tgbridge.fabric.compat.VanishCompat
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
@@ -53,3 +54,10 @@ fun ServerPlayerEntity.isVanished() =
             (it as VanishCompat).isVanished(this)
         }
         ?: false
+
+fun getPlayerName(player: ServerPlayerEntity): Text =
+    if (ConfigManager.config.messages.useRealUsername) {
+        player.name
+    } else {
+        player.displayName ?: player.name
+    }

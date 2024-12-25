@@ -26,8 +26,7 @@ class EventManager(private val plugin: PaperBootstrap) : Listener {
         plugin.server.pluginManager.registerEvents(object : Listener {
             @EventHandler(priority = EventPriority.LOWEST)
             fun onMessage(e: AsyncChatEvent) {
-                val username = e.player.displayName().asString()
-                plugin.tgbridge.onChatMessage(TBPlayerEventData(username, e.message()))
+                plugin.tgbridge.onChatMessage(TBPlayerEventData(getPlayerName(e.player), e.message()))
             }
         }, plugin)
     }
@@ -37,8 +36,7 @@ class EventManager(private val plugin: PaperBootstrap) : Listener {
         plugin.server.pluginManager.registerEvents(object : Listener {
             @EventHandler(priority = EventPriority.LOWEST)
             fun onMessage(e: AsyncPlayerChatEvent) {
-                val username = e.player.displayName().asString()
-                plugin.tgbridge.onChatMessage(TBPlayerEventData(username, Component.text(e.message)))
+                plugin.tgbridge.onChatMessage(TBPlayerEventData(getPlayerName(e.player), Component.text(e.message)))
             }
         }, plugin)
     }
@@ -61,9 +59,7 @@ class EventManager(private val plugin: PaperBootstrap) : Listener {
         if (e.player.isVanished()) {
             return
         }
-        val username = e.player.displayName().asString()
-        val msg = e.message() ?: return
-        plugin.tgbridge.onPlayerAdvancement(TBPlayerEventData(username, msg))
+        plugin.tgbridge.onPlayerAdvancement(TBPlayerEventData(getPlayerName(e.player), e.message() ?: return))
     }
 
     @EventHandler
@@ -71,7 +67,7 @@ class EventManager(private val plugin: PaperBootstrap) : Listener {
         if (e.player.isVanished()) {
             return
         }
-        val username = e.player.displayName().asString()
+        val username = getPlayerName(e.entity)
         val msg = e.deathMessage() ?: Component.translatable("death.attack.generic", Component.text(username))
         plugin.tgbridge.onPlayerDeath(TBPlayerEventData(username, msg))
     }
@@ -81,7 +77,7 @@ class EventManager(private val plugin: PaperBootstrap) : Listener {
         if (e.player.isVanished()) {
             return
         }
-        plugin.tgbridge.onPlayerJoin(e.player.displayName().asString())
+        plugin.tgbridge.onPlayerJoin(getPlayerName(e.player))
     }
 
     @EventHandler
@@ -89,7 +85,7 @@ class EventManager(private val plugin: PaperBootstrap) : Listener {
         if (e.player.isVanished()) {
             return
         }
-        plugin.tgbridge.onPlayerLeave(e.player.displayName().asString())
+        plugin.tgbridge.onPlayerLeave(getPlayerName(e.player))
     }
 
     private fun registerCommandHandlers() {
