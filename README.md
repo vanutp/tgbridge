@@ -20,8 +20,6 @@ https://github.com/vanutp/tgbridge/assets/11143488/697a6d5d-1f2c-4156-bf8d-14044
 - Supports achievements & death messages from any mod out of the box
 - Supports Telegram topics (bot will work only in its dedicated topic)
 - `/list` command in Telegram will print the list of currently online players
-- If you have BlueMap and Xaero's Minimap/World Map installed, you can set the `messages.bluemapUrl` option
-  to be able to view shared waypoints from Telegram on the BlueMap
 - If you don't want every Minecraft message to be forwarded, you can set the `messages.requirePrefixInMinecraft`
   option to your desired prefix (for example `!`). Only messages starting with that prefix will be forwarded.
 - If you do want every message to be forwarded, but don't like that tons of messages are sent in the Telegram chat,
@@ -61,6 +59,19 @@ Alternatively, make the bot a group admin.
 
 #### I get "Conflict: terminated by other getUpdates request; make sure that only one bot instance is running" error
 Make sure that there is only one server running with that bot token. You can't use one bot for multiple servers due to Bot API limitations
+
+## Compatibility
+
+Currently there are no known incompatibilities. Please report if you find any.
+
+This mod has integrations with the following mods/plugins:
+
+- [BlueMap](https://modrinth.com/plugin/bluemap) +
+[Xaero's Minimap](https://modrinth.com/mod/xaeros-minimap)/[Xaero's World Map](https://modrinth.com/mod/xaeros-world-map):
+shows shared waypoints as BlueMap links in the Telegram chat. Requires `messages.bluemapUrl` option to be set to work.
+- [EssentialsX](https://modrinth.com/plugin/essentialsx): vanish support
+- [SuperVanish](https://www.spigotmc.org/resources/supervanish-be-invisible.1331/)
+- [Fabric Vanish](https://modrinth.com/mod/vanish)
 
 ## Contributions
 
