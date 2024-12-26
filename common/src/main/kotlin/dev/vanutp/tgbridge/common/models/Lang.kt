@@ -29,7 +29,6 @@ data class LangTelegram(
 
 @Serializable
 data class MessageMeta(
-    val format: String = "<aqua>\\<<sender>></aqua> <text>",
     val reply: String = "<blue>[R <sender>: <text>]",
     val replyToMinecraft: String = "<blue>[R <text>]",
     val forward: String = "<gray>[F <from>]",
@@ -69,6 +68,7 @@ data class MessageFormatting(
 
 @Serializable
 data class LangMinecraft(
+    val format: String = "<aqua>\\<<sender>></aqua> <text>",
     val messageMeta: MessageMeta = MessageMeta(),
     val messageFormatting: MessageFormatting = MessageFormatting(),
 )

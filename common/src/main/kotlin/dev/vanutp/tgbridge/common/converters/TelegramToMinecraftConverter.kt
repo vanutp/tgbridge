@@ -257,7 +257,7 @@ object TelegramToMinecraftConverter {
             .fold(Component.text()) { acc, component -> acc.append(component) }
             .build()
 
-        return lang.minecraft.messageMeta.format.formatMiniMessage(
+        return lang.minecraft.format.formatMiniMessage(
             listOf("sender" to msg.senderName),
             listOf("text" to textComponent),
         )

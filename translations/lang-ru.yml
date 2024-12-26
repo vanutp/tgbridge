@@ -16,8 +16,8 @@ telegram:
 # See https://docs.advntr.dev/minimessage/format.html for more information.
 # Additionally, {variable} syntax can be used instead of <variable> for some plain-text placeholders.
 minecraft:
+  format: "<aqua>\\<<sender>></aqua> <text>"
   messageMeta:
-    format: "<aqua>\\<<sender>></aqua> <text>"
     reply: "<blue>[О <sender>: <text>]"
     replyToMinecraft: "<blue>[О <text>]"
     forward: "<gray>[П <from>]"
