@@ -1,15 +1,13 @@
 package dev.vanutp.tgbridge.common.converters
 
+import dev.vanutp.tgbridge.common.*
 import dev.vanutp.tgbridge.common.ConfigManager.config
 import dev.vanutp.tgbridge.common.ConfigManager.lang
-import dev.vanutp.tgbridge.common.TgMessage
-import dev.vanutp.tgbridge.common.TgMessageMedia
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.minimessage.MiniMessage
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
+import net.kyori.adventure.text.format.TextDecoration
 
 object TelegramToMinecraftConverter {
-    private val mm = MiniMessage.miniMessage()
+    private val urlRegex = Regex("^[a-z]+://")
 
     private fun trimReplyMessageText(text: String): String {
         val lines = text.split("\n", limit = 2)
@@ -22,7 +20,7 @@ object TelegramToMinecraftConverter {
 
     private fun mediaToText(msg: TgMessageMedia): Component? {
         var inner = msg.poll?.let {
-            mm.deserialize(lang.minecraft.messageMeta.poll, Placeholder.unparsed("title", it.question))
+            lang.minecraft.messageMeta.poll.formatMiniMessage(listOf("title" to it.question))
         }
 
         listOf(
@@ -36,12 +34,14 @@ object TelegramToMinecraftConverter {
             msg.voice to lang.minecraft.messageMeta.voiceMessage,
         ).forEach {
             if (it.first != null) {
-                inner = mm.deserialize(it.second)
+                inner = it.second.formatMiniMessage()
             }
         }
 
         return inner?.let {
-            mm.deserialize(lang.minecraft.messageMeta.mediaFormatting, Placeholder.component("media", it))
+            lang.minecraft.messageMeta.mediaFormatting.formatMiniMessage(
+                componentPlaceholders = listOf("media" to it)
+            )
         }
     }
 
@@ -49,7 +49,8 @@ object TelegramToMinecraftConverter {
         var isReplyToMinecraft: Boolean,
         var senderName: String,
         var media: Component?,
-        var text: String?,
+        var text: String,
+        var entities: List<TgEntity>,
     )
 
     private fun replyToText(msg: TgMessage, botId: Long): Component? {
@@ -67,7 +68,8 @@ object TelegramToMinecraftConverter {
                 isReplyToMinecraft = reply.from?.id == botId,
                 senderName = reply.senderName,
                 media = mediaToText(reply),
-                text = reply.effectiveText
+                text = reply.effectiveText ?: "",
+                entities = reply.entities,
             )
         }
         msg.externalReply?.let { reply ->
@@ -75,25 +77,30 @@ object TelegramToMinecraftConverter {
                 isReplyToMinecraft = false,
                 senderName = reply.senderName,
                 media = mediaToText(reply),
-                text = null,
+                text = "",
+                entities = emptyList(),
             )
         }
         msg.quote?.let {
             info?.text = it.text
+            info?.entities = it.entities
         }
 
         return info?.let {
-            val fullText = "${it.media ?: ""} ${trimReplyMessageText(it.text ?: "")}".trim()
+            val formattedText = formattedTextToComponent(trimReplyMessageText(it.text), it.entities)
+            val fullText = if (it.media != null && it.text.isNotEmpty()) {
+                it.media!!.append(Component.text(" ")).append(formattedText)
+            } else {
+                it.media ?: formattedText
+            }
             if (it.isReplyToMinecraft) {
-                mm.deserialize(
-                    lang.minecraft.messageMeta.replyToMinecraft,
-                    Placeholder.unparsed("text", fullText),
+                lang.minecraft.messageMeta.replyToMinecraft.formatMiniMessage(
+                    componentPlaceholders = listOf("text" to fullText)
                 )
             } else {
-                mm.deserialize(
-                    lang.minecraft.messageMeta.reply,
-                    Placeholder.unparsed("sender", it.senderName),
-                    Placeholder.unparsed("text", fullText),
+                lang.minecraft.messageMeta.reply.formatMiniMessage(
+                    listOf("sender" to it.senderName),
+                    listOf("text" to fullText),
                 )
             }
         }
@@ -106,8 +113,111 @@ object TelegramToMinecraftConverter {
             msg.forwardFromChat.title
         }
         return forwardFromName?.let {
-            mm.deserialize(lang.minecraft.messageMeta.forward, Placeholder.unparsed("from", it))
+            lang.minecraft.messageMeta.forward.formatMiniMessage(listOf("from" to it))
         }
+    }
+
+    private fun ensureValidUrl(url: String): String {
+        return if (urlRegex.matchesAt(url, 0)) {
+            url
+        } else {
+            "https://$url"
+        }
+    }
+
+    private fun formattedTextToComponent(text: String, entities: List<TgEntity>): Component {
+        val components = mutableListOf<Component>()
+        val currEntities = entities.filter { it.offset == 0 }.toMutableList()
+        val nextEntities = currEntities.toMutableList()
+        var prevSpoilerContent: Component? = null
+        var currText = ""
+        for (i in text.indices) {
+            currText += text[i]
+            var entitiesChanged = false
+            entities.forEach {
+                if (it.offset + it.length == i + 1) {
+                    nextEntities.remove(it)
+                    entitiesChanged = true
+                }
+                if (it.offset == i + 1) {
+                    nextEntities.add(it)
+                    entitiesChanged = true
+                }
+            }
+            var isSpoiler = false
+            if (entitiesChanged || i == text.length - 1) {
+                var component: Component = Component.text(currText)
+                currEntities.forEach {
+                    component = when (it.type) {
+                        TgEntityType.BOLD -> component.decoration(TextDecoration.BOLD, true)
+                        TgEntityType.ITALIC -> component.decoration(TextDecoration.ITALIC, true)
+                        TgEntityType.UNDERLINE -> component.decoration(TextDecoration.UNDERLINED, true)
+                        TgEntityType.STRIKETHROUGH -> component.decoration(TextDecoration.STRIKETHROUGH, true)
+
+                        TgEntityType.URL ->
+                            lang.minecraft.messageFormatting.linkFormatting.formatMiniMessage(
+                                listOf("url" to ensureValidUrl(currText), "text_plain" to currText),
+                                listOf("text" to component),
+                            )
+
+                        TgEntityType.TEXT_LINK ->
+                            lang.minecraft.messageFormatting.linkFormatting.formatMiniMessage(
+                                listOf("url" to ensureValidUrl(it.url!!), "text_plain" to currText),
+                                listOf("text" to component),
+                            )
+
+                        TgEntityType.MENTION ->
+                            lang.minecraft.messageFormatting.mentionFormatting.formatMiniMessage(
+                                listOf("username" to currText),
+                                listOf("text" to component),
+                            )
+
+                        TgEntityType.HASHTAG, TgEntityType.CASHTAG ->
+                            lang.minecraft.messageFormatting.hashtagFormatting.formatMiniMessage(
+                                emptyList(),
+                                listOf("text" to component),
+                            )
+
+                        TgEntityType.SPOILER -> {
+                            isSpoiler = true
+                            component
+                        }
+
+                        TgEntityType.CODE, TgEntityType.PRE ->
+                            lang.minecraft.messageFormatting.codeFormatting.formatMiniMessage(
+                                listOf("text_plain" to currText),
+                                listOf("text" to component),
+                            )
+
+                        TgEntityType.BLOCKQUOTE, TgEntityType.EXPANDABLE_BLOCKQUOTE ->
+                            lang.minecraft.messageFormatting.quoteFormatting.formatMiniMessage(
+                                listOf("text_plain" to currText),
+                                listOf("text" to component),
+                            )
+
+                        else -> component
+                    }
+                }
+                if (isSpoiler) {
+                    if (prevSpoilerContent != null) {
+                        components.removeLast()
+                        component = prevSpoilerContent.append(component)
+                    }
+                    prevSpoilerContent = component
+                    component = lang.minecraft.messageFormatting.spoilerFormatting.formatMiniMessage(
+                        listOf("text_plain" to component.asString()),
+                        listOf("text" to component),
+                    )
+                } else {
+                    prevSpoilerContent = null
+                }
+                components.add(component)
+                currText = ""
+                currEntities.clear()
+                currEntities.addAll(nextEntities)
+            }
+        }
+        return components.fold(Component.text()) { acc, component -> acc.append(component) }.build()
     }
 
     fun convert(msg: TgMessage, botId: Long): Component {
@@ -117,16 +227,22 @@ object TelegramToMinecraftConverter {
             val pinnedMessageComponents = mutableListOf<Component>()
             forwardFromToText(pinnedMsg)?.let { pinnedMessageComponents.add(it) }
             mediaToText(pinnedMsg)?.let { pinnedMessageComponents.add(it) }
-            pinnedMsg.effectiveText?.let { pinnedMessageComponents.add(Component.text(it)) }
+            pinnedMsg.effectiveText?.let {
+                pinnedMessageComponents.add(
+                    formattedTextToComponent(
+                        it,
+                        pinnedMsg.entities
+                    )
+                )
+            }
 
             val pinnedMessageDataComponent = pinnedMessageComponents
                 .flatMap { listOf(it, Component.text(" ")) }
                 .fold(Component.text()) { acc, component -> acc.append(component) }
                 .build()
             components.add(
-                mm.deserialize(
-                    lang.minecraft.messageMeta.pin,
-                    Placeholder.component("message", pinnedMessageDataComponent)
+                lang.minecraft.messageMeta.pin.formatMiniMessage(
+                    componentPlaceholders = listOf("message" to pinnedMessageDataComponent)
                 )
             )
         }
@@ -134,17 +250,16 @@ object TelegramToMinecraftConverter {
         forwardFromToText(msg)?.let { components.add(it) }
         replyToText(msg, botId)?.let { components.add(it) }
         mediaToText(msg)?.let { components.add(it) }
-        msg.effectiveText?.let { components.add(Component.text(it)) }
+        msg.effectiveText?.let { components.add(formattedTextToComponent(it, msg.entities)) }
 
         val textComponent = components
             .flatMap { listOf(it, Component.text(" ")) }
             .fold(Component.text()) { acc, component -> acc.append(component) }
             .build()
 
-        return mm.deserialize(
-            lang.minecraft.messageMeta.format,
-            Placeholder.unparsed("sender", msg.senderName),
-            Placeholder.component("text", textComponent),
+        return lang.minecraft.messageMeta.format.formatMiniMessage(
+            listOf("sender" to msg.senderName),
+            listOf("text" to textComponent),
         )
     }
 }

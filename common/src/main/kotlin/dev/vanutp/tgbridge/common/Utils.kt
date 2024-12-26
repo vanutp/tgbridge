@@ -5,6 +5,8 @@ import dev.vanutp.tgbridge.common.ConfigManager.getMinecraftLangKey
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.TranslatableComponent
+import net.kyori.adventure.text.minimessage.MiniMessage
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 
 fun String.escapeHTML(): String = this
     .replace("&", "&amp;")
@@ -44,6 +46,23 @@ fun String.formatLang(vararg args: Pair<String, String>): String {
         res = res.replace("{${it.first}}", it.second)
     }
     return res
+}
+
+private val mm = MiniMessage.miniMessage()
+
+fun String.formatMiniMessage(
+    plainPlaceholders: List<Pair<String, String>> = emptyList(),
+    componentPlaceholders: List<Pair<String, Component>> = emptyList(),
+): Component {
+    var res = this
+    plainPlaceholders.forEach {
+        res = res.replace("{${it.first}}", mm.escapeTags(it.second))
+    }
+    return mm.deserialize(
+        res,
+        *plainPlaceholders.map { Placeholder.unparsed(it.first, it.second) }.toTypedArray(),
+        *componentPlaceholders.map { Placeholder.component(it.first, it.second) }.toTypedArray()
+    )
 }
 
 

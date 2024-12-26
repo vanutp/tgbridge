@@ -14,6 +14,7 @@ telegram:
   playerListZeroOnline: "📝 <b>Онлайн 0</b>"
 # This section uses MiniMessage formatting (in non-strict mode).
 # See https://docs.advntr.dev/minimessage/format.html for more information.
+# Additionally, {variable} syntax can be used instead of <variable> for some plain-text placeholders.
 minecraft:
   messageMeta:
     format: "<aqua>\\<<sender>></aqua> <text>"
@@ -32,3 +33,10 @@ minecraft:
     videoMessage: "[Видеосообщение]"
     voiceMessage: "[Голосовое сообщение]"
     poll: "[Опрос: <title>]"
+  messageFormatting:
+    linkFormatting: "<#1e88ff><underlined><hover:show_text:'<green><url>'><click:open_url:'{url}'><text>"
+    mentionFormatting: "<#1e88ff><hover:show_text:'<green>Упомянуть (Shift+ЛКМ)'><insert:{username}><text>"
+    hashtagFormatting: "<#1e88ff><text>"
+    codeFormatting: "<gray><hover:show_text:'<green>Нажми чтобы скопировать'><click:copy_to_clipboard:'{text_plain}'><insert:'{text_plain}'><text>"
+    quoteFormatting: "<italic><text>"
+    spoilerFormatting: "<obfuscated><hover:show_text:'<text>'><text_plain>"

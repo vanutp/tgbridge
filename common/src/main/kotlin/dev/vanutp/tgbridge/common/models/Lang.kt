@@ -48,8 +48,29 @@ data class MessageMeta(
 )
 
 @Serializable
+data class MessageFormatting(
+    val linkFormatting: String = "<#1e88ff><underlined>" +
+            "<hover:show_text:'<green><url>'>" +
+            "<click:open_url:'{url}'>" +
+            "<text>",
+    val mentionFormatting: String = "<#1e88ff>" +
+            "<hover:show_text:'<green>Shift-click to mention'>" +
+            "<insert:{username}>" +
+            "<text>",
+    val hashtagFormatting: String = "<#1e88ff><text>",
+    val codeFormatting: String = "<gray>" +
+            "<hover:show_text:'<green>Click to copy'>" +
+            "<click:copy_to_clipboard:'{text_plain}'>" +
+            "<insert:'{text_plain}'>" +
+            "<text>",
+    val quoteFormatting: String = "<italic><text>",
+    val spoilerFormatting: String = "<obfuscated><hover:show_text:'<text>'><text_plain>",
+)
+
+@Serializable
 data class LangMinecraft(
     val messageMeta: MessageMeta = MessageMeta(),
+    val messageFormatting: MessageFormatting = MessageFormatting(),
 )
 
 @Serializable
@@ -60,6 +81,7 @@ data class Lang(
     @YamlComment(
         "This section uses MiniMessage formatting (in non-strict mode).",
         "See https://docs.advntr.dev/minimessage/format.html for more information.",
+        "Additionally, {variable} syntax can be used instead of <variable> for some plain-text placeholders."
     )
     val minecraft: LangMinecraft = LangMinecraft(),
 )

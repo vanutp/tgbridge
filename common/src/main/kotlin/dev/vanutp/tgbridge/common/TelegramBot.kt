@@ -81,6 +81,55 @@ data class TgExternalReplyInfo(
 
 data class TgTextQuote(
     val text: String,
+    val entities: List<TgEntity> = emptyList(),
+)
+
+enum class TgEntityType {
+    @SerializedName("mention")
+    MENTION,
+    @SerializedName("hashtag")
+    HASHTAG,
+    @SerializedName("cashtag")
+    CASHTAG,
+    @SerializedName("bot_command")
+    BOT_COMMAND,
+    @SerializedName("url")
+    URL,
+    @SerializedName("email")
+    EMAIL,
+    @SerializedName("phone_number")
+    PHONE_NUMBER,
+    @SerializedName("bold")
+    BOLD,
+    @SerializedName("italic")
+    ITALIC,
+    @SerializedName("underline")
+    UNDERLINE,
+    @SerializedName("strikethrough")
+    STRIKETHROUGH,
+    @SerializedName("spoiler")
+    SPOILER,
+    @SerializedName("blockquote")
+    BLOCKQUOTE,
+    @SerializedName("expandable_blockquote")
+    EXPANDABLE_BLOCKQUOTE,
+    @SerializedName("code")
+    CODE,
+    @SerializedName("pre")
+    PRE,
+    @SerializedName("text_link")
+    TEXT_LINK,
+    @SerializedName("text_mention")
+    TEXT_MENTION,
+    @SerializedName("custom_emoji")
+    CUSTOM_EMOJI,
+}
+
+data class TgEntity(
+    val type: TgEntityType,
+    val offset: Int,
+    val length: Int,
+    val url: String? = null,
 )
 
 data class TgMessage(
@@ -104,7 +153,11 @@ data class TgMessage(
     @SerializedName("author_signature")
     val authorSignature: String? = null,
     val text: String? = null,
+    @SerializedName("entities")
+    val textEntities: List<TgEntity>? = null,
     val caption: String? = null,
+    @SerializedName("caption_entities")
+    val captionEntities: List<TgEntity>? = null,
     override val animation: TgAny? = null,
     override val photo: List<TgAny>? = null,
     override val audio: TgAny? = null,
@@ -127,6 +180,8 @@ data class TgMessage(
             ?: ""
     val effectiveText
         get() = text ?: caption
+    val entities
+        get() = textEntities ?: captionEntities ?: emptyList()
 }
 
 data class TgUpdate(
