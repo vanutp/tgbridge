@@ -34,9 +34,9 @@ minecraft:
     voiceMessage: "[Голосовое сообщение]"
     poll: "[Опрос: <title>]"
   messageFormatting:
-    linkFormatting: "<#1e88ff><underlined><hover:show_text:'<green><url>'><click:open_url:'{url}'><text>"
-    mentionFormatting: "<#1e88ff><hover:show_text:'<green>Упомянуть (Shift+ЛКМ)'><insert:{username}><text>"
-    hashtagFormatting: "<#1e88ff><text>"
+    linkFormatting: "<#7878ff><underlined><hover:show_text:'<green><url>'><click:open_url:'{url}'><text>"
+    mentionFormatting: "<#7878ff><hover:show_text:'<green>Упомянуть (Shift+ЛКМ)'><insert:{username}><text>"
+    hashtagFormatting: "<#7878ff><text>"
     codeFormatting: "<gray><hover:show_text:'<green>Нажми чтобы скопировать'><click:copy_to_clipboard:'{text_plain}'><insert:'{text_plain}'><text>"
     quoteFormatting: "<italic><text>"
     spoilerFormatting: "<obfuscated><hover:show_text:'<text>'><text_plain>"

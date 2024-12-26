@@ -48,15 +48,15 @@ data class MessageMeta(
 
 @Serializable
 data class MessageFormatting(
-    val linkFormatting: String = "<#1e88ff><underlined>" +
+    val linkFormatting: String = "<#7878ff><underlined>" +
             "<hover:show_text:'<green><url>'>" +
             "<click:open_url:'{url}'>" +
             "<text>",
-    val mentionFormatting: String = "<#1e88ff>" +
+    val mentionFormatting: String = "<#7878ff>" +
             "<hover:show_text:'<green>Shift-click to mention'>" +
             "<insert:{username}>" +
             "<text>",
-    val hashtagFormatting: String = "<#1e88ff><text>",
+    val hashtagFormatting: String = "<#7878ff><text>",
     val codeFormatting: String = "<gray>" +
             "<hover:show_text:'<green>Click to copy'>" +
             "<click:copy_to_clipboard:'{text_plain}'>" +
