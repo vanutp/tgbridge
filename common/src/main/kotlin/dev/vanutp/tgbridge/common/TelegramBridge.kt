@@ -2,6 +2,8 @@ package dev.vanutp.tgbridge.common
 
 import dev.vanutp.tgbridge.common.ConfigManager.config
 import dev.vanutp.tgbridge.common.ConfigManager.lang
+import dev.vanutp.tgbridge.common.converters.MinecraftToTelegramConverter
+import dev.vanutp.tgbridge.common.converters.TelegramFormattedText
 import dev.vanutp.tgbridge.common.converters.TelegramToMinecraftConverter
 import dev.vanutp.tgbridge.common.models.LastMessage
 import dev.vanutp.tgbridge.common.models.LastMessageType
@@ -14,6 +16,7 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TranslatableComponent
 import java.time.Clock
 import java.time.temporal.ChronoUnit
+import kotlin.math.max
 
 
 abstract class TelegramBridge {
@@ -115,38 +118,40 @@ abstract class TelegramBridge {
     }
 
     fun onChatMessage(e: TBPlayerEventData) = withScopeAndLock {
-        val rawMinecraftText = e.text.asString()
-        val bluemapLink = rawMinecraftText.asBluemapLinkOrNone()
+        var telegramText = MinecraftToTelegramConverter.convert(e.text)
+        val bluemapLink = telegramText.text.asBluemapLinkOrNone()
         val prefix = config.messages.requirePrefixInMinecraft ?: ""
-        if (bluemapLink == null && !rawMinecraftText.startsWith(prefix)) {
+        if (bluemapLink == null && !telegramText.text.startsWith(prefix)) {
             return@withScopeAndLock
         }
 
-        val textWithoutPrefix = if (config.messages.keepPrefix) {
-            rawMinecraftText
-        } else {
-            rawMinecraftText.removePrefix(prefix)
+        if (!config.messages.keepPrefix) {
+            telegramText = TelegramFormattedText(
+                telegramText.text.removePrefix(prefix),
+                telegramText.entities.map { it.copy(offset = max(it.offset - prefix.length, 0)) },
+            )
         }
-        val escapedText = textWithoutPrefix.escapeHTML()
 
-        val currText = lang.telegram.chatMessage.formatLang(
-            "username" to e.username,
-            "text" to (bluemapLink ?: escapedText),
+        val tgPrefix = MinecraftToTelegramConverter.convert(
+            lang.telegram.chatMessage.formatMiniMessage(listOf("username" to e.username))
+                .append(Component.text(" "))
         )
+
+        val currText = tgPrefix + telegramText
         val currDate = Clock.systemUTC().instant()
 
         val lm = lastMessage
         if (
             lm != null
             && lm.type == LastMessageType.TEXT
-            && (lm.text + "\n" + currText).length <= 4000
+            && (lm.text!! + "\n" + currText).text.length <= 4000
             && currDate.minus((config.messages.mergeWindow ?: 0).toLong(), ChronoUnit.SECONDS) < lm.date
         ) {
-            lm.text += "\n" + currText
+            lm.text = lm.text!! + "\n" + currText
             lm.date = currDate
-            editMessageText(lm.id, lm.text!!)
+            editMessageText(lm.id, lm.text!!.text)
         } else {
-            val newMsg = sendMessage(currText)
+            val newMsg = sendMessage(currText.text, currText.entities)
             lastMessage = LastMessage(
                 LastMessageType.TEXT,
                 newMsg.messageId,
@@ -254,8 +259,14 @@ abstract class TelegramBridge {
         }
     }
 
-    private suspend fun sendMessage(text: String): TgMessage {
-        return bot.sendMessage(config.general.chatId, text, replyToMessageId = config.general.topicId)
+    private suspend fun sendMessage(text: String, entities: List<TgEntity>? = null): TgMessage {
+        return bot.sendMessage(
+            config.general.chatId,
+            text,
+            entities,
+            parseMode = if (entities == null) "HTML" else null,
+            replyToMessageId = config.general.topicId,
+        )
     }
 
     private suspend fun editMessageText(messageId: Int, text: String): TgMessage {

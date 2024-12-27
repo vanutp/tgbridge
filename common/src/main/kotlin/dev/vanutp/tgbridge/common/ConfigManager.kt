@@ -44,6 +44,12 @@ object ConfigManager {
             val mm = MiniMessage.miniMessage()
             lang = lang.copy(
                 version = 2,
+                telegram = lang.telegram.copy(
+                    chatMessage = lang.telegram.chatMessage
+                        .replace("{sender}", "<sender>")
+                        .replace("{text}", "")
+                        .trim()
+                ),
                 minecraft = lang.minecraft.copy(
                     messageMeta = lang.minecraft.messageMeta.copy(
                         reply = "<blue>" + mm.escapeTags(lang.minecraft.messageMeta.reply)

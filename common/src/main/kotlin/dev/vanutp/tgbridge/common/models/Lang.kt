@@ -19,7 +19,8 @@ data class LangTelegram(
     val playerLeft: String = "😕 <b>{username} left the game</b>",
     val playerDied: String = "☠️ <b>{deathMessage}</b>",
 
-    val chatMessage: String = "<b>[{username}]</b> {text}",
+    @YamlComment("This option uses MiniMessage formatting (see below for details)")
+    val chatMessage: String = "<b>[<username>]</b>",
 
     val advancements: LangAdvancements = LangAdvancements(),
 

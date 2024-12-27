@@ -1,5 +1,6 @@
 package dev.vanutp.tgbridge.common.models
 
+import dev.vanutp.tgbridge.common.converters.TelegramFormattedText
 import java.time.Instant
 
 enum class LastMessageType {
@@ -11,6 +12,6 @@ data class LastMessage(
     val type: LastMessageType,
     val id: Int,
     var date: Instant,
-    var text: String? = null,
+    var text: TelegramFormattedText? = null,
     val leftPlayer: String? = null,
 )

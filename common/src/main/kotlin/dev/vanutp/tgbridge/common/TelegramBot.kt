@@ -201,10 +201,12 @@ data class TgSendMessageRequest(
     val chatId: Long,
     @SerializedName("text")
     val text: String,
+    @SerializedName("entities")
+    val entities: List<TgEntity>? = null,
     @SerializedName("reply_to_message_id")
     val replyToMessageId: Int? = null,
     @SerializedName("parse_mode")
-    val parseMode: String = "HTML",
+    val parseMode: String? = "HTML",
     @SerializedName("disable_web_page_preview")
     val disableWebPagePreview: Boolean = true,
 )
@@ -367,11 +369,12 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: Abstr
     suspend fun sendMessage(
         chatId: Long,
         text: String,
+        entities: List<TgEntity>? = null,
         replyToMessageId: Int? = null,
-        parseMode: String = "HTML",
+        parseMode: String? = "HTML",
         disableWebPagePreview: Boolean = true,
     ): TgMessage = call {
-        client.sendMessage(TgSendMessageRequest(chatId, text, replyToMessageId, parseMode, disableWebPagePreview))
+        client.sendMessage(TgSendMessageRequest(chatId, text, entities, replyToMessageId, parseMode, disableWebPagePreview))
     }
 
     suspend fun editMessageText(

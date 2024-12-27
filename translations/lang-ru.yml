@@ -5,7 +5,8 @@ telegram:
   playerJoined: "🥳 <b>{username} зашёл на сервер</b>"
   playerLeft: "😕 <b>{username} покинул сервер</b>"
   playerDied: "☠️ <b>{deathMessage}</b>"
-  chatMessage: "<b>[{username}]</b> {text}"
+  # This option uses MiniMessage formatting (see below for details)
+  chatMessage: "<b>[{username}]</b>"
   advancements:
     regular: "😼 <b>{username} получил достижение {title}</b>\n\n<i>{description}</i>"
     goal: "🎯 <b>{username} достиг цели {title}</b>\n\n<i>{description}</i>"

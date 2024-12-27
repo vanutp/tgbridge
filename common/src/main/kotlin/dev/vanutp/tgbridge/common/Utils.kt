@@ -1,10 +1,8 @@
 package dev.vanutp.tgbridge.common
 
 import dev.vanutp.tgbridge.common.ConfigManager.config
-import dev.vanutp.tgbridge.common.ConfigManager.getMinecraftLangKey
+import dev.vanutp.tgbridge.common.converters.MinecraftToTelegramConverter
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.TextComponent
-import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 
@@ -14,31 +12,7 @@ fun String.escapeHTML(): String = this
     .replace("<", "&lt;")
 
 
-fun Component.asString(): String {
-    return when (this) {
-        is TranslatableComponent -> {
-            var res = getMinecraftLangKey(this.key()) ?: this.key()
-            // We're using older versions of kyori on some platforms, so using deprecated args() is ok
-            this.args().forEachIndexed { i, x ->
-                val child = x.asString()
-                if (i == 0) {
-                    res = res.replace("%s", child)
-                }
-                res = res.replace("%${i + 1}\$s", child)
-            }
-            res
-        }
-
-        is TextComponent -> {
-            val children = this.children().joinToString("") {
-                it.asString()
-            }
-            this.content() + children
-        }
-
-        else -> this.toString()
-    }
-}
+fun Component.asString() = MinecraftToTelegramConverter.convert(this).text
 
 fun String.formatLang(vararg args: Pair<String, String>): String {
     var res = this
