@@ -72,6 +72,8 @@ shows shared waypoints as BlueMap links in the Telegram chat. Requires `messages
 - [EssentialsX](https://modrinth.com/plugin/essentialsx): vanish support
 - [SuperVanish](https://www.spigotmc.org/resources/supervanish-be-invisible.1331/)
 - [Fabric Vanish](https://modrinth.com/mod/vanish)
+- [StyledChat](https://modrinth.com/mod/styled-chat) or similar mod/plugin:
+chat messages formatting will be visible in Telegram.
 
 ## Contributions
 

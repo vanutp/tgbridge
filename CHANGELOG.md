@@ -1,3 +1,13 @@
+### 0.6.0
+
+- 1.21.4 support
+- Add an option to disable start/stop messages
+- Add an option to use real username instead of display name
+- Allow customization of Minecraft message formatting
+- Support message formatting. Formatting in Minecraft -> Telegram messages requires Styled Chat or similar mod/plugin
+- Fabric: Add support for Fabric Vanish
+- Paper: Add support for EssentialsX vanish and SuperVanish
+
 ### 0.5.0
 
 - fabric: Merge all fabric versions in one jar
