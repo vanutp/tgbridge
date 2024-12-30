@@ -2,6 +2,7 @@ package dev.vanutp.tgbridge.common
 
 import dev.vanutp.tgbridge.common.ConfigManager.config
 import dev.vanutp.tgbridge.common.converters.MinecraftToTelegramConverter
+import dev.vanutp.tgbridge.common.converters.TelegramFormattedText
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
@@ -43,7 +44,7 @@ fun String.formatMiniMessage(
 val XAERO_WAYPOINT_RGX =
     Regex("""xaero-waypoint:([^:]+):[^:]:([-\d]+):([-\d]+|~):([-\d]+):\d+:(?:false|true):\d+:Internal-(?:the-)?(overworld|nether|end)-waypoints""")
 
-fun String.asBluemapLinkOrNone(): String? {
+fun String.asBluemapLinkOrNone(): TelegramFormattedText? {
     XAERO_WAYPOINT_RGX.matchEntire(this)?.let {
         try {
             var waypointName = it.groupValues[1]
@@ -56,7 +57,18 @@ fun String.asBluemapLinkOrNone(): String? {
             val z = Integer.parseInt(it.groupValues[4])
             val worldName = it.groupValues[5]
 
-            return """<a href="${config.messages.bluemapUrl}#$worldName:$x:$y:$z:50:0:0:0:0:perspective">$waypointName</a>"""
+            val url = "${config.messages.bluemapUrl}#$worldName:$x:$y:$z:50:0:0:0:0:perspective"
+            return TelegramFormattedText(
+                text = waypointName,
+                entities = listOf(
+                    TgEntity(
+                        offset = 0,
+                        length = waypointName.length,
+                        type = TgEntityType.TEXT_LINK,
+                        url = url
+                    )
+                )
+            )
         } catch (_: NumberFormatException) {
         }
     }

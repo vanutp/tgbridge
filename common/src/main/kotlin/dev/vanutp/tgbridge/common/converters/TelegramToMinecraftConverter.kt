@@ -83,7 +83,7 @@ object TelegramToMinecraftConverter {
         }
         msg.quote?.let {
             info?.text = it.text
-            info?.entities = it.entities
+            info?.entities = it.entities ?: emptyList()
         }
 
         return info?.let {

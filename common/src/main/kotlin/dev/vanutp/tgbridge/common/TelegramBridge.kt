@@ -125,7 +125,9 @@ abstract class TelegramBridge {
             return@withScopeAndLock
         }
 
-        if (!config.messages.keepPrefix) {
+        if (bluemapLink != null) {
+            telegramText = bluemapLink
+        } else if (!config.messages.keepPrefix) {
             telegramText = TelegramFormattedText(
                 telegramText.text.removePrefix(prefix),
                 telegramText.entities.map { it.copy(offset = max(it.offset - prefix.length, 0)) },
@@ -149,7 +151,7 @@ abstract class TelegramBridge {
         ) {
             lm.text = lm.text!! + "\n" + currText
             lm.date = currDate
-            editMessageText(lm.id, lm.text!!.text)
+            editMessageText(lm.id, lm.text!!.text, lm.text!!.entities)
         } else {
             val newMsg = sendMessage(currText.text, currText.entities)
             lastMessage = LastMessage(
@@ -269,8 +271,14 @@ abstract class TelegramBridge {
         )
     }
 
-    private suspend fun editMessageText(messageId: Int, text: String): TgMessage {
-        return bot.editMessageText(config.general.chatId, messageId, text)
+    private suspend fun editMessageText(messageId: Int, text: String, entities: List<TgEntity>? = null): TgMessage {
+        return bot.editMessageText(
+            config.general.chatId,
+            messageId,
+            text,
+            entities,
+            parseMode = if (entities == null) "HTML" else null,
+        )
     }
 
     private suspend fun deleteMessage(messageId: Int) {

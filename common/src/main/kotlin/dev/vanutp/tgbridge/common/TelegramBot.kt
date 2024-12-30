@@ -81,7 +81,7 @@ data class TgExternalReplyInfo(
 
 data class TgTextQuote(
     val text: String,
-    val entities: List<TgEntity> = emptyList(),
+    val entities: List<TgEntity>? = emptyList(),
 )
 
 enum class TgEntityType {
@@ -218,8 +218,10 @@ data class TgEditMessageRequest(
     val messageId: Int,
     @SerializedName("text")
     val text: String,
+    @SerializedName("entities")
+    val entities: List<TgEntity>? = null,
     @SerializedName("parse_mode")
-    val parseMode: String = "HTML",
+    val parseMode: String? = "HTML",
     @SerializedName("disable_web_page_preview")
     val disableWebPagePreview: Boolean = true,
 )
@@ -381,10 +383,11 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: Abstr
         chatId: Long,
         messageId: Int,
         text: String,
-        parseMode: String = "HTML",
+        entities: List<TgEntity>? = null,
+        parseMode: String? = "HTML",
         disableWebPagePreview: Boolean = true,
     ): TgMessage = call {
-        client.editMessageText(TgEditMessageRequest(chatId, messageId, text, parseMode, disableWebPagePreview))
+        client.editMessageText(TgEditMessageRequest(chatId, messageId, text, entities, parseMode, disableWebPagePreview))
     }
 
     suspend fun deleteMessage(chatId: Long, messageId: Int) = call {
