@@ -77,8 +77,12 @@ chat messages formatting will be visible in Telegram.
 
 ## Contributions
 
-Feel free to open an issue if you think something is missing/can be done better.
-Please ask in an issue before creating a pull request
+Here's how you can help:
+
+- Open an issue to suggest improvements or report bugs
+- Look for issues labeled "help wanted" if you want to contribute code
+- Before working on a pull request, please discuss your proposed changes in an issue first - this helps 
+avoid duplicate work and ensures your contribution aligns with the project's goals
 
 ## Acknowledgements
 
