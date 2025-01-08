@@ -1,3 +1,10 @@
+### 0.6.1
+
+- Add CMI to legacy chat listener exceptions list. Fixes CMI global chat compatibility.
+- Fix errors when config has default values
+- Don't show vanished players in the player list
+- Paper: Decrease event listener priorities
+
 ### 0.6.0
 
 - 1.21.4 support
