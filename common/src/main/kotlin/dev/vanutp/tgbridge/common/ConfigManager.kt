@@ -11,8 +11,6 @@ import net.kyori.adventure.text.minimessage.MiniMessage
 import java.nio.file.Path
 import kotlin.io.path.*
 
-class DefaultConfigUnchangedException : Exception("botToken or chatId is not set")
-
 object ConfigManager {
     private val yaml = Yaml(configuration = YamlConfiguration(strictMode = false))
     private lateinit var configDir: Path
@@ -88,9 +86,6 @@ object ConfigManager {
             configPath.writeText(yaml.encodeToString(Config()))
         }
         val loadedConfig = yaml.decodeFromString<Config>(configPath.readText())
-        if (loadedConfig.general.botToken == Config().general.botToken || loadedConfig.general.chatId == Config().general.chatId) {
-            throw DefaultConfigUnchangedException()
-        }
         if (loadedConfig.general.chatId > 0) {
             loadedConfig.general.chatId = -1000000000000 - loadedConfig.general.chatId
         }

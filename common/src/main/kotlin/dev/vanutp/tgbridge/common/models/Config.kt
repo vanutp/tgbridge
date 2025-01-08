@@ -104,4 +104,7 @@ data class Config(
     val messages: GameMessagesConfig = GameMessagesConfig(),
     val events: GameEventsConfig = GameEventsConfig(),
     val advanced: AdvancedConfig = AdvancedConfig(),
-)
+) {
+    fun hasDefaultValues() =
+        general.botToken == Config().general.botToken || general.chatId == Config().general.chatId
+}

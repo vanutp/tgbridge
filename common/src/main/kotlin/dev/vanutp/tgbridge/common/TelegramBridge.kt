@@ -34,9 +34,8 @@ abstract class TelegramBridge {
     fun init() {
         logger.info("tgbridge starting on ${platform.name}")
         platformInit()
-        try {
-            ConfigManager.init(platform.configDir, platform::getLanguageKey)
-        } catch (_: DefaultConfigUnchangedException) {
+        ConfigManager.init(platform.configDir, platform::getLanguageKey)
+        if (config.hasDefaultValues()) {
             logger.error("Can't start with default config values: please fill in botToken and chatId")
             return
         }
@@ -101,6 +100,17 @@ abstract class TelegramBridge {
     }
 
     fun onReloadCommand(ctx: TBCommandContext): Boolean {
+        if (!initialized) {
+            try {
+                if (config.hasDefaultValues()) {
+                    ctx.reply("A restart is required after initially filling in the bot token and chat ID")
+                    return false
+                }
+            } catch (_: UninitializedPropertyAccessException) {
+            }
+            ctx.reply("Mod was not properly initialized, please restart the server")
+            return false
+        }
         try {
             ConfigManager.reload()
         } catch (e: Exception) {
@@ -117,12 +127,12 @@ abstract class TelegramBridge {
         return true
     }
 
-    fun onChatMessage(e: TBPlayerEventData) = withScopeAndLock {
+    fun onChatMessage(e: TBPlayerEventData) = wrapMinecraftHandler {
         var telegramText = MinecraftToTelegramConverter.convert(e.text)
         val bluemapLink = telegramText.text.asBluemapLinkOrNone()
         val prefix = config.messages.requirePrefixInMinecraft ?: ""
         if (bluemapLink == null && !telegramText.text.startsWith(prefix)) {
-            return@withScopeAndLock
+            return@wrapMinecraftHandler
         }
 
         if (bluemapLink != null) {
@@ -163,18 +173,18 @@ abstract class TelegramBridge {
         }
     }
 
-    fun onPlayerDeath(e: TBPlayerEventData) = withScopeAndLock {
+    fun onPlayerDeath(e: TBPlayerEventData) = wrapMinecraftHandler {
         if (!config.events.enableDeathMessages) {
-            return@withScopeAndLock
+            return@wrapMinecraftHandler
         }
         val component = e.text as TranslatableComponent
         sendMessage(lang.telegram.playerDied.formatLang("deathMessage" to component.asString().escapeHTML()))
         lastMessage = null
     }
 
-    fun onPlayerJoin(username: String) = withScopeAndLock {
+    fun onPlayerJoin(username: String) = wrapMinecraftHandler {
         if (!config.events.enableJoinMessages) {
-            return@withScopeAndLock
+            return@wrapMinecraftHandler
         }
         val lm = lastMessage
         val currDate = Clock.systemUTC().instant()
@@ -191,9 +201,9 @@ abstract class TelegramBridge {
         lastMessage = null
     }
 
-    fun onPlayerLeave(username: String) = withScopeAndLock {
+    fun onPlayerLeave(username: String) = wrapMinecraftHandler {
         if (!config.events.enableLeaveMessages) {
-            return@withScopeAndLock
+            return@wrapMinecraftHandler
         }
         val newMsg = sendMessage(lang.telegram.playerLeft.formatLang("username" to username))
         lastMessage = LastMessage(
@@ -204,10 +214,10 @@ abstract class TelegramBridge {
         )
     }
 
-    fun onPlayerAdvancement(e: TBPlayerEventData) = withScopeAndLock {
+    fun onPlayerAdvancement(e: TBPlayerEventData) = wrapMinecraftHandler {
         val advancementsCfg = config.events.advancementMessages
         if (!advancementsCfg.enable) {
-            return@withScopeAndLock
+            return@wrapMinecraftHandler
         }
         val component = e.text as TranslatableComponent
         val advancementTypeKey = component.key()
@@ -227,17 +237,17 @@ abstract class TelegramBridge {
         }
         val langKey = when (advancementTypeKey) {
             "chat.type.advancement.task" -> {
-                if (!advancementsCfg.enableTask) return@withScopeAndLock
+                if (!advancementsCfg.enableTask) return@wrapMinecraftHandler
                 lang.telegram.advancements.regular
             }
 
             "chat.type.advancement.goal" -> {
-                if (!advancementsCfg.enableGoal) return@withScopeAndLock
+                if (!advancementsCfg.enableGoal) return@wrapMinecraftHandler
                 lang.telegram.advancements.goal
             }
 
             "chat.type.advancement.challenge" -> {
-                if (!advancementsCfg.enableChallenge) return@withScopeAndLock
+                if (!advancementsCfg.enableChallenge) return@wrapMinecraftHandler
                 lang.telegram.advancements.challenge
             }
 
@@ -253,7 +263,10 @@ abstract class TelegramBridge {
         lastMessage = null
     }
 
-    private fun withScopeAndLock(fn: suspend () -> Unit) {
+    private fun wrapMinecraftHandler(fn: suspend () -> Unit) {
+        if (!initialized) {
+            return
+        }
         coroutineScope.launch {
             lastMessageLock.withLock {
                 fn()
