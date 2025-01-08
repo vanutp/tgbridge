@@ -15,7 +15,10 @@ class PaperPlatform(private val plugin: JavaPlugin) : Platform() {
     }
 
     override fun getOnlinePlayerNames(): Array<String> {
-        return plugin.server.onlinePlayers.map { it.name }.toTypedArray()
+        return plugin.server.onlinePlayers
+            .filterNot { it.isVanished() }
+            .map { it.name }
+            .toTypedArray()
     }
 
     override fun getLanguageKey(key: String) = with(Language.getInstance()) {

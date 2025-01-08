@@ -16,7 +16,10 @@ class FabricPlatform : Platform() {
     }
 
     override fun getOnlinePlayerNames(): Array<String> {
-        return server.playerNames
+        return server.playerManager.playerList
+            .filterNot { it.isVanished() }
+            .map { getPlayerName(it).string }
+            .toTypedArray()
     }
 
     override fun getLanguageKey(key: String) = with(Language.getInstance()) {
