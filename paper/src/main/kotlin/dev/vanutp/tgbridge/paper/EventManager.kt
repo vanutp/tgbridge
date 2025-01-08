@@ -1,6 +1,5 @@
 package dev.vanutp.tgbridge.paper
 
-import dev.vanutp.tgbridge.common.asString
 import dev.vanutp.tgbridge.common.models.TBCommandContext
 import dev.vanutp.tgbridge.common.models.TBPlayerEventData
 import io.papermc.paper.event.player.AsyncChatEvent
@@ -43,7 +42,7 @@ class EventManager(private val plugin: PaperBootstrap) : Listener {
 
     private fun shouldUseLegacyChatListener(): Boolean {
         return PaperConfigManager.config.compat.useLegacyChatListener
-            ?: Bukkit.getPluginManager().isPluginEnabled("Chatty")
+            ?: listOf("Chatty", "CMI").any { Bukkit.getPluginManager().isPluginEnabled(it) }
     }
 
     private fun registerChatMessageListener() {
