@@ -53,7 +53,7 @@ class EventManager(private val plugin: PaperBootstrap) : Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.MONITOR)
     fun onPlayerAdvancement(e: PlayerAdvancementDoneEvent) {
         if (e.player.isVanished()) {
             return
@@ -61,7 +61,7 @@ class EventManager(private val plugin: PaperBootstrap) : Listener {
         plugin.tgbridge.onPlayerAdvancement(TBPlayerEventData(getPlayerName(e.player), e.message() ?: return))
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.MONITOR)
     fun onPlayerDeath(e: PlayerDeathEvent) {
         if (e.player.isVanished()) {
             return
@@ -71,7 +71,7 @@ class EventManager(private val plugin: PaperBootstrap) : Listener {
         plugin.tgbridge.onPlayerDeath(TBPlayerEventData(username, msg))
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.MONITOR)
     fun onPlayerJoin(e: PlayerJoinEvent) {
         if (e.player.isVanished()) {
             return
@@ -79,7 +79,7 @@ class EventManager(private val plugin: PaperBootstrap) : Listener {
         plugin.tgbridge.onPlayerJoin(getPlayerName(e.player))
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.MONITOR)
     fun onPlayerQuit(e: PlayerQuitEvent) {
         if (e.player.isVanished()) {
             return
