@@ -1,0 +1,53 @@
+name: Bug Report
+description: Report a problem with the mod
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Provide a summary of the issue in the Title above.
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the bug
+      description: A clear and concise description of what the bug is, including reproduction steps
+      placeholder: |
+        Bold text isn't forwarded to Minecraft.
+        1. Send a message with **bold text** to the Telegram chat
+        2. See that the message isn't bold in Minecraft chat
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs/Screenshots
+      description: If applicable, add screenshots or logs to help explain your problem. Please use code formatting, mclo.gs, or any other paste service for logs
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional info
+      description: Add any other context about the problem here
+  - type: input
+    id: mc-version
+    attributes:
+      label: Minecraft version
+    validations:
+      required: true
+  - type: dropdown
+    id: loader
+    attributes:
+      label: Loader
+      description: Fabric/Forge/Paper
+      options:
+        - Fabric
+        - (Neo)Forge
+        - Paper
+    validations:
+      required: true
+  - type: checkboxes
+    attributes:
+      label: tgbridge version
+      description: The Code of Conduct helps create a safe space for everyone. We require
+        that everyone agrees to it.
+      options:
+        - label: I'm running the latest version of the mod
+          required: true

@@ -1,0 +1,26 @@
+name: Feature Request
+description: Suggest a new feature, improvement or request a mod integration
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: Provide a summary of the issue in the Title above.
+  - type: textarea
+    id: description
+    attributes:
+      label: Feature description
+      description: Please provide a detailed description of the feature you are requesting
+    validations:
+      required: true
+  - type: textarea
+    id: usecase
+    attributes:
+      label: Feature use case
+      description: Describe a use case for this feature. When will it it be useful? What problem does it solve?
+    validations:
+      required: true
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional details
+      description: Add any other information you want to include
