@@ -38,8 +38,6 @@ export class FabricServer extends Server {
         `Failed to install ${this.type} ${this.version}`,
       );
     }
-
-    await this.configureServer();
   }
 
   protected override get startCommand(): string[] {

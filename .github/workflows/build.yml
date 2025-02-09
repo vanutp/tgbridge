@@ -1,4 +1,4 @@
-name: Build
+name: Build & Test
 
 on:
   push: {}
@@ -6,6 +6,7 @@ on:
 
 jobs:
   build:
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -28,3 +29,33 @@ jobs:
         with:
           name: tgbridge
           path: build/release/*.jar
+  test:
+    name: Test
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - uses: actions/download-artifact@v4
+        with:
+          name: tgbridge
+          path: build/release/
+      - uses: actions/cache@v4
+        with:
+          path: |
+            tests/run/**
+            !tests/run/*/world/**
+            !tests/run/*/crash-reports/**
+            !tests/run/*/logs/**
+            !tests/run/**.log
+          key: tests-key
+
+      - name: Run tests
+        working-directory: tests
+        run: deno run -A src/main.ts --no-build

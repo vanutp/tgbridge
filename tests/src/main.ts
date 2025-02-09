@@ -141,8 +141,11 @@ async function main() {
     }
   }
 
+  const totalTests = servers.length * TESTS.length;
   console.log();
-  console.log(`Total ${totalPassed}/${servers.length * TESTS.length} tests passed`);
+  console.log(`Total ${totalPassed}/${totalTests} tests passed`);
+
+  Deno.exit(totalPassed == totalTests ? 0 : 1);
 }
 
 await main();
