@@ -179,8 +179,10 @@ abstract class TelegramBridge {
         if (!config.events.enableDeathMessages) {
             return@wrapMinecraftHandler
         }
-        val component = e.text as TranslatableComponent
-        sendMessage(lang.telegram.playerDied.formatLang("deathMessage" to component.asString().escapeHTML()))
+        val telegramText = MinecraftToTelegramConverter.convert(
+            lang.telegram.playerDied.formatMiniMessage(listOf(), listOf("death_message" to e.text))
+        )
+        sendMessage(telegramText.text, telegramText.entities)
         lastMessage = null
     }
 

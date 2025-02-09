@@ -1,10 +1,11 @@
-version: 2
+# Translations to other languages can be downloaded from https://github.com/vanutp/tgbridge
 telegram:
   serverStarted: "✅ <b>Сервер запущен!</b>"
   serverStopped: "❌ <b>Сервер остановлен!</b>"
   playerJoined: "🥳 <b>{username} зашёл на сервер</b>"
   playerLeft: "😕 <b>{username} покинул сервер</b>"
-  playerDied: "☠️ <b>{deathMessage}</b>"
+  # This option uses MiniMessage formatting (see below for details)
+  playerDied: "☠️ <b><death_message></b>"
   # This option uses MiniMessage formatting (see below for details)
   chatMessage: "<b>[{username}]</b>"
   advancements:
@@ -41,3 +42,5 @@ minecraft:
     codeFormatting: "<gray><hover:show_text:'<green>Нажми чтобы скопировать'><click:copy_to_clipboard:'{text_plain}'><insert:'{text_plain}'><text>"
     quoteFormatting: "<italic><text>"
     spoilerFormatting: "<obfuscated><hover:show_text:'<text>'><text_plain>"
+# Don't change the version manually
+version: 3

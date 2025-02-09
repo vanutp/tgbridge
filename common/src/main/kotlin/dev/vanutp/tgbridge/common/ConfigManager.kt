@@ -71,7 +71,15 @@ object ConfigManager {
                     )
                 )
             )
-        } else if (lang.version != 2) {
+        } else if (lang.version == 2) {
+            lang = lang.copy(
+                version = 3,
+                telegram = lang.telegram.copy(
+                    playerDied = lang.telegram.playerDied
+                        .replace("{deathMessage}", "<death_message>")
+                ),
+            )
+        } else if (lang.version != 3) {
             throw Exception("Unsupported lang version ${lang.version}")
         }
     }

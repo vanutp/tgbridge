@@ -17,7 +17,8 @@ data class LangTelegram(
 
     val playerJoined: String = "🥳 <b>{username} joined the game</b>",
     val playerLeft: String = "😕 <b>{username} left the game</b>",
-    val playerDied: String = "☠️ <b>{deathMessage}</b>",
+    @YamlComment("This option uses MiniMessage formatting (see below for details)")
+    val playerDied: String = "☠️ <b><death_message></b>",
 
     @YamlComment("This option uses MiniMessage formatting (see below for details)")
     val chatMessage: String = "<b>[<username>]</b>",
@@ -77,7 +78,6 @@ data class LangMinecraft(
 @Serializable
 data class Lang(
     @YamlComment("Translations to other languages can be downloaded from https://github.com/vanutp/tgbridge")
-    val version: Int = 1,
     val telegram: LangTelegram = LangTelegram(),
     @YamlComment(
         "This section uses MiniMessage formatting (in non-strict mode).",
@@ -85,4 +85,6 @@ data class Lang(
         "Additionally, {variable} syntax can be used instead of <variable> for some plain-text placeholders."
     )
     val minecraft: LangMinecraft = LangMinecraft(),
+    @YamlComment("Don't change the version manually")
+    val version: Int = 1,
 )
