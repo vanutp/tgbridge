@@ -1,9 +1,7 @@
 package dev.vanutp.tgbridge.paper
 
 import dev.vanutp.tgbridge.common.TelegramBridge
-import dev.vanutp.tgbridge.paper.compat.AbstractCompat
-import dev.vanutp.tgbridge.paper.compat.EssentialsVanishCompat
-import dev.vanutp.tgbridge.paper.compat.SuperVanishCompat
+import dev.vanutp.tgbridge.paper.compat.*
 
 class PaperTelegramBridge(private val plugin: PaperBootstrap) : TelegramBridge() {
     override val logger = PaperLogger(plugin)
@@ -12,18 +10,28 @@ class PaperTelegramBridge(private val plugin: PaperBootstrap) : TelegramBridge()
 
     lateinit var integrations: List<AbstractCompat> private set
 
-    override fun platformInit() {
-        PaperConfigManager.init(platform.configDir)
-        eventManager.register()
-
+    private fun asyncInit() {
+        // Running in a scheduled task to wait for all the plugins
+        // to load to reliably test if a plugin is enabled
         integrations = listOf(
             EssentialsVanishCompat(plugin),
             SuperVanishCompat(plugin),
+            ChattyV2Compat(plugin),
+            ChattyV3Compat(plugin),
+            UnsupportedChatPluginCompat(plugin),
         ).filter {
-            plugin.server.pluginManager.getPlugin(it.pluginId)?.isEnabled == true
+            it.shouldEnable()
         }
         for (integration in integrations) {
+            logger.info("Using ${integration::class.simpleName}")
             integration.enable()
         }
+
+        eventManager.register()
+    }
+
+    override fun platformInit() {
+        PaperConfigManager.init(platform.configDir)
+        plugin.server.scheduler.scheduleSyncDelayedTask(this.plugin, this::asyncInit)
     }
 }

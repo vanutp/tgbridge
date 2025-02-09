@@ -29,6 +29,14 @@ repositories {
             includeGroup("net.essentialsx")
         }
     }
+    maven {
+        name = "scarsz"
+        url = uri("https://nexus.scarsz.me/content/groups/public/")
+        content {
+            includeGroup("ru.brikster")
+            includeGroup("ru.mrbrikster")
+        }
+    }
 }
 
 dependencies {
@@ -39,6 +47,8 @@ dependencies {
 
     compileOnly("com.github.LeonMangler:SuperVanish:$superVanishVersion")
     compileOnly("net.essentialsx:EssentialsX:$essentialsXVersion")
+    compileOnly("ru.brikster:chatty-api:3.0.0-20240908.194144-1")
+    compileOnly("ru.mrbrikster:chatty-api:2.19.13")
 }
 
 

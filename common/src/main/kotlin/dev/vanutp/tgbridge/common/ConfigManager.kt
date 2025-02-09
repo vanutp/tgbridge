@@ -76,6 +76,19 @@ object ConfigManager {
         }
     }
 
+    private fun migrateConfig() {
+        if (config.version == 1) {
+            config = config.copy(
+                version = 2,
+                messages = config.messages.copy(
+                    requirePrefixInMinecraft = "",
+                ),
+            )
+        } else if (config.version != 2) {
+            throw Exception("Unsupported config version ${config.version}")
+        }
+    }
+
     fun reload() {
         if (configDir.notExists()) {
             configDir.createDirectory()
@@ -90,6 +103,7 @@ object ConfigManager {
             loadedConfig.general.chatId = -1000000000000 - loadedConfig.general.chatId
         }
         config = loadedConfig
+        migrateConfig()
         // write new keys & update docs
         configPath.writeText(yaml.encodeToString(config))
 

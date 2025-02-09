@@ -130,7 +130,9 @@ abstract class TelegramBridge {
     fun onChatMessage(e: TBPlayerEventData) = wrapMinecraftHandler {
         var telegramText = MinecraftToTelegramConverter.convert(e.text)
         val bluemapLink = telegramText.text.asBluemapLinkOrNone()
-        val prefix = config.messages.requirePrefixInMinecraft ?: ""
+        val prefix = config.messages.incompatiblePluginChatPrefix
+            ?: config.messages.requirePrefixInMinecraft
+            ?: ""
         if (bluemapLink == null && !telegramText.text.startsWith(prefix)) {
             return@wrapMinecraftHandler
         }

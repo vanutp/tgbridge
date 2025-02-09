@@ -2,14 +2,13 @@ package dev.vanutp.tgbridge.paper
 
 import dev.vanutp.tgbridge.common.models.TBCommandContext
 import dev.vanutp.tgbridge.common.models.TBPlayerEventData
+import dev.vanutp.tgbridge.paper.compat.IChatCompat
 import io.papermc.paper.event.player.AsyncChatEvent
 import net.kyori.adventure.text.Component
-import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.PlayerDeathEvent
-import org.bukkit.event.player.AsyncPlayerChatEvent
 import org.bukkit.event.player.PlayerAdvancementDoneEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
@@ -23,34 +22,22 @@ class EventManager(private val plugin: PaperBootstrap) : Listener {
 
     private fun registerPaperChatListener() {
         plugin.server.pluginManager.registerEvents(object : Listener {
-            @EventHandler(priority = EventPriority.LOWEST)
+            @EventHandler(priority = EventPriority.MONITOR)
             fun onMessage(e: AsyncChatEvent) {
+                if (e.isCancelled) {
+                    return
+                }
                 plugin.tgbridge.onChatMessage(TBPlayerEventData(getPlayerName(e.player), e.message()))
             }
         }, plugin)
     }
 
-    private fun registerLegacyChatListener() {
-        plugin.logger.info("Using legacy chat event")
-        plugin.server.pluginManager.registerEvents(object : Listener {
-            @EventHandler(priority = EventPriority.LOWEST)
-            fun onMessage(e: AsyncPlayerChatEvent) {
-                plugin.tgbridge.onChatMessage(TBPlayerEventData(getPlayerName(e.player), Component.text(e.message)))
-            }
-        }, plugin)
-    }
-
-    private fun shouldUseLegacyChatListener(): Boolean {
-        return PaperConfigManager.config.compat.useLegacyChatListener
-            ?: listOf("Chatty", "CMI").any { Bukkit.getPluginManager().isPluginEnabled(it) }
-    }
-
     private fun registerChatMessageListener() {
-        if (shouldUseLegacyChatListener()) {
-            registerLegacyChatListener()
-        } else {
-            registerPaperChatListener()
+        if (plugin.tgbridge.integrations.any { it is IChatCompat }) {
+            plugin.logger.info("Not using chat listener because a chat plugin integration is active")
+            return
         }
+        registerPaperChatListener()
     }
 
     @EventHandler(priority = EventPriority.MONITOR)

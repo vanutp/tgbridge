@@ -39,11 +39,28 @@ data class GameMessagesConfig(
     )
     val bluemapUrl: String? = null,
     @YamlComment(
+        "Deprecated, install a compatible chat plugin or use incompatiblePluginPrefix",
         "If this value is set, messages without specified prefix won't be forwarded to Telegram.",
+        "Only set this if you don't have a chat plugin installed",
         "Example: \"!\" (quotes are required)",
         "Default value: \"\" (disabled)",
     )
     val requirePrefixInMinecraft: String? = "",
+    @YamlComment(
+        "Use this if you have an incompatible plugin, such as CMI or AdvancedChat installed.",
+        "Will register a legacy chat listener with LOWEST priority",
+        "and only forward messages that start with the specified string.",
+        "Currently this only has an effect on Paper. See the wiki for more information.",
+        "Example: \"!\" (quotes are required)",
+        "Default value: null (disabled)",
+    )
+    val incompatiblePluginChatPrefix: String? = null,
+    @YamlComment(
+        "Specify the chat name to forward messages from.",
+        "Only has an effect when a chat plugin with support for named chats, such as Chatty, is installed.",
+        "Default value: global"
+    )
+    val globalChatName: String = "global",
     @YamlComment(
         "Set to true to keep the prefix specified in the above setting in the message"
     )
@@ -98,12 +115,15 @@ data class AdvancedConfig(
 data class Config(
     @YamlComment(
         "It's enough to set botToken and chatId for the plugin to work.",
-        "When your group has topics enabled, you should also set topicId."
+        "When your group has topics enabled, you should also set topicId.",
+        "See https://tgbridge.vanutp.dev for more information."
     )
     val general: GeneralConfig = GeneralConfig(),
     val messages: GameMessagesConfig = GameMessagesConfig(),
     val events: GameEventsConfig = GameEventsConfig(),
     val advanced: AdvancedConfig = AdvancedConfig(),
+    @YamlComment("Don't change the version manually")
+    val version: Int = 1,
 ) {
     fun hasDefaultValues() =
         general.botToken == Config().general.botToken || general.chatId == Config().general.chatId
