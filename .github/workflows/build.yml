@@ -1,0 +1,30 @@
+name: Build
+
+on:
+  push: {}
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: gradle
+          cache-dependency-path: |
+            **/*.gradle*
+            **/gradle.properties
+            **/gradle-wrapper.properties
+            gradle/*.versions.toml
+            **/versions.properties
+
+      - name: Run build
+        run: ./gradlew build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tgbridge
+          path: build/release/*.jar
