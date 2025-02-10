@@ -22,7 +22,6 @@ interface TestMatrixProject {
   versions: string[];
 }
 
-// TODO: add 1.21.3
 export const TEST_MATRIX: TestMatrixProject[] = [
   {
     project: 'fabric',
