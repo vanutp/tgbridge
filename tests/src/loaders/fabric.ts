@@ -60,6 +60,7 @@ export class FabricServer extends Server {
 
   protected override getDependencies() {
     const FABRIC_API_MAP = {
+      '1.21.4': 'https://cdn.modrinth.com/data/P7dR8mSH/versions/UnrycCWP/fabric-api-0.115.1%2B1.21.4.jar',
       '1.21.3': 'https://cdn.modrinth.com/data/P7dR8mSH/versions/FjU3tsgY/fabric-api-0.107.0%2B1.21.3.jar',
       '1.21.1': 'https://cdn.modrinth.com/data/P7dR8mSH/versions/thGkUOxt/fabric-api-0.107.0%2B1.21.1.jar',
       '1.20.6': 'https://cdn.modrinth.com/data/P7dR8mSH/versions/ocg4hG3t/fabric-api-0.100.8%2B1.20.6.jar',
@@ -73,7 +74,7 @@ export class FabricServer extends Server {
       throw new Error(`Unsupported fabric version ${this.version}`)
     }
     return [
-      'https://cdn.modrinth.com/data/Ha28R6CL/versions/B0fZidZi/fabric-language-kotlin-1.12.3%2Bkotlin.2.0.21.jar',
+      'https://cdn.modrinth.com/data/Ha28R6CL/versions/476dzMG5/fabric-language-kotlin-1.13.1%2Bkotlin.2.1.10.jar',
       FABRIC_API_MAP[this.version as keyof typeof FABRIC_API_MAP],
     ]
   }

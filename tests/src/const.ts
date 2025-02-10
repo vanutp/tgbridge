@@ -27,7 +27,7 @@ export const TEST_MATRIX: TestMatrixProject[] = [
   {
     project: 'fabric',
     server: ServerType.fabric,
-    versions: ['1.19.2', '1.19.4', '1.20.1', '1.20.6', '1.21.1'],
+    versions: ['1.19.2', '1.19.4', '1.20.1', '1.21.1', '1.21.4'],
   },
   {
     project: 'forge-1.19.2',
@@ -42,11 +42,11 @@ export const TEST_MATRIX: TestMatrixProject[] = [
   {
     project: 'neoforge-1.21',
     server: ServerType.neoforge,
-    versions: ['1.21.1'],
+    versions: ['1.21.1', '1.21.4'],
   },
   {
     project: 'paper',
     server: ServerType.paper,
-    versions: ['1.19.2', '1.21.1'],
+    versions: ['1.19.2', '1.21.4'],
   },
 ];

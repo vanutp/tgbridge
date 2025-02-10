@@ -54,7 +54,7 @@ jobs:
             !tests/run/*/crash-reports/**
             !tests/run/*/logs/**
             !tests/run/**.log
-          key: tests-key
+          key: tests-${{ hashFiles('tests/src/**') }}
 
       - name: Run tests
         working-directory: tests

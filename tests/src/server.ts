@@ -120,12 +120,19 @@ simulation-distance=2
       await this._install();
       await Deno.writeTextFile(this.installedFile, '');
     }
+
+    const depFilenames: string[] = [];
     for (const depUrl of this.getDependencies()) {
       const depFilename = basename(depUrl);
+      depFilenames.push(decodeURIComponent(depFilename));
       const depPath = new URL(depFilename, this.modsDir);
-      // TODO: remove old jars
       if (!(await exists(depPath))) {
         await downloadFile(depUrl, depPath);
+      }
+    }
+    for await (const entry of Deno.readDir(this.modsDir)) {
+      if (entry.isFile && !depFilenames.includes(entry.name)) {
+        await Deno.remove(new URL(entry.name, this.modsDir));
       }
     }
 

@@ -1,46 +1,52 @@
 {
   "version": "4",
   "specifiers": {
-    "jsr:@libs/xml@6": "6.0.0",
-    "jsr:@std/async@^1.0.7": "1.0.7",
-    "jsr:@std/fs@^1.0.5": "1.0.5",
-    "jsr:@std/path@^1.0.7": "1.0.7",
-    "jsr:@std/regexp@1": "1.0.0",
-    "npm:mineflayer@^4.23.0": "4.23.0_minecraft-data@3.78.0_prismarine-registry@1.10.0",
-    "npm:nanoid@^5.0.8": "5.0.8",
-    "npm:prismarine-chat@^1.10.1": "1.10.1",
+    "jsr:@libs/xml@^6.0.4": "6.0.4",
+    "jsr:@std/async@^1.0.10": "1.0.10",
+    "jsr:@std/fs@^1.0.11": "1.0.11",
+    "jsr:@std/path@^1.0.8": "1.0.8",
+    "jsr:@std/regexp@^1.0.1": "1.0.1",
+    "npm:mineflayer@^4.26.0": "4.26.0_minecraft-data@3.83.1_prismarine-registry@1.11.0",
+    "npm:nanoid@^5.0.9": "5.0.9",
+    "npm:prismarine-chat@^1.11.0": "1.11.0",
     "npm:rcon-client@^4.2.5": "4.2.5"
   },
   "jsr": {
-    "@libs/xml@6.0.0": {
-      "integrity": "d629f461bc10598de9ad55470f3b7c9bf1707cc2b90be9603a129259b8e5d0a5"
+    "@libs/xml@6.0.4": {
+      "integrity": "c896f17016dbf5f2d62496e0bd6cd7db145c05987d0e45d4dd2c87785a60f528"
     },
-    "@std/async@1.0.7": {
-      "integrity": "f4fadc0124432e37cba11e8b3880164661a664de00a65118d976848f32f96290"
+    "@std/async@1.0.10": {
+      "integrity": "2ff1b1c7d33d1416159989b0f69e59ec7ee8cb58510df01e454def2108b3dbec"
     },
-    "@std/fs@1.0.5": {
-      "integrity": "41806ad6823d0b5f275f9849a2640d87e4ef67c51ee1b8fb02426f55e02fd44e",
+    "@std/fs@1.0.11": {
+      "integrity": "ba674672693340c5ebdd018b4fe1af46cb08741f42b4c538154e97d217b55bdd",
       "dependencies": [
         "jsr:@std/path"
       ]
     },
-    "@std/path@1.0.7": {
-      "integrity": "76a689e07f0e15dcc6002ec39d0866797e7156629212b28f27179b8a5c3b33a1"
+    "@std/path@1.0.8": {
+      "integrity": "548fa456bb6a04d3c1a1e7477986b6cffbce95102d0bb447c67c4ee70e0364be"
     },
-    "@std/regexp@1.0.0": {
-      "integrity": "158628d134c49a0858afe05017c4666f5f73d3a56602c346549ca42f3fab244a"
+    "@std/regexp@1.0.1": {
+      "integrity": "5179d823465085c5480dafb44438466e83c424fadc61ba31f744050ecc0f596d"
     }
   },
   "npm": {
-    "@azure/msal-common@14.15.0": {
-      "integrity": "sha512-ImAQHxmpMneJ/4S8BRFhjt1MZ3bppmpRPYYNyzeQPeFN288YKbb8TmmISQEbtfkQ1BPASvYZU5doIZOPBAqENQ=="
+    "@azure/msal-common@14.16.0": {
+      "integrity": "sha512-1KOZj9IpcDSwpNiQNjt0jDYZpQvNZay7QAEi/5DLubay40iGYtLzya/jbjRPLyOTZhEKyL1MzPuw2HqBCjceYA=="
     },
-    "@azure/msal-node@2.15.0": {
-      "integrity": "sha512-gVPW8YLz92ZeCibQH2QUw96odJoiM3k/ZPH3f2HxptozmH6+OnyyvKXo/Egg39HAM230akarQKHf0W74UHlh0Q==",
+    "@azure/msal-node@2.16.2": {
+      "integrity": "sha512-An7l1hEr0w1HMMh1LU+rtDtqL7/jw74ORlc9Wnh06v7TU/xpG39/Zdr1ZJu3QpjUfKJ+E0/OXMW8DRSWTlh7qQ==",
       "dependencies": [
         "@azure/msal-common",
         "jsonwebtoken",
         "uuid"
+      ]
+    },
+    "@types/node-rsa@1.1.4": {
+      "integrity": "sha512-dB0ECel6JpMnq5ULvpUTunx3yNm8e/dIkv8Zu9p2c8me70xIRUUG3q+qXRwcSf9rN3oqamv4116iHy90dJGRpA==",
+      "dependencies": [
+        "@types/node"
       ]
     },
     "@types/node@22.5.4": {
@@ -49,8 +55,8 @@
         "undici-types"
       ]
     },
-    "@types/readable-stream@4.0.16": {
-      "integrity": "sha512-Fvp+8OcU8PyV90KTk5tR/rI8OjD3MP5NUow5rjOsZo+9zxf4p4soJtK9j4V6yeG30TH6rZxqRaP4JLa8lNNTNQ==",
+    "@types/readable-stream@4.0.18": {
+      "integrity": "sha512-21jK/1j+Wg+7jVw1xnSwy/2Q1VgVjWuFssbYGTREPUBeZ+rqVFl2udq0IkxzPC0ZhOzVceUbyIACFZKLqKEBlA==",
       "dependencies": [
         "@types/node",
         "safe-buffer@5.1.2"
@@ -112,8 +118,8 @@
     "commander@2.20.3": {
       "integrity": "sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ=="
     },
-    "debug@4.3.7": {
-      "integrity": "sha512-Er2nc/H7RrMXZBFCEim6TCmMk02Z8vLC2Rbi1KEBggpo0fS6l0S1nnapwmIi3yW/+GOJap1Krg4w0Hg80oCqgQ==",
+    "debug@4.4.0": {
+      "integrity": "sha512-6WTZ/IxCY/T6BALoZHaE4ctp9xm+Z5kY/pzYaCHRFeyVhojxlrm+46y68HA6hr0TcwEssoxNiDEUJQjfPZ/RYA==",
       "dependencies": [
         "ms"
       ]
@@ -147,9 +153,6 @@
     },
     "ieee754@1.2.1": {
       "integrity": "sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA=="
-    },
-    "jose@4.15.9": {
-      "integrity": "sha512-1vUQX+IdDMVPj4k8kOxgUqlcK518yluMuGZwqlr44FS1ppZB/5GWh4rZG89erpOBOJjU/OBsnCVFfapsRz6nEA=="
     },
     "json-schema-traverse@0.4.1": {
       "integrity": "sha512-xbbCH5dCYU5T8LcEhhuh7HJ88HXuW3qsI3Y0zOZFKfZEHcpWiHU/Jxzk629Brsab/mMiHQti9wMP+845RPe3Vg=="
@@ -217,15 +220,16 @@
     "macaddress@0.5.3": {
       "integrity": "sha512-vGBKTA+jwM4KgjGZ+S/8/Mkj9rWzePyGY6jManXPGhiWu63RYwW8dKPyk5koP+8qNVhPhHgFa1y/MJ4wrjsNrg=="
     },
-    "minecraft-data@3.78.0": {
-      "integrity": "sha512-Ssks8QD31lsoxqa7LySTqeP9romsfAbfsSGiUHiGMeqfxRi/PtOxGLyKD1BXB8V/tXLztFcbQYqzIhprDkPguw=="
+    "minecraft-data@3.83.1": {
+      "integrity": "sha512-5K26za9k5WV1OnfkGexA77lBhfGZeFw3rT3NM7/rbFXRZC65prCx7Tk2BQvC9UfzgxxvmxHfxM5y8G1U+Oxgfg=="
     },
     "minecraft-folder-path@1.2.0": {
       "integrity": "sha512-qaUSbKWoOsH9brn0JQuBhxNAzTDMwrOXorwuRxdJKKKDYvZhtml+6GVCUrY5HRiEsieBEjCUnhVpDuQiKsiFaw=="
     },
-    "minecraft-protocol@1.50.0": {
-      "integrity": "sha512-GiZy8g4YG0iZEKifX6ulCyhVnTDGZ1gH0ouUdxjo6xkKwp4KOf+ptbBgZ8G5+WHCumrI91+v/JYU07uCvKdi0w==",
+    "minecraft-protocol@1.54.0": {
+      "integrity": "sha512-v8pWRVhD9kyd/X52j/XESxrNxkmz1OHzSXAJkPLOQUUTENEqisJhu1c3abS7ZI+MAXHAEA/vaCb/Eh6XFxw0lA==",
       "dependencies": [
+        "@types/node-rsa",
         "@types/readable-stream",
         "aes-js",
         "buffer-equal",
@@ -238,7 +242,7 @@
         "node-fetch",
         "node-rsa",
         "prismarine-auth",
-        "prismarine-chat",
+        "prismarine-chat@1.11.0",
         "prismarine-nbt",
         "prismarine-realms",
         "protodef",
@@ -247,21 +251,21 @@
         "yggdrasil"
       ]
     },
-    "mineflayer@4.23.0_minecraft-data@3.78.0_prismarine-registry@1.10.0": {
-      "integrity": "sha512-wSchhS59hK+oPs8tFg847H82YEvxU7zYKdDKj4e5FVo3CxJ74eXJVT+JcFwEvoqFO7kXiQlhJITxEvO13GOSKA==",
+    "mineflayer@4.26.0_minecraft-data@3.83.1_prismarine-registry@1.11.0": {
+      "integrity": "sha512-1mCuyqIJUieq/ul7s7UUvcUvycYEMN7GFL5iCUB8DraDsJhj1waP74WkaMUMOKmNukv72T8+6S9O0Jaxer1QHw==",
       "dependencies": [
         "minecraft-data",
         "minecraft-protocol",
-        "prismarine-biome",
-        "prismarine-block",
-        "prismarine-chat",
+        "prismarine-biome@1.3.0_minecraft-data@3.83.1_prismarine-registry@1.11.0",
+        "prismarine-block@1.21.0_minecraft-data@3.83.1_prismarine-registry@1.11.0__minecraft-data@3.83.1",
+        "prismarine-chat@1.11.0",
         "prismarine-chunk",
         "prismarine-entity",
-        "prismarine-item",
+        "prismarine-item@1.16.0",
         "prismarine-nbt",
         "prismarine-physics",
         "prismarine-recipe",
-        "prismarine-registry",
+        "prismarine-registry@1.11.0",
         "prismarine-windows",
         "prismarine-world",
         "protodef",
@@ -281,8 +285,8 @@
     "ms@2.1.3": {
       "integrity": "sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA=="
     },
-    "nanoid@5.0.8": {
-      "integrity": "sha512-TcJPw+9RV9dibz1hHUzlLVy8N4X9TnwirAjrU08Juo6BNKggzVfP2ZJ/3ZUSq15Xl5i85i+Z89XBO90pB2PghQ=="
+    "nanoid@5.0.9": {
+      "integrity": "sha512-Aooyr6MXU6HpvvWXKoVoXwKMs/KyVakWwg7xQfv5/S/RIgJMy0Ifa45H9qqYy7pTCszrHzP21Uk4PZq2HpEM8Q=="
     },
     "nearley@2.20.1": {
       "integrity": "sha512-+Mc8UaAebFzgV+KpI5n7DasuuQCHA89dmwm7JXw3TV43ukfNQ9DnBH3Mdb2g/I4Fdxc26pwimBWvjIw0UAILSQ==",
@@ -305,81 +309,130 @@
         "asn1"
       ]
     },
-    "prismarine-auth@2.5.0": {
-      "integrity": "sha512-CRv/pL6d/T+4cdjWS223PXG+ygHbz40Kef04L59SLMT+axNdAQro23eZZhgiIIu6u7rlvJcZYlIY93gFNtKxXA==",
+    "prismarine-auth@2.6.0": {
+      "integrity": "sha512-9XXYtr6rnJ5EZ/pf63HJvvYPh3lSPe/AIZubwj2BXBQBEidoBR3P5MIm/1nukLwnF1xHiNpF5Y20gcHCdigMDg==",
       "dependencies": [
         "@azure/msal-node",
         "@xboxreplay/xboxlive-auth",
         "debug",
-        "jose",
-        "node-fetch",
         "smart-buffer",
         "uuid-1345"
       ]
     },
-    "prismarine-biome@1.3.0_minecraft-data@3.78.0_prismarine-registry@1.10.0": {
+    "prismarine-biome@1.3.0": {
+      "integrity": "sha512-GY6nZxq93mTErT7jD7jt8YS1aPrOakbJHh39seYsJFXvueIOdHAmW16kYQVrTVMW5MlWLQVxV/EquRwOgr4MnQ=="
+    },
+    "prismarine-biome@1.3.0_minecraft-data@3.83.1_prismarine-registry@1.11.0": {
       "integrity": "sha512-GY6nZxq93mTErT7jD7jt8YS1aPrOakbJHh39seYsJFXvueIOdHAmW16kYQVrTVMW5MlWLQVxV/EquRwOgr4MnQ==",
       "dependencies": [
         "minecraft-data",
-        "prismarine-registry"
+        "prismarine-registry@1.11.0_minecraft-data@3.83.1"
       ]
     },
-    "prismarine-block@1.19.0_minecraft-data@3.78.0_prismarine-registry@1.10.0": {
-      "integrity": "sha512-2tMDqRBrIxOZc2X3HNsGb1LqqA/oyTmKSucktS52aMyxclNdYMWgUcHER0bwrYwbJ00xdQDB6EHByO3QWp1PhQ==",
+    "prismarine-biome@1.3.0_minecraft-data@3.83.1_prismarine-registry@1.11.0__minecraft-data@3.83.1": {
+      "integrity": "sha512-GY6nZxq93mTErT7jD7jt8YS1aPrOakbJHh39seYsJFXvueIOdHAmW16kYQVrTVMW5MlWLQVxV/EquRwOgr4MnQ==",
       "dependencies": [
         "minecraft-data",
-        "prismarine-biome",
-        "prismarine-chat",
-        "prismarine-item",
-        "prismarine-nbt",
-        "prismarine-registry"
+        "prismarine-registry@1.11.0_minecraft-data@3.83.1"
       ]
     },
-    "prismarine-chat@1.10.1": {
-      "integrity": "sha512-XukYcuueuhDxzEXG7r8BZyt6jOObrPPB4JESCgb+/XenB9nExoSHF8eTQWWj8faKPLqm1dRQaYwFJlNBlJZJUw==",
+    "prismarine-block@1.21.0_minecraft-data@3.83.1_prismarine-registry@1.11.0": {
+      "integrity": "sha512-Um7zRIMHKbtpHYq+bSibc+LgFPqhHCnJgy5DeUYGG1VPLptrHjgAwvzb9bztzpzz4auziZIX+325CCWSDjIv+Q==",
+      "dependencies": [
+        "minecraft-data",
+        "prismarine-biome@1.3.0",
+        "prismarine-chat@1.11.0_minecraft-data@3.83.1",
+        "prismarine-item@1.16.0_minecraft-data@3.83.1",
+        "prismarine-nbt",
+        "prismarine-registry@1.11.0"
+      ]
+    },
+    "prismarine-block@1.21.0_minecraft-data@3.83.1_prismarine-registry@1.11.0__minecraft-data@3.83.1": {
+      "integrity": "sha512-Um7zRIMHKbtpHYq+bSibc+LgFPqhHCnJgy5DeUYGG1VPLptrHjgAwvzb9bztzpzz4auziZIX+325CCWSDjIv+Q==",
+      "dependencies": [
+        "minecraft-data",
+        "prismarine-biome@1.3.0_minecraft-data@3.83.1_prismarine-registry@1.11.0__minecraft-data@3.83.1",
+        "prismarine-chat@1.11.0_minecraft-data@3.83.1_prismarine-registry@1.11.0__minecraft-data@3.83.1",
+        "prismarine-item@1.16.0_minecraft-data@3.83.1_prismarine-registry@1.11.0__minecraft-data@3.83.1",
+        "prismarine-nbt",
+        "prismarine-registry@1.11.0_minecraft-data@3.83.1"
+      ]
+    },
+    "prismarine-chat@1.11.0": {
+      "integrity": "sha512-VJT/MWYB3qoiznUhrgvSQh76YFpzpCZpY85kJKxHLbd3UVoM0wsfs43Eg8dOltiZG92wc5/DTMLlT07TEeoa9w==",
       "dependencies": [
         "mojangson",
         "prismarine-nbt",
-        "prismarine-registry"
+        "prismarine-registry@1.11.0"
       ]
     },
-    "prismarine-chunk@1.36.0_minecraft-data@3.78.0_prismarine-registry@1.10.0": {
-      "integrity": "sha512-RqXtCBz7n4iNG44nkwjqvGebbQIWZYjyCp3ORi3nBeLJ6AnmOH+qauaHkqH8hcyUFS6ObQeFx/xYYMwgMSoCKw==",
+    "prismarine-chat@1.11.0_minecraft-data@3.83.1": {
+      "integrity": "sha512-VJT/MWYB3qoiznUhrgvSQh76YFpzpCZpY85kJKxHLbd3UVoM0wsfs43Eg8dOltiZG92wc5/DTMLlT07TEeoa9w==",
       "dependencies": [
-        "prismarine-biome",
-        "prismarine-block",
+        "mojangson",
         "prismarine-nbt",
-        "prismarine-registry",
+        "prismarine-registry@1.11.0"
+      ]
+    },
+    "prismarine-chat@1.11.0_minecraft-data@3.83.1_prismarine-registry@1.11.0__minecraft-data@3.83.1": {
+      "integrity": "sha512-VJT/MWYB3qoiznUhrgvSQh76YFpzpCZpY85kJKxHLbd3UVoM0wsfs43Eg8dOltiZG92wc5/DTMLlT07TEeoa9w==",
+      "dependencies": [
+        "mojangson",
+        "prismarine-nbt",
+        "prismarine-registry@1.11.0_minecraft-data@3.83.1"
+      ]
+    },
+    "prismarine-chunk@1.38.1_minecraft-data@3.83.1_prismarine-registry@1.11.0": {
+      "integrity": "sha512-VL7BpYYzmZSKveiKNfwp/a50pPqEVy4rMdpOL6niyUsV/Nk4hRcqd2uo7GyKHlJci/mK3g7GOR8jsVX+hU07Aw==",
+      "dependencies": [
+        "prismarine-biome@1.3.0_minecraft-data@3.83.1_prismarine-registry@1.11.0",
+        "prismarine-block@1.21.0_minecraft-data@3.83.1_prismarine-registry@1.11.0__minecraft-data@3.83.1",
+        "prismarine-nbt",
+        "prismarine-registry@1.11.0",
         "smart-buffer",
         "uint4",
         "vec3",
         "xxhash-wasm"
       ]
     },
-    "prismarine-entity@2.4.0": {
-      "integrity": "sha512-DBwjmoCX1IYAhN99KwYkk2rMArn65JHTzuuGXchr4GLWQs7UN4Pf9tELqBwNOu4r57x3RaW0+9+0sI3FvJQWzQ==",
+    "prismarine-entity@2.5.0": {
+      "integrity": "sha512-nRPCawUwf9r3iKqi4I7mZRlir1Ix+DffWYdWq6p/KNnmiXve+xHE5zv8XCdhZlUmOshugHv5ONl9o6ORAkCNIA==",
       "dependencies": [
-        "prismarine-chat",
-        "prismarine-item",
-        "prismarine-registry",
+        "prismarine-chat@1.11.0",
+        "prismarine-item@1.16.0",
+        "prismarine-registry@1.11.0",
         "vec3"
       ]
     },
-    "prismarine-item@1.15.0": {
-      "integrity": "sha512-DysyiCzaI8S7PpRLFylAZnQo2CppXiBbaUp+8rhK+EzvzmMdS+D1/oETQm9ysB5Jw9eCer6iWGMgzZXxJE5+/w==",
+    "prismarine-item@1.16.0": {
+      "integrity": "sha512-88Tz+/6HquYIsDuseae5G3IbqLeMews2L+ba2gX+p6K6soU9nuFhCfbwN56QuB7d/jZFcWrCYAPE5+UhwWh67w==",
       "dependencies": [
         "prismarine-nbt",
-        "prismarine-registry"
+        "prismarine-registry@1.11.0"
       ]
     },
-    "prismarine-nbt@2.5.0": {
-      "integrity": "sha512-F0/8UAa9SDDnAGrBYqZc4nG8h2zj5cE2eAJU5xlDR/IsQQ3moVxkOjE3h3nMv6SbvZrvAcgX7waA/nd9LLHYdA==",
+    "prismarine-item@1.16.0_minecraft-data@3.83.1": {
+      "integrity": "sha512-88Tz+/6HquYIsDuseae5G3IbqLeMews2L+ba2gX+p6K6soU9nuFhCfbwN56QuB7d/jZFcWrCYAPE5+UhwWh67w==",
+      "dependencies": [
+        "prismarine-nbt",
+        "prismarine-registry@1.11.0"
+      ]
+    },
+    "prismarine-item@1.16.0_minecraft-data@3.83.1_prismarine-registry@1.11.0__minecraft-data@3.83.1": {
+      "integrity": "sha512-88Tz+/6HquYIsDuseae5G3IbqLeMews2L+ba2gX+p6K6soU9nuFhCfbwN56QuB7d/jZFcWrCYAPE5+UhwWh67w==",
+      "dependencies": [
+        "prismarine-nbt",
+        "prismarine-registry@1.11.0_minecraft-data@3.83.1"
+      ]
+    },
+    "prismarine-nbt@2.7.0": {
+      "integrity": "sha512-Du9OLQAcCj3y29YtewOJbbV4ARaSUEJiTguw0PPQbPBy83f+eCyDRkyBpnXTi/KPyEpgYCzsjGzElevLpFoYGQ==",
       "dependencies": [
         "protodef"
       ]
     },
-    "prismarine-physics@1.9.0": {
-      "integrity": "sha512-4qYF6mQ9fOyONaJIF18eZBzsXPq9RD30gxiXoqFjB7sk/rtLIb5ye72YxeYZA3Q9PyBhGH1ANdrHwJ+21WEedQ==",
+    "prismarine-physics@1.10.0": {
+      "integrity": "sha512-FE2xUSDhrdgjlJFtBPMTQt1FX3uG2YvKceRvoMmhcCni0MrS8365ZlbIcW06SB1sKIpoNQWanS5LuefynzwdXQ==",
       "dependencies": [
         "minecraft-data",
         "prismarine-nbt",
@@ -393,24 +446,33 @@
         "node-fetch"
       ]
     },
-    "prismarine-recipe@1.3.1_prismarine-registry@1.10.0": {
+    "prismarine-recipe@1.3.1_prismarine-registry@1.11.0": {
       "integrity": "sha512-xfa9E9ACoaDi+YzNQ+nk8kWSIqt5vSZOOCHIT+dTXscf/dng2HaJ/59uwe1D/jvOkAd2OvM6RRJM6fFe0q/LDA==",
       "dependencies": [
-        "prismarine-registry"
+        "prismarine-registry@1.11.0"
       ]
     },
-    "prismarine-registry@1.10.0": {
-      "integrity": "sha512-6TYQiZHtsJ87HsB2E0yamCFp77ZyyLT16OmW5iXB5V30yCPflhHvR5TR2IqISmmiRc2093BkHfiIhsOZaMatmQ==",
+    "prismarine-registry@1.11.0": {
+      "integrity": "sha512-uTvWE+bILxYv4i5MrrlxPQ0KYWINv1DJ3P2570GLC8uCdByDiDLBFfVyk4BrqOZBlDBft9CnaJMeOsC1Ly1iXw==",
       "dependencies": [
         "minecraft-data",
+        "prismarine-block@1.21.0_minecraft-data@3.83.1_prismarine-registry@1.11.0__minecraft-data@3.83.1",
+        "prismarine-nbt"
+      ]
+    },
+    "prismarine-registry@1.11.0_minecraft-data@3.83.1": {
+      "integrity": "sha512-uTvWE+bILxYv4i5MrrlxPQ0KYWINv1DJ3P2570GLC8uCdByDiDLBFfVyk4BrqOZBlDBft9CnaJMeOsC1Ly1iXw==",
+      "dependencies": [
+        "minecraft-data",
+        "prismarine-block@1.21.0_minecraft-data@3.83.1_prismarine-registry@1.11.0",
         "prismarine-nbt"
       ]
     },
     "prismarine-windows@2.9.0": {
       "integrity": "sha512-fm4kOLjGFPov7TEJRmXHoiPabxIQrG36r2mDjlNxfkcLfMHFb3/1ML6mp4iRQa7wL0GK4DIAyiBqCWoeWDxARg==",
       "dependencies": [
-        "prismarine-item",
-        "prismarine-registry",
+        "prismarine-item@1.16.0",
+        "prismarine-registry@1.11.0",
         "typed-emitter@2.1.0"
       ]
     },
@@ -423,14 +485,14 @@
     "process@0.11.10": {
       "integrity": "sha512-cdGef/drWFoydD1JsMzuFf8100nZl+GT+yacc2bEced5f9Rjk4z+WtFUTBu9PhOi9j/jfmBPu0mMEY4wIdAF8A=="
     },
-    "protodef-validator@1.3.1": {
-      "integrity": "sha512-lZ5FWKZYR9xOjpMw1+EfZRfCjzNRQWPq+Dk+jki47Sikl2EeWEPnTfnJERwnU/EwFq6us+0zqHHzSsmLeYX+Lg==",
+    "protodef-validator@1.4.0": {
+      "integrity": "sha512-2y2coBolqCEuk5Kc3QwO7ThR+/7TZiOit4FrpAgl+vFMvq8w76nDhh09z08e2NQOdrgPLsN2yzXsvRvtADgUZQ==",
       "dependencies": [
         "ajv"
       ]
     },
-    "protodef@1.17.0": {
-      "integrity": "sha512-mnpNPV3xwu63u3NwZuXM1RCp979vjHxUGHzVrb6dxbvof5Fx+b8Rs0G0c3xtEuFDreGAMWS7VrlNkDUDBMsFWQ==",
+    "protodef@1.18.0": {
+      "integrity": "sha512-jO64lkzkh0dYc0AVWCU/GzCKwqhFFIz1kfEz0NBf0RUuRNcmvgKbopabJdfZ6W8NvALdySUXgEhvKDZPhdBwrg==",
       "dependencies": [
         "lodash.get",
         "lodash.reduce",
@@ -457,8 +519,8 @@
         "typed-emitter@0.1.0"
       ]
     },
-    "readable-stream@4.5.2": {
-      "integrity": "sha512-yjavECdqeZ3GLXNgRXgeQEdz9fvDDkNKyHnbHRFtOr7/LcfgBcmct7t/ET+HaCTqfh06OzoAxrkN/IfjJBVe+g==",
+    "readable-stream@4.7.0": {
+      "integrity": "sha512-oIGGmcpTLwPga8Bn6/Z75SVaH1z5dUut2ibSyAMVhmUggWpmDn2dapB0n7f8nwaSiRtepAsfJyfXIO5DCVAODg==",
       "dependencies": [
         "abort-controller",
         "buffer",
@@ -482,8 +544,8 @@
     "safe-buffer@5.2.1": {
       "integrity": "sha512-rp3So07KcdmmKbGvgaNxQSJr7bGVSVk5S9Eq1F+ppbRo70+YeaDxkw5Dd8NPN+GD6bjnYm2VuPuCXmpuYvmCXQ=="
     },
-    "semver@7.6.3": {
-      "integrity": "sha512-oVekP1cKtI+CTDvHWYFUcMtsK/00wmAEfyqKfNdARm8u1wNVhSgaX7A8d4UuIlUI5e84iEwOhs7ZPYRmzU9U6A=="
+    "semver@7.7.1": {
+      "integrity": "sha512-hlq8tAfn0m/61p4BVRcPzIGr6LKiMwo4VM6dGi6pt4qcRkmNzTcWq6eCEjEh+qXjkMDvPlOFFSGwQjoEa6gyMA=="
     },
     "smart-buffer@4.2.0": {
       "integrity": "sha512-94hK0Hh8rPqQl2xXc3HsaBoOXKV20MToPkcXvwbISWLEs+64sBq5kFgn2kJDHb1Pry9yrP0dxrCI9RRci7RXKg=="
@@ -497,8 +559,8 @@
     "tr46@0.0.3": {
       "integrity": "sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw=="
     },
-    "tslib@2.8.0": {
-      "integrity": "sha512-jWVzBLplnCmoaTr13V9dYbiQ99wvZRd0vNWaDRg+aVYRcjDF3nDksxFDE/+fkXnKhpnUUkmx5pK/v8mCtLVqZA=="
+    "tslib@2.8.1": {
+      "integrity": "sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w=="
     },
     "typed-emitter@0.1.0": {
       "integrity": "sha512-Tfay0l6gJMP5rkil8CzGbLthukn+9BN/VXWcABVFPjOoelJ+koW8BuPZYk+h/L+lEeIp1fSzVRiWRPIjKVjPdg=="
@@ -559,14 +621,14 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@libs/xml@6",
-      "jsr:@std/async@^1.0.7",
-      "jsr:@std/fs@^1.0.5",
-      "jsr:@std/path@^1.0.7",
-      "jsr:@std/regexp@1",
-      "npm:mineflayer@^4.23.0",
-      "npm:nanoid@^5.0.8",
-      "npm:prismarine-chat@^1.10.1",
+      "jsr:@libs/xml@^6.0.4",
+      "jsr:@std/async@^1.0.10",
+      "jsr:@std/fs@^1.0.11",
+      "jsr:@std/path@^1.0.8",
+      "jsr:@std/regexp@^1.0.1",
+      "npm:mineflayer@^4.26.0",
+      "npm:nanoid@^5.0.9",
+      "npm:prismarine-chat@^1.11.0",
       "npm:rcon-client@^4.2.5"
     ]
   }

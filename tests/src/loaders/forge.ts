@@ -62,7 +62,7 @@ abstract class AnyForgeServer extends Server {
   protected override getDependencies() {
     if (this.version.split('.')[1] == '21' || this.version == '1.20.6') {
       return [
-        'https://cdn.modrinth.com/data/ordsPcFz/versions/5Vlx7W4o/kotlinforforge-5.6.0-all.jar',
+        'https://cdn.modrinth.com/data/ordsPcFz/versions/uZAwdzAR/kotlinforforge-5.7.0-all.jar',
       ];
     } else if (this.version.split('.')[1] == '20' || this.version == '1.19.4') {
       return [
