@@ -2,6 +2,7 @@ package dev.vanutp.tgbridge.paper
 
 import dev.vanutp.tgbridge.common.models.TBCommandContext
 import dev.vanutp.tgbridge.common.models.TBPlayerEventData
+import dev.vanutp.tgbridge.paper.compat.EssentialsVanishCompat
 import dev.vanutp.tgbridge.paper.compat.IChatCompat
 import io.papermc.paper.event.player.AsyncChatEvent
 import net.kyori.adventure.text.Component
@@ -16,6 +17,7 @@ import org.bukkit.event.player.PlayerQuitEvent
 class EventManager(private val plugin: PaperBootstrap) : Listener {
     fun register() {
         registerChatMessageListener()
+        registerJoinLeaveListener()
         registerCommandHandlers()
         plugin.server.pluginManager.registerEvents(this, plugin)
     }
@@ -58,23 +60,30 @@ class EventManager(private val plugin: PaperBootstrap) : Listener {
         plugin.tgbridge.onPlayerDeath(TBPlayerEventData(username, msg))
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
-    fun onPlayerJoin(e: PlayerJoinEvent) {
-        if (e.player.isVanished()) {
+    private fun registerJoinLeaveListener() {
+        if (plugin.tgbridge.integrations.any { it is EssentialsVanishCompat }) {
             return
         }
-        plugin.tgbridge.onPlayerJoin(
-            getPlayerName(e.player),
-            e.player.hasPlayedBefore(),
-        )
-    }
+        plugin.server.pluginManager.registerEvents(object : Listener {
+            @EventHandler(priority = EventPriority.MONITOR)
+            fun onPlayerJoin(e: PlayerJoinEvent) {
+                if (e.player.isVanished()) {
+                    return
+                }
+                plugin.tgbridge.onPlayerJoin(
+                    getPlayerName(e.player),
+                    e.player.hasPlayedBefore(),
+                )
+            }
 
-    @EventHandler(priority = EventPriority.MONITOR)
-    fun onPlayerQuit(e: PlayerQuitEvent) {
-        if (e.player.isVanished()) {
-            return
-        }
-        plugin.tgbridge.onPlayerLeave(getPlayerName(e.player))
+            @EventHandler(priority = EventPriority.MONITOR)
+            fun onPlayerQuit(e: PlayerQuitEvent) {
+                if (e.player.isVanished()) {
+                    return
+                }
+                plugin.tgbridge.onPlayerLeave(getPlayerName(e.player))
+            }
+        }, plugin)
     }
 
     private fun registerCommandHandlers() {
