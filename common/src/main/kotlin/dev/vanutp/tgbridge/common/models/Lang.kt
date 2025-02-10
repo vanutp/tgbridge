@@ -16,6 +16,7 @@ data class LangTelegram(
     val serverStopped: String = "❌ <b>Server stopped!</b>",
 
     val playerJoined: String = "🥳 <b>{username} joined the game</b>",
+    val playerJoinedFirstTime: String = "🥳 <b>{username} joined the game for the first time</b>",
     val playerLeft: String = "😕 <b>{username} left the game</b>",
     @YamlComment("This option uses MiniMessage formatting (see below for details)")
     val playerDied: String = "☠️ <b><death_message></b>",

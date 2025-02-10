@@ -186,7 +186,7 @@ abstract class TelegramBridge {
         lastMessage = null
     }
 
-    fun onPlayerJoin(username: String) = wrapMinecraftHandler {
+    fun onPlayerJoin(username: String, hasPlayedBefore: Boolean) = wrapMinecraftHandler {
         if (!config.events.enableJoinMessages) {
             return@wrapMinecraftHandler
         }
@@ -200,7 +200,12 @@ abstract class TelegramBridge {
         ) {
             deleteMessage(lm.id)
         } else {
-            sendMessage(lang.telegram.playerJoined.formatLang("username" to username))
+            val message = if (hasPlayedBefore) {
+                lang.telegram.playerJoined
+            } else {
+                lang.telegram.playerJoinedFirstTime
+            }
+            sendMessage(message.formatLang("username" to username))
         }
         lastMessage = null
     }

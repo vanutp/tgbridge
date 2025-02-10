@@ -3,6 +3,7 @@ telegram:
   serverStarted: "✅ <b>Сервер запущен!</b>"
   serverStopped: "❌ <b>Сервер остановлен!</b>"
   playerJoined: "🥳 <b>{username} зашёл на сервер</b>"
+  playerJoinedFirstTime: "🥳 <b>{username} в первый раз зашёл на сервер</b>"
   playerLeft: "😕 <b>{username} покинул сервер</b>"
   # This option uses MiniMessage formatting (see below for details)
   playerDied: "☠️ <b><death_message></b>"

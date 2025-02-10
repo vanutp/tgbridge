@@ -53,7 +53,15 @@ object EventManager {
 
     private fun registerPlayerJoinListener() {
         FORGE_BUS.addListener { e: PlayerEvent.PlayerLoggedInEvent ->
-            ForgeTelegramBridge.onPlayerJoin(getPlayerName(e.entity).string)
+            val hasPlayedBefore = e.entity.persistentData.run {
+                getBoolean("hasPlayedBefore").also {
+                    putBoolean("hasPlayedBefore", true)
+                }
+            }
+            ForgeTelegramBridge.onPlayerJoin(
+                getPlayerName(e.entity).string,
+                hasPlayedBefore,
+            )
         }
     }
 

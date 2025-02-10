@@ -14,7 +14,7 @@ class EssentialsVanishCompat(bootstrap: PaperBootstrap) : IVanishCompat, Abstrac
         if (e.value) {
             bootstrap.tgbridge.onPlayerLeave(username)
         } else {
-            bootstrap.tgbridge.onPlayerJoin(username)
+            bootstrap.tgbridge.onPlayerJoin(username, true)
         }
     }
 }

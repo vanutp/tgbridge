@@ -17,7 +17,7 @@ class VanishCompat : ICompat {
             if (isVanished) {
                 FabricTelegramBridge.onPlayerLeave(username)
             } else {
-                FabricTelegramBridge.onPlayerJoin(username)
+                FabricTelegramBridge.onPlayerJoin(username, true)
             }
         }
     }

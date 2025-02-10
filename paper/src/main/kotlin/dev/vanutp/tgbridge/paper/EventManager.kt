@@ -63,7 +63,10 @@ class EventManager(private val plugin: PaperBootstrap) : Listener {
         if (e.player.isVanished()) {
             return
         }
-        plugin.tgbridge.onPlayerJoin(getPlayerName(e.player))
+        plugin.tgbridge.onPlayerJoin(
+            getPlayerName(e.player),
+            e.player.hasPlayedBefore(),
+        )
     }
 
     @EventHandler(priority = EventPriority.MONITOR)

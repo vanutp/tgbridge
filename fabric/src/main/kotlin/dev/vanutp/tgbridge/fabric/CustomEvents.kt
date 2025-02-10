@@ -17,9 +17,9 @@ class CustomEvents {
             }
         }
         val PLAYER_JOIN_EVENT = EventFactory.createArrayBacked(PlayerJoin::class.java) { handlers ->
-            PlayerJoin { player ->
+            PlayerJoin { player, hasPlayedBefore ->
                 for (handler in handlers) {
-                    handler.onPlayerJoin(player)
+                    handler.onPlayerJoin(player, hasPlayedBefore)
                 }
             }
         }
@@ -44,7 +44,7 @@ class CustomEvents {
     }
 
     fun interface PlayerJoin {
-        fun onPlayerJoin(player: ServerPlayerEntity): Unit
+        fun onPlayerJoin(player: ServerPlayerEntity, hasPlayedBefore: Boolean): Unit
     }
 
     fun interface PlayerLeave {

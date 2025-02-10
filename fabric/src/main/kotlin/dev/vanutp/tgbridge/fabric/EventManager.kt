@@ -54,12 +54,13 @@ object EventManager {
     }
 
     private fun registerPlayerJoinListener() {
-        CustomEvents.PLAYER_JOIN_EVENT.register { player ->
+        CustomEvents.PLAYER_JOIN_EVENT.register { player, hasPlayedBefore ->
             if (player.isVanished()) {
                 return@register
             }
             FabricTelegramBridge.onPlayerJoin(
                 getPlayerName(player).string,
+                hasPlayedBefore,
             )
         }
     }

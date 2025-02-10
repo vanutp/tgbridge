@@ -1,6 +1,7 @@
 package dev.vanutp.tgbridge.fabric.mixin;
 
 import dev.vanutp.tgbridge.fabric.CustomEvents;
+import dev.vanutp.tgbridge.fabric.IHasPlayedBefore;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ConnectedClientData;
@@ -14,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 abstract class PlayerManagerMixin_modern {
     @Inject(method = "onPlayerConnect", at = @At("RETURN"))
     private void onPlayerConnect(ClientConnection connection, ServerPlayerEntity player, ConnectedClientData clientData, CallbackInfo ci) {
-        CustomEvents.Companion.getPLAYER_JOIN_EVENT().invoker().onPlayerJoin(player);
+        CustomEvents.Companion.getPLAYER_JOIN_EVENT().invoker().onPlayerJoin(player, ((IHasPlayedBefore)player).getHasPlayedBefore());
     }
 
     @Inject(method = "remove", at = @At("HEAD"))

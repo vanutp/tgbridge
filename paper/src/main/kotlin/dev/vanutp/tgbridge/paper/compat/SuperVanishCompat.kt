@@ -16,6 +16,6 @@ class SuperVanishCompat(bootstrap: PaperBootstrap) : IVanishCompat, AbstractComp
 
     @EventHandler
     private fun onUnvanish(e: PlayerShowEvent) {
-        bootstrap.tgbridge.onPlayerJoin(getPlayerName(e.player))
+        bootstrap.tgbridge.onPlayerJoin(getPlayerName(e.player), true)
     }
 }
