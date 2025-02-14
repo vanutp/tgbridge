@@ -13,7 +13,7 @@ class UnsupportedChatPluginCompat(bootstrap: PaperBootstrap) : IChatCompat, Abst
     override val pluginId = null
 
     override fun shouldEnable(): Boolean {
-        return config.messages.incompatiblePluginChatPrefix != null
+        return config.integrations.incompatiblePluginChatPrefix != null
     }
 
     @EventHandler(priority = EventPriority.LOWEST)

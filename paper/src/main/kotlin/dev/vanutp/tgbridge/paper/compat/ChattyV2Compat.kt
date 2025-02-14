@@ -17,7 +17,7 @@ class ChattyV2Compat(bootstrap: PaperBootstrap) : IChatCompat, AbstractCompat(bo
 
     @EventHandler
     fun onChattyMessage(e: ChattyMessageEvent) {
-        if (e.chat.name != config.messages.globalChatName) {
+        if (e.chat.name != config.integrations.globalChatName) {
             return
         }
         bootstrap.tgbridge.onChatMessage(TBPlayerEventData(getPlayerName(e.player), Component.text(e.message)))
