@@ -1,0 +1,128 @@
+options:
+  general.botToken:
+    type: string
+    default: '"your bot token"'
+    required: true
+  general.chatId:
+    type: number
+    default: 0
+    required: true
+  general.topicId:
+    type: number | null
+    default: null
+
+  messages.requirePrefixInMinecraft:
+    type: string | null
+    default: null (отключено)
+    example: '"!" (кавычки обязательны)'
+    description: |
+      ::: warning
+      Не включайте это если у вас установлен чат-плагин.
+      См. [Совместимость](https://tgbridge.vanutp.dev/ru/compatibility#chat) для подробной информации
+      :::
+      Если эта опция задана, сообщения без указанного префикса не будет переслано в Telegram.
+  messages.keepPrefix:
+    type: boolean
+    default: false
+    description: |
+      Установите значение `true`, чтобы оставлять префикс, указанный в настройке выше, в сообщении
+  messages.mergeWindow:
+    type: number
+    default: 0 (отключено)
+    description: |
+      Сообщения, отправленные в течение указанного интервала, будут объединены в одно.
+      Значение указывается в секундах
+  messages.useRealUsername:
+    type: boolean
+    default: false
+    description: |
+      Установите значение `true`, чтобы использовать реальный ник игрока вместо отображаемого имени
+      во всех сообщениях в Telegram
+
+  integrations.bluemapUrl:
+    type: string | null
+    default: null (отключено)
+    example: https://map.example.com
+    description: |
+      Если эта опция задана, вейпойнты, которыми игроки поделились с помощью
+      Xaero's Minimap/World Map, будут отображаться как ссылки на указанный инстанс BlueMap
+  integrations.globalChatName:
+    type: string
+    default: '"global"'
+    description: |
+      Название чата из которого пересылать сообщения в Telegram.
+      Используется только если установлен совместимый плагин чата с поддержкой мультичатов
+      (см. [Совместимость](https://tgbridge.vanutp.dev/ru/compatibility#chat))
+  integrations.incompatiblePluginChatPrefix:
+    type: string | null
+    default: null (отключено)
+    example: '"!" (кавычки обязательны)'
+    description: |
+      См. также: [Совместимость](https://tgbridge.vanutp.dev/ru/compatibility#chat)
+      
+      Используйте эту опцию, если вы используете несовместимый плагин, например CMI или AdvancedChat.
+      Зарегистрирует legacy-обработчик ивентов чата с приоритетом LOWEST
+      и будет отправлять только сообщения, начинающиеся с указанного префикса.
+      Поддерживается только на Paper.
+
+  events.advancementMessages.enable:
+    type: boolean
+    default: true
+  events.advancementMessages.enableTask:
+    type: boolean
+    default: true
+    description: |
+      Настройка пересылки каждого типа ачивок
+  events.advancementMessages.enableGoal:
+    type: boolean
+    default: true
+    description: |
+      Настройка пересылки каждого типа ачивок
+  events.advancementMessages.enableChallenge:
+    type: boolean
+    default: true
+    description: |
+      Настройка пересылки каждого типа ачивок
+  events.advancementMessages.showDescription:
+    type: boolean
+    default: true
+    description: |
+      Добавлять описания достижений при пересылке в Telegram
+  events.enableDeathMessages:
+    type: boolean
+    default: true
+  events.enableJoinMessages:
+    type: boolean
+    default: true
+  events.enableLeaveMessages:
+    type: boolean
+    default: true
+  events.leaveJoinMergeWindow:
+    type: number
+    default: 0 (отключено)
+    description: |
+      Если игрок выходит и заходит в течение указанного интервала,
+      сообщения входа и выхода будут удалены.
+      Это полезно когда игроки часто переподключаются, например из-за проблем с соединением.
+      Работает только когда и enableJoinMessages и enableLeaveMessages включены.
+      Значение указывается в секундах
+  events.enableStartMessages:
+    type: boolean
+    default: true
+    description: |
+      Отправлять ли сообщение в Telegram при старте сервера
+  events.enableStopMessages:
+    type: boolean
+    default: true
+    description: |
+      Отправлять ли сообщение в Telegram при остановке сервера
+
+  advanced.botApiUrl:
+    type: string
+    default: '"https://api.telegram.org"'
+
+  version:
+    type: number
+    default: 1
+    description: |
+      Версия конфига. Не меняйте вручную

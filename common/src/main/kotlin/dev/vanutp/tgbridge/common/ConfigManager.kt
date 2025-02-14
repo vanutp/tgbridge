@@ -89,11 +89,18 @@ object ConfigManager {
             config = config.copy(
                 version = 2,
                 messages = config.messages.copy(
-                    requirePrefixInMinecraft = "",
+                    requirePrefixInMinecraft = null,
                 ),
             )
         } else if (config.version != 2) {
             throw Exception("Unsupported config version ${config.version}")
+        }
+        if (config.general.chatId > 0) {
+            config = config.copy(
+                general = config.general.copy(
+                    chatId = -1000000000000 - config.general.chatId
+                )
+            )
         }
     }
 
@@ -106,11 +113,7 @@ object ConfigManager {
         if (configPath.notExists()) {
             configPath.writeText(yaml.encodeToString(Config()))
         }
-        val loadedConfig = yaml.decodeFromString<Config>(configPath.readText())
-        if (loadedConfig.general.chatId > 0) {
-            loadedConfig.general.chatId = -1000000000000 - loadedConfig.general.chatId
-        }
-        config = loadedConfig
+        config = yaml.decodeFromString<Config>(configPath.readText())
         migrateConfig()
         // write new keys & update docs
         configPath.writeText(yaml.encodeToString(config))

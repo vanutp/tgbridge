@@ -1,0 +1,127 @@
+options:
+  general.botToken:
+    type: string
+    default: '"your bot token"'
+    required: true
+  general.chatId:
+    type: number
+    default: 0
+    required: true
+  general.topicId:
+    type: number | null
+    default: null
+
+  messages.requirePrefixInMinecraft:
+    type: string | null
+    default: null (disabled)
+    example: '"!" (quotes are required)'
+    description: |
+      ::: warning
+      Don't enable this if you have a chat plugin installed.
+      See [Compatiblility](https://tgbridge.vanutp.dev/en/compatibility#chat) for more info
+      :::
+      If this value is set, messages without specified prefix won't be forwarded to Telegram.
+  messages.keepPrefix:
+    type: boolean
+    default: false
+    description: |
+      Set to `true` to keep the prefix specified in the above setting in the message
+  messages.mergeWindow:
+    type: number
+    default: 0 (disabled)
+    description: |
+      Chat messages sent within the specified interval will be merged in one.
+      The value is specified in seconds
+  messages.useRealUsername:
+    type: boolean
+    default: false
+    description: |
+      Set to `true` to use real player username instead of display name in all Telegram messages
+
+  integrations.bluemapUrl:
+    type: string | null
+    default: null (disabled)
+    example: https://map.example.com
+    description: |
+      If this value is set, waypoints shared from Xaero's Minimap/World Map will be rendered
+      as links to a specified BlueMap instance.
+  integrations.globalChatName:
+    type: string
+    default: '"global"'
+    description: |
+      The chat name to forward messages from.
+      Only has an effect when a compatible chat plugin with support for named chats, such as Chatty, is installed.
+      (see [Compatiblility](https://tgbridge.vanutp.dev/en/compatibility#chat))
+  integrations.incompatiblePluginChatPrefix:
+    type: string | null
+    default: null (disabled)
+    example: '"!" (quotes are required)'
+    description: |
+      See also: [Compatiblility](https://tgbridge.vanutp.dev/en/compatibility#chat)
+      
+      Use this if you have an incompatible plugin, such as CMI or AdvancedChat installed.
+      Will register a legacy chat listener with LOWEST priority
+      and only forward messages that start with the specified string.
+      Currently this only has an effect on Paper.
+
+  events.advancementMessages.enable:
+    type: boolean
+    default: true
+  events.advancementMessages.enableTask:
+    type: boolean
+    default: true
+    description: |
+      Configure forwarding of each advancement type
+  events.advancementMessages.enableGoal:
+    type: boolean
+    default: true
+    description: |
+      Configure forwarding of each advancement type
+  events.advancementMessages.enableChallenge:
+    type: boolean
+    default: true
+    description: |
+      Configure forwarding of each advancement type
+  events.advancementMessages.showDescription:
+    type: boolean
+    default: true
+    description: |
+      Include advancement descriptions in Telegram messages
+  events.enableDeathMessages:
+    type: boolean
+    default: true
+  events.enableJoinMessages:
+    type: boolean
+    default: true
+  events.enableLeaveMessages:
+    type: boolean
+    default: true
+  events.leaveJoinMergeWindow:
+    type: number
+    default: 0 (disabled)
+    description: |
+      If a player leaves and then joins within the specified time interval,
+      the leave and join messages will be deleted.
+      This is useful when players frequently re-join, for example because of connection problems.
+      Only has effect when both enableJoinMessages and enableLeaveMessages are set to true.
+      The value is specified in seconds
+  events.enableStartMessages:
+    type: boolean
+    default: true
+    description: |
+      Whether to send a Telegram message when the server starts
+  events.enableStopMessages:
+    type: boolean
+    default: true
+    description: |
+      Whether to send a Telegram message when the server stops
+
+  advanced.botApiUrl:
+    type: string
+    default: '"https://api.telegram.org"'
+
+  version:
+    type: number
+    default: 1
+    description: |
+      Config file version. Don't change manually
