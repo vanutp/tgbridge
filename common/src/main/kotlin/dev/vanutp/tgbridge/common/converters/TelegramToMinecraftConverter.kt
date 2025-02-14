@@ -4,6 +4,7 @@ import dev.vanutp.tgbridge.common.*
 import dev.vanutp.tgbridge.common.ConfigManager.config
 import dev.vanutp.tgbridge.common.ConfigManager.lang
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.event.HoverEvent
 import net.kyori.adventure.text.format.TextDecoration
 
 object TelegramToMinecraftConverter {

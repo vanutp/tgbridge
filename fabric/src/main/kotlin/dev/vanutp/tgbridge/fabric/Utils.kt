@@ -8,6 +8,7 @@ import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 import net.minecraft.registry.DynamicRegistryManager
 import net.minecraft.registry.Registries
 import net.minecraft.server.network.ServerPlayerEntity
+import net.minecraft.text.HoverEvent
 import net.minecraft.text.Text
 
 

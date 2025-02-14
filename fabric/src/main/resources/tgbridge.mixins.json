@@ -8,10 +8,16 @@
     "PlayerAdvancementTrackerMixin_modern",
     "PlayerManagerMixin_201",
     "PlayerManagerMixin_modern",
-    "ServerPlayerEntityMixin"
+    "ServerPlayerEntityMixin",
+    "image.HoverEventActionMixin"
   ],
   "plugin": "dev.vanutp.tgbridge.fabric.TgbridgeMixinPlugin",
   "injectors": {
     "defaultRequire": 1
-  }
+  },
+  "client": [
+    "image.ChatHudMixin",
+    "image.DrawContextMixin",
+    "image.TextRendererMixin"
+  ]
 }
