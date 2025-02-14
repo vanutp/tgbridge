@@ -1,0 +1,7 @@
+node_modules/
+
+.idea/
+
+.vitepress/cache/
+.vitepress/dist/
+*.mts.timestamp-*
