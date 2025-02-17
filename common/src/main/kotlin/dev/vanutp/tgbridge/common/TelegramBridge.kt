@@ -72,7 +72,17 @@ abstract class TelegramBridge {
         bot.registerMessageHandler(this::onTelegramMessage)
     }
 
+    private fun checkMessageChat(msg: TgMessage): Boolean {
+        val messageThreadId = msg.messageThreadId ?: 1
+        val chatValid = msg.chat.id == config.general.chatId
+        val topicValid = config.general.topicId == null || messageThreadId == config.general.topicId
+        return chatValid && topicValid
+    }
+
     private suspend fun onTelegramListCommand(msg: TgMessage) {
+        if (!checkMessageChat(msg)) {
+            return
+        }
         val onlinePlayerNames = platform.getOnlinePlayerNames()
         if (onlinePlayerNames.isNotEmpty()) {
             sendMessage(
@@ -87,10 +97,7 @@ abstract class TelegramBridge {
     }
 
     private suspend fun onTelegramMessage(msg: TgMessage) {
-        if (
-            msg.chat.id != config.general.chatId
-            || config.general.topicId != null && msg.messageThreadId != config.general.topicId
-        ) {
+        if (!checkMessageChat(msg)) {
             return
         }
         lastMessageLock.withLock {
