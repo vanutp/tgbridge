@@ -46,6 +46,9 @@ val XAERO_WAYPOINT_RGX =
     Regex("""xaero-waypoint:([^:]+):[^:]:([-\d]+):([-\d]+|~):([-\d]+):\d+:(?:false|true):\d+:Internal-(?:the-)?(overworld|nether|end)-waypoints""")
 
 fun String.asBluemapLinkOrNone(): TelegramFormattedText? {
+    if (config.integrations.bluemapUrl == null) {
+        return null
+    }
     XAERO_WAYPOINT_RGX.matchEntire(this)?.let {
         try {
             var waypointName = it.groupValues[1]
