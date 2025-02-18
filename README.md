@@ -1,3 +1,8 @@
+<div align="right">
+🌍 English / <a href="https://github.com/vanutp/tgbridge/blob/master/README-ru.md">Русский</a>
+</div>
+
+
 # Minecraft Telegram Bridge
 
 A feature-rich multiloader mod to sync Telegram and Minecraft chats
@@ -6,6 +11,7 @@ https://github.com/vanutp/tgbridge/assets/11143488/697a6d5d-1f2c-4156-bf8d-14044
 
 ## Features
 
+- Supports Fabric, (Neo)Forge and Paper
 - Aims to support most of the mods and plugins
 - Supports Telegram topics (bot will work only in its dedicated topic)
 - Every feature can be toggled or configured

@@ -1,6 +1,8 @@
 # Compatibility
 
-This mod aims to be compatible with most of existing mods/plugins.
+This mod aims to be compatible with most of existing mods/plugins,
+and to provide useful integrations,
+See below for the current list of implemented integrations.
 
 If you would like to see support for a mod/plugin not in this list,
 feel free to submit a [feature request](https://github.com/vanutp/tgbridge/issues/new?template=feature_request.yml).
@@ -20,9 +22,8 @@ and [CMI](https://www.spigotmc.org/resources/cmi-300-commands-insane-kits-portal
 is currently not implemented due to the lack of published APIs by these projects
 (see [#49](https://github.com/vanutp/tgbridge/issues/49), [#50](https://github.com/vanutp/tgbridge/issues/50)).
 
-To use tgbridge with these plugins, set the [`integrations.incompatiblePluginChatPrefix`](/en/reference#integrations-incompatiblepluginchatprefix)
+To use tgbridge with these plugins, set the [`integrations.incompatiblePluginChatPrefix`](/en/reference#incompatiblepluginchatprefix)
 config option
-<!-- TODO: add config reference link -->
 
 ## Vanish
 
@@ -40,11 +41,10 @@ Works out of the box with:
 
 - [BlueMap](https://modrinth.com/plugin/bluemap) +
   [Xaero's Minimap](https://modrinth.com/mod/xaeros-minimap)/[Xaero's World Map](https://modrinth.com/mod/xaeros-world-map) integration:
-  shows shared waypoints as BlueMap links in the Telegram chat. Set the [`integrations.bluemapUrl`](/en/reference#integrations-bluemapurl)
+  shows shared waypoints as BlueMap links in the Telegram chat. Set the [`integrations.bluemapUrl`](/en/reference#bluemapurl)
   option to enable
-<!-- TODO: add config reference link -->
 
 - If you send a formatted message in Minecraft using [StyledChat](https://modrinth.com/mod/styled-chat)
   or a similar mod/plugin, the formatting will be visible in Telegram 
 
-- Install [spark](https://modrinth.com/mod/spark) to use `/tps` command in Telegram
+- If [spark](https://modrinth.com/mod/spark) is installed, `/tps` command will be available in Telegram

@@ -1,14 +1,17 @@
 # Localization
 
 This mod uses 2 language files: `lang.yml` for bot's own messages and `minecraft_lang.json`
-for Minecraft messages. It's a bit hard to use another language due to
-the fact that the minecraft server installation only supports English language.
+for Minecraft messages, such as advancements and death messages.
+It's a bit hard to use another language due to the fact that the minecraft server
+installation only supports English language.
 
 ## Bot's own messages
 
 You can download `lang.yml` for other languages from the
 [translations](https://github.com/vanutp/tgbridge/blob/master/translations) directory of this repository.
 If you want your language to be added, feel free to submit a Pull Request with your translation.
+
+Also, `lang.yml` is meant to be customized by the server owner and is never overwritten by the mod.
 
 ## Minecraft messages
 

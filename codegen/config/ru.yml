@@ -1,3 +1,8 @@
+title: Опции конфигурации
+type: Тип
+default: По умолчанию
+required: Обязательно
+example: Пример
 options:
   general.botToken:
     type: string

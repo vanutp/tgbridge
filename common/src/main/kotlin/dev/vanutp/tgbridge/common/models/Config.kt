@@ -34,7 +34,7 @@ data class MessagesConfig(
     @YamlComment(
         "::: warning",
         "Don't enable this if you have a chat plugin installed.",
-        "See [Compatiblility](https://tgbridge.vanutp.dev/en/compatibility#chat) for more info",
+        "See [Compatibility](https://tgbridge.vanutp.dev/en/compatibility#chat) for more info",
         ":::",
         "If this value is set, messages without specified prefix won't be forwarded to Telegram.",
         "Example: \"!\" (quotes are required)",
@@ -69,11 +69,11 @@ data class IntegrationsConfig(
     @YamlComment(
         "The chat name to forward messages from.",
         "Only has an effect when a compatible chat plugin with support for named chats, such as Chatty, is installed.",
-        "(see [Compatiblility](https://tgbridge.vanutp.dev/en/compatibility#chat))",
+        "(see [Compatibility](https://tgbridge.vanutp.dev/en/compatibility#chat))",
     )
     val globalChatName: String = "global",
     @YamlComment(
-        "See also: [Compatiblility](https://tgbridge.vanutp.dev/en/compatibility#chat)",
+        "See also: [Compatibility](https://tgbridge.vanutp.dev/en/compatibility#chat)",
         "Use this if you have an incompatible plugin, such as CMI or AdvancedChat installed.",
         "Will register a legacy chat listener with LOWEST priority",
         "and only forward messages that start with the specified string.",

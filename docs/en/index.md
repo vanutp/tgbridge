@@ -17,13 +17,13 @@ features:
     details: Easy to setup, works out of the box
     link: /en/quickstart
   - title: Compatible
-    details: Aims to support most of the mods and plugins
+    details: Supports Fabric, (Neo)Forge and Paper. Aims to support most of the mods and plugins
     link: /en/compatibility
   - title: Feature-rich
-    details: Contains a lot of useful features, including some unique ones
+    details: Contains a lot of useful features, including unique ones
     link: /en/features
   - title: Configurable
-    details: All features can be toggled or configured
+    details: Every feature can be toggled or configured
     link: /en/reference
 ---
 

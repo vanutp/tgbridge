@@ -3,7 +3,7 @@
 ## Server or client?
 
 This mod mostly works server-side, but can optionally be installed client-side for features
-such as `/tgbridge dump_lang` command (see [Localization](/en/localization)) and image rendering support.
+such as `/tgbridge dump_lang` command (see [Localization](/en/localization)) and image rendering support (coming soon).
 
 ## Getting your chat and topic ids
 
@@ -15,7 +15,7 @@ There are multiple ways to get them:
 Right click/tap on any message in your chat/topic and choose "Copy Message Link".
 If there is no such option, enable "Chat history for new members" in the group settings. It can then be disabled.
 
-The copied link will be in the format "https://t.me/c/<chat_id>/<topic_id>/<message_id>".
+The copied link will be in the format `https://t.me/c/<chat_id>/<topic_id>/<message_id>`.
 Topic id will only be present if the chat has topics enabled, otherwise you don't need it.
 :::
 
@@ -45,6 +45,6 @@ You can then get your topic id using the first method, if you need it.
 4. Use the `/tgbridge reload` command to reload the config
 5. The bot should work now
 
-To learn more about mod features, check out other pages in the sidebar.
+To learn more about mod features, check out the [Features](/en/features) page.
 
 If something doesn't work, check the [Troubleshooting](/en/troubleshooting) section.

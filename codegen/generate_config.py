@@ -19,6 +19,11 @@ class ConfigOption(BaseModel):
 
 
 class ConfigSpec(BaseModel):
+    title: str
+    type: str
+    default: str
+    required: str
+    example: str
     options: dict[str, ConfigOption]
 
 
@@ -193,7 +198,7 @@ class DocsRenderer:
     spec: ConfigSpec
 
     def __init__(self, spec: ConfigSpec):
-        self.root = DocsSection(name='Config reference', children={})
+        self.root = DocsSection(name=spec.title, children={})
         self.spec = spec
 
     def get_or_create_parent(self, path: list[str]) -> DocsSection:
@@ -214,15 +219,15 @@ class DocsRenderer:
 
     def render_opt(self, name: str, opt: ConfigOption, depth: int) -> str:
         res = '#' * depth + f' {name}\n\n'
-        res += f'- **Type:** `{opt.type}`\n'
+        res += f'- **{self.spec.type}:** `{opt.type}`\n'
         if opt.required:
-            res += '- **Required**\n'
+            res += f'- **{self.spec.required}**\n'
         default_val, default_help = parse_default(opt.default)
         if default_help:
-            res += f'- **Default:** `{default_val}`{default_help}\n'
+            res += f'- **{self.spec.default}:** `{default_val}`{default_help}\n'
         if opt.example:
             example_val, example_help = parse_default(opt.example)
-            res += f'- **Example:** `{example_val}`{example_help}\n'
+            res += f'- **{self.spec.example}:** `{example_val}`{example_help}\n'
         if opt.description:
             res += f'\n{opt.description}\n'
         return res

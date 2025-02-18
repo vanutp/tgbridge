@@ -1,5 +1,6 @@
 import {defineConfig} from 'vitepress'
 import enConfig from './en.ts'
+import ruConfig from './ru.ts'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -10,11 +11,13 @@ export default defineConfig({
       label: 'English',
       lang: 'en',
       link: '/en/',
+      themeConfig: enConfig,
     },
     ru: {
       label: 'Русский',
       lang: 'ru',
       link: '/ru/',
+      themeConfig: ruConfig,
     },
   },
   head: [
@@ -26,16 +29,33 @@ export default defineConfig({
   ],
   cleanUrls: true,
   themeConfig: {
-    ...enConfig,
     logo: '/logo.png',
-    outline: 'deep',
     search: {
       provider: 'local',
-    },
-    lastUpdated: {
-      formatOptions: {
-        dateStyle: 'long',
-        forceLocale: true,
+      options: {
+        locales: {
+          ru: {
+            translations: {
+              button: {
+                buttonText: 'Поиск',
+                buttonAriaLabel: 'Поиск',
+              },
+              modal: {
+                displayDetails: 'Подробный список',
+                resetButtonTitle: 'Сбросить',
+                backButtonTitle: 'Закрыть',
+                noResultsText: 'Нет результатов по запросу',
+                footer: {
+                  selectText: 'выбрать',
+                  navigateText: 'перейти',
+                  navigateUpKeyAriaLabel: 'стрелка вверх',
+                  navigateDownKeyAriaLabel: 'стрелка вниз',
+                  closeText: 'закрыть',
+                },
+              },
+            },
+          },
+        },
       },
     },
     socialLinks: [
