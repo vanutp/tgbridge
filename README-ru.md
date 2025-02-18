@@ -1,11 +1,22 @@
-<div align="right">
+<p align="right">
 🌍 <a href="https://github.com/vanutp/tgbridge/blob/master/README.md">English</a> / Русский
-</div>
+</p>
+
+<div align="center">
 
 # Minecraft Telegram Bridge
+</div>
 
+<p align="center">
 Функциональный мод для синхронизации чатов Telegram и Minecraft,
 поддерживающий Fabric, (Neo)Forge и Paper
+</p>
+
+<div align="center">
+
+[![Modrinth - Downloads](https://img.shields.io/modrinth/dt/tgbridge?style=for-the-badge&logo=modrinth&label=Download)](https://modrinth.com/mod/tgbridge)
+[![Docs](https://img.shields.io/website?url=https%3A%2F%2Ftgbridge.vanutp.dev&style=for-the-badge&label=Docs&color=%238b00dd)](https://tgbridge.vanutp.dev/)
+</div>
 
 https://github.com/vanutp/tgbridge/assets/11143488/697a6d5d-1f2c-4156-bf8d-140446a83f5e
 

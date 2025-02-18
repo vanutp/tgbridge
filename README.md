@@ -1,11 +1,21 @@
-<div align="right">
+<p align="right">
 🌍 English / <a href="https://github.com/vanutp/tgbridge/blob/master/README-ru.md">Русский</a>
-</div>
+</p>
 
+<div align="center">
 
 # Minecraft Telegram Bridge
+</div>
 
+<p align="center">
 A feature-rich multiloader mod to sync Telegram and Minecraft chats
+</p>
+
+<div align="center">
+
+[![Modrinth - Downloads](https://img.shields.io/modrinth/dt/tgbridge?style=for-the-badge&logo=modrinth&label=Download)](https://modrinth.com/mod/tgbridge)
+[![Docs](https://img.shields.io/website?url=https%3A%2F%2Ftgbridge.vanutp.dev&style=for-the-badge&label=Docs&color=%238b00dd)](https://tgbridge.vanutp.dev/)
+</div>
 
 https://github.com/vanutp/tgbridge/assets/11143488/697a6d5d-1f2c-4156-bf8d-140446a83f5e
 
@@ -27,8 +37,8 @@ Here's how you can help:
 
 - Open an issue to suggest improvements or report bugs
 - Look for issues labeled "help wanted" if you want to contribute code
-- Before working on a pull request, please discuss your proposed changes in an issue first - this helps 
-avoid duplicate work and ensures your contribution aligns with the project's goals
+- Before working on a pull request, please discuss your proposed changes in an issue first - this helps
+  avoid duplicate work and ensures your contribution aligns with the project's goals
 
 ## Acknowledgements
 
