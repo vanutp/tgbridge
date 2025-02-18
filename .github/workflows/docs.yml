@@ -5,10 +5,10 @@ on:
     paths:
       - 'docs/**'
       - '.github/workflows/docs.yml'
+  # TODO: use pull_request_target
   pull_request:
     paths:
       - 'docs/**'
-    paths-ignore:
       - '.github/workflows/docs.yml'
   workflow_dispatch: {}
 
