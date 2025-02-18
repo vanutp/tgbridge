@@ -150,6 +150,8 @@ data class TgMessage(
     val quote: TgTextQuote? = null,
     @SerializedName("message_thread_id")
     val messageThreadId: Int? = null,
+    @SerializedName("is_topic_message")
+    val isTopicMessage: Boolean? = null,
     @SerializedName("author_signature")
     val authorSignature: String? = null,
     val text: String? = null,

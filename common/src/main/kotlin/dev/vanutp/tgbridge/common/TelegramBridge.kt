@@ -73,7 +73,13 @@ abstract class TelegramBridge {
     }
 
     private fun checkMessageChat(msg: TgMessage): Boolean {
-        val messageThreadId = msg.messageThreadId ?: 1
+        val isTopicMessage = msg.isTopicMessage ?: false
+        val messageThreadId = if (isTopicMessage) {
+            msg.messageThreadId!!
+        } else {
+            // Replies in "General" topic have threadId set to the reply message id
+            1
+        }
         val chatValid = msg.chat.id == config.general.chatId
         val topicValid = config.general.topicId == null || messageThreadId == config.general.topicId
         return chatValid && topicValid
