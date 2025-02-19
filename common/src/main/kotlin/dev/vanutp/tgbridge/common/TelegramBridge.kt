@@ -25,6 +25,7 @@ abstract class TelegramBridge {
     protected abstract val platform: Platform
     private var initialized: Boolean = false
     private lateinit var bot: TelegramBot
+    private var spark: SparkHelper? = null
 
     private var lastMessage: LastMessage? = null
     private val lastMessageLock = Mutex()
@@ -52,6 +53,8 @@ abstract class TelegramBridge {
     }
 
     fun onServerStarted() = wrapMinecraftHandler {
+        // Doing this here to ensure spark is loaded
+        spark = SparkHelper.createOrNull()
         if (config.events.enableStartMessages) {
             sendMessage(lang.telegram.serverStarted)
         }
@@ -71,6 +74,7 @@ abstract class TelegramBridge {
     }
 
     private fun registerTelegramHandlers() {
+        bot.registerCommandHandler("tps", this::onTelegramTpsCommand)
         bot.registerCommandHandler("list", this::onTelegramListCommand)
         bot.registerMessageHandler(this::onTelegramMessage)
     }
@@ -86,6 +90,19 @@ abstract class TelegramBridge {
         val chatValid = msg.chat.id == config.general.chatId
         val topicValid = config.general.topicId == null || messageThreadId == config.general.topicId
         return chatValid && topicValid
+    }
+
+    private suspend fun onTelegramTpsCommand(msg: TgMessage) {
+        val spark = spark
+        if (!checkMessageChat(msg) || spark == null) {
+            return
+        }
+        val durations = spark.getPlaceholders()
+        if (durations == null) {
+            logger.error("Unable to get spark data")
+            return
+        }
+        sendMessage(lang.telegram.tps.formatLang(*durations))
     }
 
     private suspend fun onTelegramListCommand(msg: TgMessage) {

@@ -28,6 +28,12 @@ data class LangTelegram(
 
     val playerList: String = "📝 <b>{count} players online:</b> {usernames}",
     val playerListZeroOnline: String = "📝 <b>0 players online</b>",
+
+    @YamlComment(
+        "Available placeholders: tps5s, tps10s, tps1m, tps5m, tps15m, mspt10sAvg, mspt1mAvg, mspt5mAvg",
+        "Available durations: 5s, 10s, 1m, 5m, 15m",
+    )
+    val tps: String = "📊 <b>TPS:</b> <code>{tps10s}</code>\n⏱️ <b>MSPT:</b> <code>{mspt10sAvg}</code>",
 )
 
 @Serializable
