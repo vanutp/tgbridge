@@ -28,6 +28,8 @@ class PaperTelegramBridge(private val plugin: PaperBootstrap) : TelegramBridge()
         }
 
         eventManager.register()
+
+        onServerStarted()
     }
 
     override fun platformInit() {

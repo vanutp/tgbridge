@@ -12,6 +12,7 @@ import net.neoforged.fml.common.Mod
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent
 import net.neoforged.fml.loading.FMLPaths
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent
+import net.neoforged.neoforge.event.server.ServerStartedEvent
 import net.neoforged.neoforge.event.server.ServerStartingEvent
 import net.neoforged.neoforge.event.server.ServerStoppingEvent
 import thedarkcolour.kotlinforforge.neoforge.forge.FORGE_BUS
@@ -35,6 +36,9 @@ object NeoForgeTelegramBridge : TelegramBridge() {
                 EventManager.register()
                 FORGE_BUS.addListener { _: ServerStartingEvent ->
                     init()
+                }
+                FORGE_BUS.addListener { _: ServerStartedEvent ->
+                    onServerStarted()
                 }
                 FORGE_BUS.addListener { _: ServerStoppingEvent ->
                     shutdown()

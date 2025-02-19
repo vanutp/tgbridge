@@ -31,6 +31,9 @@ object FabricTelegramBridge : DedicatedServerModInitializer, TelegramBridge() {
             this.server = server
             init()
         }
+        ServerLifecycleEvents.SERVER_STARTED.register {
+            onServerStarted()
+        }
         ServerLifecycleEvents.SERVER_STOPPING.register {
             shutdown()
         }

@@ -9,6 +9,7 @@ import net.minecraft.server.command.ServerCommandSource
 import net.minecraft.text.Text
 import net.minecraft.util.Language
 import net.minecraftforge.client.event.RegisterClientCommandsEvent
+import net.minecraftforge.event.server.ServerStartedEvent
 import net.minecraftforge.event.server.ServerStartingEvent
 import net.minecraftforge.event.server.ServerStoppingEvent
 import net.minecraftforge.fml.common.Mod
@@ -35,6 +36,9 @@ object ForgeTelegramBridge : TelegramBridge() {
                 EventManager.register()
                 FORGE_BUS.addListener { _: ServerStartingEvent ->
                     init()
+                }
+                FORGE_BUS.addListener { _: ServerStartedEvent ->
+                    onServerStarted()
                 }
                 FORGE_BUS.addListener { _: ServerStoppingEvent ->
                     shutdown()

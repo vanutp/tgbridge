@@ -43,15 +43,18 @@ abstract class TelegramBridge {
 
         runBlocking {
             bot.init()
-            if (config.events.enableStartMessages) {
-                sendMessage(lang.telegram.serverStarted)
-            }
         }
         registerTelegramHandlers()
         coroutineScope.launch {
             bot.startPolling(coroutineScope)
         }
         initialized = true
+    }
+
+    fun onServerStarted() = wrapMinecraftHandler {
+        if (config.events.enableStartMessages) {
+            sendMessage(lang.telegram.serverStarted)
+        }
     }
 
     fun shutdown() {
