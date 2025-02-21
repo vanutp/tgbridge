@@ -2,6 +2,7 @@ package dev.vanutp.tgbridge.paper
 
 import dev.vanutp.tgbridge.common.TelegramBridge
 import dev.vanutp.tgbridge.paper.compat.*
+import kotlin.io.path.deleteIfExists
 
 class PaperTelegramBridge(private val plugin: PaperBootstrap) : TelegramBridge() {
     override val logger = PaperLogger(plugin)
@@ -10,7 +11,12 @@ class PaperTelegramBridge(private val plugin: PaperBootstrap) : TelegramBridge()
 
     lateinit var integrations: List<AbstractCompat> private set
 
-    private fun asyncInit() {
+    init {
+        val configPath = platform.configDir.resolve("config-paper.yml")
+        configPath.deleteIfExists()
+    }
+
+    fun asyncInit() {
         // Running in a scheduled task to wait for all the plugins
         // to load to reliably test if a plugin is enabled
         integrations = listOf(
@@ -30,10 +36,5 @@ class PaperTelegramBridge(private val plugin: PaperBootstrap) : TelegramBridge()
         eventManager.register()
 
         onServerStarted()
-    }
-
-    override fun platformInit() {
-        PaperConfigManager.init(platform.configDir)
-        plugin.server.scheduler.scheduleSyncDelayedTask(this.plugin, this::asyncInit)
     }
 }

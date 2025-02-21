@@ -30,14 +30,11 @@ abstract class TelegramBridge {
     private var lastMessage: LastMessage? = null
     private val lastMessageLock = Mutex()
 
-    open fun platformInit() {}
-
     fun init() {
         logger.info("tgbridge starting on ${platform.name}")
-        platformInit()
         ConfigManager.init(platform.configDir, platform::getLanguageKey)
         if (config.hasDefaultValues()) {
-            logger.error("Can't start with default config values: please fill in botToken and chatId")
+            logger.warn("Can't start with default config values: please fill in botToken and chatId, then run /tgbridge reload")
             return
         }
         bot = TelegramBot(config.advanced.botApiUrl, config.general.botToken, logger)
@@ -132,12 +129,24 @@ abstract class TelegramBridge {
         platform.broadcastMessage(TelegramToMinecraftConverter.convert(msg, bot.me.id))
     }
 
+    private fun tryReinit(ctx: TBCommandContext): Boolean {
+        init()
+        if (initialized) {
+            onServerStarted()
+            ctx.reply("tgbridge initialized")
+        } else if (config.hasDefaultValues()) {
+            ctx.reply("Config still has default values: please fill in botToken and chatId")
+        } else {
+            ctx.reply("Error initializing the mod, check the server console for errors")
+        }
+        return initialized
+    }
+
     fun onReloadCommand(ctx: TBCommandContext): Boolean {
         if (!initialized) {
             try {
                 if (config.hasDefaultValues()) {
-                    ctx.reply("A restart is required after initially filling in the bot token and chat ID")
-                    return false
+                    return tryReinit(ctx)
                 }
             } catch (_: UninitializedPropertyAccessException) {
             }
