@@ -21,6 +21,9 @@ export default defineConfig({
     },
   },
   head: [
+    ['link', {rel: 'icon', type: 'image/png', sizes: '96x96', href: '/favicon-96x96.png'}],
+    ['link', {rel: 'shortcut icon', href: '/favicon.ico'}],
+    ['link', {rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png'}],
     ['script', {
       defer: '',
       src: 'https://zond.vanutp.dev/script.js',
@@ -60,6 +63,7 @@ export default defineConfig({
     },
     socialLinks: [
       {icon: 'github', link: 'https://github.com/vanutp/tgbridge'},
+      {icon: 'modrinth', link: 'https://modrinth.com/mod/tgbridge'},
     ],
   },
   sitemap: {
