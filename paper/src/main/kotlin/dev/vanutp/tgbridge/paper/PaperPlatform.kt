@@ -11,7 +11,9 @@ class PaperPlatform(private val plugin: JavaPlugin) : Platform() {
     override val configDir = plugin.dataFolder.toPath().absolute()
 
     override fun broadcastMessage(text: Component) {
-        plugin.server.broadcast(text)
+        for (p in plugin.server.onlinePlayers.filterNot { it.scoreboardTags.contains("hidden-telegram") }) {
+            p.sendMessage(text)
+        }
     }
 
     override fun getOnlinePlayerNames(): Array<String> {

@@ -99,5 +99,15 @@ class EventManager(private val plugin: PaperBootstrap) : Listener {
                 )
             )
         }
+
+        plugin.getCommand("tgshow")!!.setExecutor { commandSender, _, _, args ->
+            commandSender.getServer().getPlayer(commandSender.getName())?.removeScoreboardTag("hidden-telegram")
+            return@setExecutor true
+        }
+
+        plugin.getCommand("tghide")!!.setExecutor { commandSender, _, _, args ->
+            commandSender.getServer().getPlayer(commandSender.getName())?.addScoreboardTag("hidden-telegram")
+            return@setExecutor true
+        }
     }
 }
