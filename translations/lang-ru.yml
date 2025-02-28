@@ -15,6 +15,9 @@ telegram:
     challenge: "🏅 <b>{username} завершил испытание {title}</b>\n\n<i>{description}</i>"
   playerList: "📝 <b>Онлайн {count}:</b> {usernames}"
   playerListZeroOnline: "📝 <b>Онлайн 0</b>"
+  # Available placeholders: tps5s, tps10s, tps1m, tps5m, tps15m,
+  # mspt10sAvg, mspt1mAvg, mspt5mAvg
+  tps: "📊 <b>TPS:</b> <code>{tps10s}</code>\n⏱️ <b>MSPT:</b> <code>{mspt10sAvg}</code>"
 # This section uses MiniMessage formatting (in non-strict mode).
 # See https://docs.advntr.dev/minimessage/format.html for more information.
 # Additionally, {variable} syntax can be used instead of <variable> for some plain-text placeholders.
@@ -43,5 +46,16 @@ minecraft:
     codeFormatting: "<gray><hover:show_text:'<green>Нажми чтобы скопировать'><click:copy_to_clipboard:'{text_plain}'><insert:'{text_plain}'><text>"
     quoteFormatting: "<italic><text>"
     spoilerFormatting: "<obfuscated><hover:show_text:'<text>'><text_plain>"
+  serviceMessages:
+    members:
+      joined: "<dark_purple>[вступил в группу]"
+      left: "<dark_purple>[покинул группу]"
+      added: "<dark_purple>[добавил <users> в группу]"
+      removed: "<dark_purple>[исключил <user> из группы]"
+    videoChat:
+      scheduled: "<light_purple>[запланировал видеочат]"
+      started: "<light_purple>[начал видеочат]"
+      ended: "<light_purple>[завершил видеочат]"
+      invited: "<light_purple>[пригласил <users> в видеочат]"
 # Don't change the version manually
 version: 3

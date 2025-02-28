@@ -37,6 +37,22 @@ data class LangTelegram(
 )
 
 @Serializable
+data class MembersService(
+    val joined: String = "<dark_purple>[joined the group]",
+    val left: String = "<dark_purple>[left the group]",
+    val added: String = "<dark_purple>[added <users> to the group]",
+    val removed: String = "<dark_purple>[removed <user> from the group]",
+)
+
+@Serializable
+data class VideoChatService(
+    val scheduled: String = "<light_purple>[scheduled a video chat]",
+    val started: String = "<light_purple>[started a video chat]",
+    val ended: String = "<light_purple>[ended the video chat]",
+    val invited: String = "<light_purple>[invited <users> to the video chat]",
+)
+
+@Serializable
 data class MessageMeta(
     val reply: String = "<blue>[R <sender>: <text>]",
     val replyToMinecraft: String = "<blue>[R <text>]",
@@ -76,10 +92,17 @@ data class MessageFormatting(
 )
 
 @Serializable
+data class ServiceMessages(
+    val members: MembersService = MembersService(),
+    val videoChat: VideoChatService = VideoChatService(),
+)
+
+@Serializable
 data class LangMinecraft(
     val format: String = "<aqua>\\<<sender>></aqua> <text>",
     val messageMeta: MessageMeta = MessageMeta(),
     val messageFormatting: MessageFormatting = MessageFormatting(),
+    val serviceMessages: ServiceMessages = ServiceMessages(),
 )
 
 @Serializable

@@ -107,11 +107,8 @@ object TelegramToMinecraftConverter {
     }
 
     private fun forwardFromToText(msg: TgMessage): Component? {
-        val forwardFromName = msg.forwardFrom?.let { _ ->
-            (msg.forwardFrom.firstName + " " + (msg.forwardFrom.lastName ?: "")).trim()
-        } ?: msg.forwardFromChat?.let {
-            msg.forwardFromChat.title
-        }
+        val forwardFromName = msg.forwardFrom?.fullName
+            ?: msg.forwardFromChat?.title
         return forwardFromName?.let {
             lang.minecraft.messageMeta.forward.formatMiniMessage(listOf("from" to it))
         }
@@ -220,6 +217,46 @@ object TelegramToMinecraftConverter {
         return components.fold(Component.text()) { acc, component -> acc.append(component) }.build()
     }
 
+    private fun serviceMessageToText(msg: TgMessage): Component? {
+        val vcLang = lang.minecraft.serviceMessages.videoChat
+        listOf(
+            msg.videoChatScheduled to vcLang.scheduled,
+            msg.videoChatStarted to vcLang.started,
+            msg.videoChatEnded to vcLang.ended,
+        ).forEach {
+            if (it.first != null) {
+                return it.second.formatMiniMessage()
+            }
+        }
+        msg.videoChatParticipantsInvited?.let { inv ->
+            return vcLang.invited.formatMiniMessage(
+                listOf("users" to inv.users.joinToString(", ") { it.fullName })
+            )
+        }
+
+        val membersLang = lang.minecraft.serviceMessages.members
+        msg.newChatMembers?.let { users ->
+            return if (msg.from == users[0]) {
+                membersLang.joined.formatMiniMessage()
+            } else {
+                membersLang.added.formatMiniMessage(
+                    listOf("users" to users.joinToString(", ") { it.fullName }),
+                )
+            }
+        }
+        msg.leftChatMember?.let { user ->
+            return if (msg.from == user) {
+                membersLang.left.formatMiniMessage()
+            } else {
+                membersLang.removed.formatMiniMessage(
+                    listOf("user" to user.fullName),
+                )
+            }
+        }
+
+        return null
+    }
+
     fun convert(msg: TgMessage, botId: Long): Component {
         val components = mutableListOf<Component>()
 
@@ -247,6 +284,7 @@ object TelegramToMinecraftConverter {
             )
         }
 
+        serviceMessageToText(msg)?.let { components.add(it) }
         forwardFromToText(msg)?.let { components.add(it) }
         replyToText(msg, botId)?.let { components.add(it) }
         mediaToText(msg)?.let { components.add(it) }

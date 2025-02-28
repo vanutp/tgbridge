@@ -19,7 +19,10 @@ data class TgUser(
     @SerializedName("last_name")
     val lastName: String?,
     val username: String?,
-)
+) {
+    val fullName
+        get() = (firstName + " " + (lastName ?: "")).trim()
+}
 
 data class TgChat(
     val id: Long,
@@ -70,9 +73,7 @@ data class TgExternalReplyInfo(
     override val poll: TgPoll? = null,
 ) : TgMessageMedia {
     val senderName
-        get() = origin.senderUser?.let {
-            (it.firstName + " " + (it.lastName ?: "")).trim()
-        }
+        get() = origin.senderUser?.fullName
             ?: origin.senderUserName
             ?: origin.senderChat?.title
             ?: origin.chat?.title
@@ -132,6 +133,10 @@ data class TgEntity(
     val url: String? = null,
 )
 
+data class TgVideoChatParticipantsInvited(
+    val users: List<TgUser>,
+)
+
 data class TgMessage(
     val chat: TgChat,
     @SerializedName("message_id")
@@ -172,13 +177,25 @@ data class TgMessage(
     override val poll: TgPoll? = null,
     @SerializedName("pinned_message")
     val pinnedMessage: TgMessage? = null,
+
+    @SerializedName("new_chat_members")
+    val newChatMembers: List<TgUser>? = null,
+    @SerializedName("left_chat_member")
+    val leftChatMember: TgUser? = null,
+
+    @SerializedName("video_chat_scheduled")
+    val videoChatScheduled: TgAny? = null,
+    @SerializedName("video_chat_started")
+    val videoChatStarted: TgAny? = null,
+    @SerializedName("video_chat_ended")
+    val videoChatEnded: TgAny? = null,
+    @SerializedName("video_chat_participants_invited")
+    val videoChatParticipantsInvited: TgVideoChatParticipantsInvited? = null,
 ) : TgMessageMedia {
     val senderName
         get() = authorSignature
             ?: senderChat?.title
-            ?: from?.let {
-                (it.firstName + " " + (it.lastName ?: "")).trim()
-            }
+            ?: from?.fullName
             ?: ""
     val effectiveText
         get() = text ?: caption
