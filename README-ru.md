@@ -15,7 +15,7 @@
 <div align="center">
 
 [![Modrinth - Downloads](https://img.shields.io/modrinth/dt/tgbridge?style=for-the-badge&logo=modrinth&label=Download)](https://modrinth.com/mod/tgbridge)
-[![Docs](https://img.shields.io/website?url=https%3A%2F%2Ftgbridge.vanutp.dev&style=for-the-badge&label=Docs&color=%238b00dd)](https://tgbridge.vanutp.dev/)
+[![Docs](https://img.shields.io/website?url=https%3A%2F%2Ftgbridge.vanutp.dev&style=for-the-badge&label=Docs&color=%238b00dd)](https://tgbridge.vanutp.dev/ru/)
 </div>
 
 https://github.com/vanutp/tgbridge/assets/11143488/697a6d5d-1f2c-4156-bf8d-140446a83f5e
