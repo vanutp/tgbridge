@@ -1,3 +1,17 @@
+### 0.7.0
+
+- New docs website: https://tgbridge.vanutp.dev
+- paper: Implement full integration for Chatty, better support for incompatible chat plugins (CMI, AdvancedChat, etc.). See docs for details
+- paper: Fix EssentialsX vanish integration
+- Support formatting for death messages. Also fixes incompatibilities with some mods/plugins
+- Send different message when a player joins for the first-time
+- Fix mod crash when a xaero waypoint is shared while integrations.bluemapUrl isn't set
+- Fix receiving group messages when the topic id is 1 (primary topic)
+- Send start message to the chat only when the server is fully started
+- Implement /tps Telegram command
+- Make the /tgbridge reload set bot token when the mod isn't set up
+- Support join/leave messages and video chat service messages
+
 ### 0.6.1
 
 - Add CMI to legacy chat listener exceptions list. Fixes CMI global chat compatibility.
