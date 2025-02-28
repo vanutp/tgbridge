@@ -2,6 +2,8 @@ package dev.vanutp.tgbridge.common
 
 import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.YamlConfiguration
+import com.charleskorn.kaml.YamlMap
+import com.charleskorn.kaml.yamlMap
 import dev.vanutp.tgbridge.common.models.Config
 import dev.vanutp.tgbridge.common.models.Lang
 import kotlinx.serialization.decodeFromString
@@ -12,6 +14,9 @@ import java.nio.file.Path
 import kotlin.io.path.*
 
 object ConfigManager {
+    private const val LATEST_CONFIG_VERSION = 3
+    private const val LATEST_LANG_VERSION = 3
+
     private val yaml = Yaml(configuration = YamlConfiguration(strictMode = false))
     private lateinit var configDir: Path
     lateinit var config: Config
@@ -79,12 +84,12 @@ object ConfigManager {
                         .replace("{deathMessage}", "<death_message>")
                 ),
             )
-        } else if (lang.version != 3) {
+        } else if (lang.version != LATEST_LANG_VERSION) {
             throw Exception("Unsupported lang version ${lang.version}")
         }
     }
 
-    private fun migrateConfig() {
+    private fun migrateConfig(configPath: Path) {
         if (config.version == 1) {
             config = config.copy(
                 version = 2,
@@ -92,7 +97,17 @@ object ConfigManager {
                     requirePrefixInMinecraft = null,
                 ),
             )
-        } else if (config.version != 2) {
+        } else if (config.version == 2) {
+            val data = yaml.parseToYamlNode(configPath.readText())
+            config = config.copy(
+                version = 3,
+                integrations = config.integrations.copy(
+                    bluemapUrl = data
+                        .yamlMap.get<YamlMap>("messages")
+                        ?.getScalar("bluemapUrl")?.content ?: ""
+                )
+            )
+        } else if (config.version != LATEST_CONFIG_VERSION) {
             throw Exception("Unsupported config version ${config.version}")
         }
         if (config.general.chatId > 0) {
@@ -111,16 +126,16 @@ object ConfigManager {
 
         val configPath = configDir.resolve("config.yml")
         if (configPath.notExists()) {
-            configPath.writeText(yaml.encodeToString(Config()))
+            configPath.writeText(yaml.encodeToString(Config(version = LATEST_CONFIG_VERSION)))
         }
         config = yaml.decodeFromString<Config>(configPath.readText())
-        migrateConfig()
+        migrateConfig(configPath)
         // write new keys & update docs
         configPath.writeText(yaml.encodeToString(config))
 
         val langPath = configDir.resolve("lang.yml")
         if (langPath.notExists()) {
-            langPath.writeText(yaml.encodeToString(Lang(version = 2)))
+            langPath.writeText(yaml.encodeToString(Lang(version = LATEST_LANG_VERSION)))
         }
         lang = yaml.decodeFromString<Lang>(langPath.readText())
         migrateLang()
