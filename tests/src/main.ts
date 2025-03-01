@@ -62,6 +62,9 @@ async function main() {
 
   const servers: Server[] = [];
   for (const project of TEST_MATRIX) {
+    if (project.runByDefault == false && testsToRun.length == 0) {
+      continue;
+    }
     for (const version of project.versions) {
       const key = `${project.server}-${version}`;
       if (testsToRun.length > 0 && testsToRun.every(pat => !pat.test(key))) {

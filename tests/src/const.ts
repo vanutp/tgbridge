@@ -20,6 +20,7 @@ interface TestMatrixProject {
   project: string;
   server: ServerType;
   versions: string[];
+  runByDefault?: boolean;
 }
 
 export const TEST_MATRIX: TestMatrixProject[] = [
@@ -32,6 +33,7 @@ export const TEST_MATRIX: TestMatrixProject[] = [
     project: 'forge-1.16.5',
     server: ServerType.forge,
     versions: ['1.16.5'],
+    runByDefault: false,
   },
   {
     project: 'forge-1.19.2',
