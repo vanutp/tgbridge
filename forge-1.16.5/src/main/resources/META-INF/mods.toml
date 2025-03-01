@@ -1,0 +1,25 @@
+modLoader="javafml"
+loaderVersion="[36,)"
+license='MIT'
+
+[[mods]]
+modId="tgbridge"
+version="${version}"
+displayName="Telegram Bridge"
+authors="vanutp"
+description="Sync your game with Telegram"
+logoFile="icon.png"
+displayURL="https://github.com/vanutp/tgbridge"
+displayTest="IGNORE_ALL_VERSION"
+[[dependencies.tgbridge]]
+    modId="forge"
+    mandatory=true
+    versionRange="[36,)"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.tgbridge]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.16.5]"
+    ordering="NONE"
+    side="BOTH"

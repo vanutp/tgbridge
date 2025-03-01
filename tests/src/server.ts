@@ -179,8 +179,8 @@ simulation-distance=2
         }
         await delay(500);
         timeWaited += 500;
-        if (timeWaited >= 30_000) {
-          throw new Error("Server hasn't started after 30s");
+        if (timeWaited >= 60_000) {
+          throw new Error("Server hasn't started after 60s");
         }
       }
     }
@@ -198,8 +198,8 @@ simulation-distance=2
       }
       await delay(500);
       timeWaited += 500;
-      if (timeWaited >= 30_000) {
-        throw new Error("Server hasn't started after 30s");
+      if (timeWaited >= 60_000) {
+        throw new Error("Server hasn't started after 60s");
       }
     }
     await this.client.waitForSpawn();

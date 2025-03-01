@@ -29,6 +29,11 @@ export const TEST_MATRIX: TestMatrixProject[] = [
     versions: ['1.19.2', '1.19.4', '1.20.1', '1.21.1', '1.21.4'],
   },
   {
+    project: 'forge-1.16.5',
+    server: ServerType.forge,
+    versions: ['1.16.5'],
+  },
+  {
     project: 'forge-1.19.2',
     server: ServerType.forge,
     versions: ['1.19.2'],

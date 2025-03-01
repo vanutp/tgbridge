@@ -11,6 +11,7 @@
 - Implement /tps Telegram command
 - Make the /tgbridge reload set bot token when the mod isn't set up
 - Support join/leave messages and video chat service messages
+- Support Forge 1.16.5
 
 ### 0.6.1
 

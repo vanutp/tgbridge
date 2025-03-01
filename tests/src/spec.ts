@@ -22,7 +22,8 @@ async function advancement(server: Server) {
   await delay(50)
   const msg = server.tg.findMessage(msg => (msg.text ?? '').includes('Stone Age'))
   assert(msg)
-  assert(msg.text!.includes('Mine Stone with your new Pickaxe'))
+  // 1.16.5 and other versions have different casing
+  assert(msg.text!.toLowerCase().includes('mine stone with your new pickaxe'))
 }
 
 async function command(server: Server) {

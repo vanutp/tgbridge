@@ -37,3 +37,9 @@ export function makeServer(type: ServerType, version: string, gradleProject: str
 export async function logNoNewline(message: string) {
   await Deno.stdout.write(new TextEncoder().encode(message))
 }
+
+const JAVA_8_HOME = Deno.env.get("JAVA_HOME_8_X64")
+if (!JAVA_8_HOME) {
+  throw new Error("JAVA_HOME_8_X64 not set")
+}
+export const JAVA_8_PATH = JAVA_8_HOME + "/bin/java"

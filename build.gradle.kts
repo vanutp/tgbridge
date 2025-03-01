@@ -19,6 +19,11 @@ val kotlinxCoroutinesVersion: String by project
 val kotlinxSerializationVersion: String by project
 val adventureVersion: String by project
 
+// I didn't find a good kotlin for paper library
+// kotlinforforge for 1.16.5 hasn't been updated for a long time
+fun checkBundleKotlin(projectName: String) =
+    listOf("paper", "forge-1.16.5").contains(projectName)
+
 subprojects {
     apply {
         plugin("org.jetbrains.kotlin.jvm")
@@ -36,13 +41,12 @@ subprojects {
     }
 
     dependencies {
-        if (project.name == "paper") {
-            // I didn't find a good kotlin for paper library
-            implementation("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
-            implementation("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
-            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${kotlinxCoroutinesVersion}")
-            implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${kotlinxSerializationVersion}")
-            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${kotlinxSerializationVersion}")
+        if (checkBundleKotlin(project.name)) {
+            shadow(implementation("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")!!)
+            shadow(implementation("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")!!)
+            shadow(implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${kotlinxCoroutinesVersion}")!!)
+            shadow(implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${kotlinxSerializationVersion}")!!)
+            shadow(implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${kotlinxSerializationVersion}")!!)
         } else {
             compileOnly("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
             compileOnly("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
@@ -105,7 +109,7 @@ subprojects {
             // fixes "Modules net.kyori.... and tgbridge export package net.kyori..." in forge
             mergeServiceFiles()
 
-            if (project.name == "paper") {
+            if (checkBundleKotlin(project.name)) {
                 relocate("kotlin", "tgbridge.shaded.kotlin")
                 relocate("kotlinx", "tgbridge.shaded.kotlinx")
                 relocate("org.jetbrains", "tgbridge.shaded.org.jetbrains")
@@ -134,6 +138,7 @@ subprojects {
 task("publishAll") {
     group = "publishing"
     dependsOn(":fabric:modrinth")
+    dependsOn(":forge-1.16.5:modrinth")
     dependsOn(":forge-1.19.2:modrinth")
     dependsOn(":forge-1.20.1:modrinth")
     dependsOn(":neoforge-1.21:modrinth")

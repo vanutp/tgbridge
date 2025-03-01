@@ -15,6 +15,7 @@ rootProject.name = "tgbridge"
 include(
     "common",
     "paper",
+    "forge-1.16.5",
     "forge-1.19.2",
     "forge-1.20.1",
     "neoforge-1.21",
