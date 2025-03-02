@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 abstract class PlayerManagerMixin_modern {
     @Inject(method = "onPlayerConnect", at = @At("RETURN"))
     private void onPlayerConnect(ClientConnection connection, ServerPlayerEntity player, ConnectedClientData clientData, CallbackInfo ci) {
-        CustomEvents.Companion.getPLAYER_JOIN_EVENT().invoker().onPlayerJoin(player, ((IHasPlayedBefore)player).getHasPlayedBefore());
+        CustomEvents.Companion.getPLAYER_JOIN_EVENT().invoker().onPlayerJoin(player, ((IHasPlayedBefore)player).tgbridge$getHasPlayedBefore());
     }
 
     @Inject(method = "remove", at = @At("HEAD"))

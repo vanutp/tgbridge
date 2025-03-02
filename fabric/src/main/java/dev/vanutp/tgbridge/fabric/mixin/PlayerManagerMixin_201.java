@@ -16,7 +16,7 @@ abstract class PlayerManagerMixin_201 {
     @Dynamic
     @Inject(method = "method_14570", at = @At("RETURN"))
     private void onPlayerConnect(ClientConnection connection, ServerPlayerEntity player, CallbackInfo ci) {
-        CustomEvents.Companion.getPLAYER_JOIN_EVENT().invoker().onPlayerJoin(player, ((IHasPlayedBefore) player).getHasPlayedBefore());
+        CustomEvents.Companion.getPLAYER_JOIN_EVENT().invoker().onPlayerJoin(player, ((IHasPlayedBefore) player).tgbridge$getHasPlayedBefore());
     }
 
     @Inject(method = "remove", at = @At("HEAD"))

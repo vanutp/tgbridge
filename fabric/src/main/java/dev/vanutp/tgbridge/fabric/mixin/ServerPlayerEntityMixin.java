@@ -22,7 +22,7 @@ abstract class ServerPlayerEntityMixin implements IHasPlayedBefore {
     }
 
     @Override
-    public boolean getHasPlayedBefore() {
+    public boolean tgbridge$getHasPlayedBefore() {
         return hasPlayedBefore;
     }
 
