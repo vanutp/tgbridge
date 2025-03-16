@@ -88,16 +88,16 @@ class EventManager(private val plugin: PaperBootstrap) : Listener {
 
     private fun registerCommandHandlers() {
         plugin.getCommand("tgbridge")!!.setExecutor { commandSender, _, _, args ->
-            if (args[0] == "reload") {
-                return@setExecutor plugin.tgbridge.onReloadCommand(
-                    TBCommandContext(
-                        reply = { text ->
-                            commandSender.sendMessage(text)
-                        }
-                    )
-                )
+            if (args.toList() != listOf("reload")) {
+                return@setExecutor false
             }
-            return@setExecutor false
+            return@setExecutor plugin.tgbridge.onReloadCommand(
+                TBCommandContext(
+                    reply = { text ->
+                        commandSender.sendMessage(text)
+                    }
+                )
+            )
         }
 
         plugin.getCommand("tgshow")!!.setExecutor { commandSender, _, _, args ->
