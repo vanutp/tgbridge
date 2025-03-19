@@ -64,7 +64,7 @@ tasks {
 	named<RemapJarTask>("remapJar") {
 		inputFile = shadowJar.get().archiveFile
 		archiveFileName = "${rootProject.name}-${rootProject.version}-${project.name}.jar"
-		destinationDirectory.set(file("../build/release"))
+		destinationDirectory.set(rootProject.layout.buildDirectory.dir("release"))
 	}
 }
 

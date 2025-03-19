@@ -6,7 +6,7 @@ plugins {
 }
 
 repositories {
-    maven("https://maven.minecraftforge.net/releases")
+    maven("https://maven.neoforged.net/releases")
     maven {
         name = "Kotlin for Forge"
         url = uri("https://thedarkcolour.github.io/KotlinForForge/")
@@ -16,12 +16,12 @@ repositories {
 
 val minecraftVersion: String by project
 val yarnMappings: String by project
-val forgeVersion: String by project
+val neoVersion: String by project
 val forgeKotlinVersion: String by project
 
 dependencies {
     minecraft("com.mojang:minecraft:${minecraftVersion}")
-    forge("net.minecraftforge:forge:${minecraftVersion}-${forgeVersion}")
+    forge("net.neoforged:forge:${minecraftVersion}-${neoVersion}")
     mappings("net.fabricmc:yarn:${yarnMappings}:v2")
 
     implementation("thedarkcolour:kotlinforforge:${forgeKotlinVersion}")
@@ -47,14 +47,14 @@ tasks {
     named<RemapJarTask>("remapJar") {
         inputFile = shadowJar.get().archiveFile
         archiveFileName = "${rootProject.name}-${rootProject.version}-${project.name}.jar"
-        destinationDirectory.set(file("../build/release"))
+        destinationDirectory.set(rootProject.layout.buildDirectory.dir("release"))
     }
 }
 
 modrinth {
     uploadFile.set(tasks.remapJar)
-    gameVersions.addAll("1.19.2")
-    loaders.addAll("forge")
+    gameVersions.addAll("1.20.1")
+    loaders.addAll("forge", "neoforge")
     dependencies {
         required.project("kotlin-for-forge")
     }
