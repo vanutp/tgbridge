@@ -33,12 +33,15 @@ See https://tgbridge.vanutp.dev/en/quickstart
 
 ## Contributions
 
-Here's how you can help:
+Want to help the project? Here's how you can help:
 
-- Open an issue to suggest improvements or report bugs
-- Look for issues labeled "help wanted" if you want to contribute code
-- Before working on a pull request, please discuss your proposed changes in an issue first - this helps
-  avoid duplicate work and ensures your contribution aligns with the project's goals
+- **⭐️ the repository**: Your support is important to me :)
+- **Open an issue**: Open an issue to suggest improvements or report bugs
+- **Vote for features**: Leave a 👍 on an issue if you are interested in the feature
+- **Send a PR**: Look for issues labeled "help wanted" if you want to contribute
+- Before working on a pull request, please discuss your proposed 
+  changes in an issue first — this helps avoid duplicate work and ensures your contribution
+  aligns with the project goals
 
 ## Acknowledgements
 
