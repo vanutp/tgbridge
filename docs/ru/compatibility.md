@@ -17,13 +17,13 @@
 
 - [Chatty](https://www.spigotmc.org/resources/chatty-lightweight-universal-bukkit-chat-system-solution-1-7-10-1-20.59411/)
 
-Поддержка из коробки для [AdvancedChat](https://www.spigotmc.org/resources/1-17-1-21-4-%E2%AD%95-advancedchat-%E2%AD%95-ai-powered-chat-moderation-%E2%AD%90-chat-format-%E2%9C%85-50-major-features.116061/)
-и [CMI](https://www.spigotmc.org/resources/cmi-300-commands-insane-kits-portals-essentials-economy-mysql-sqlite-much-more.3742/)
-на данный момент не реализована из-за отсутствия у этих проектов опубликованных API
-(см. [#49](https://github.com/vanutp/tgbridge/issues/49), [#50](https://github.com/vanutp/tgbridge/issues/50)).
+Статус поддержки других плагинов: [#71](https://github.com/vanutp/tgbridge/issues/71).
+Если вам нужна поддержка вашего плагина, оставьте комментарий под этим issue.
 
-Чтобы использовать tgbridge с этими плагинами, задайте опцию
-[`integrations.incompatiblePluginChatPrefix`](/ru/reference#incompatiblepluginchatprefix)
+Чтобы использовать tgbridge с неподдерживаемыми плагинами, задайте опцию
+[`integrations.incompatiblePluginChatPrefix`](/ru/reference#incompatiblepluginchatprefix).
+Она использует костыль для работы с любым плагином, но некоторые функции могут работать неправильно.
+Например, игроки в "муте" все равно смогут отправлять сообщения в Telegram-чат.
 
 ## Vanish
 

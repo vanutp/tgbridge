@@ -17,13 +17,12 @@ Works out of the box with:
 
 - [Chatty](https://www.spigotmc.org/resources/chatty-lightweight-universal-bukkit-chat-system-solution-1-7-10-1-20.59411/)
 
-Out-of-the-box support for [AdvancedChat](https://www.spigotmc.org/resources/1-17-1-21-4-%E2%AD%95-advancedchat-%E2%AD%95-ai-powered-chat-moderation-%E2%AD%90-chat-format-%E2%9C%85-50-major-features.116061/)
-and [CMI](https://www.spigotmc.org/resources/cmi-300-commands-insane-kits-portals-essentials-economy-mysql-sqlite-much-more.3742/)
-is currently not implemented due to the lack of published APIs by these projects
-(see [#49](https://github.com/vanutp/tgbridge/issues/49), [#50](https://github.com/vanutp/tgbridge/issues/50)).
+Support for other plugins is tracked in [#71](https://github.com/vanutp/tgbridge/issues/71).
+If you need support for your plugin, please leave a comment there.
 
-To use tgbridge with these plugins, set the [`integrations.incompatiblePluginChatPrefix`](/en/reference#incompatiblepluginchatprefix)
-config option
+To use tgbridge with unsupported plugins, set the [`integrations.incompatiblePluginChatPrefix`](/en/reference#incompatiblepluginchatprefix)
+config option. It uses a workaround to work with any plugin, but some features may not function correctly.
+For example, players "muted" by a plugin will still be able to send messages to the Telegram chat.
 
 ## Vanish
 
