@@ -5,6 +5,12 @@ plugins {
     id("dev.architectury.loom")
 }
 
+loom {
+    forge {
+        mixinConfig("tgbridge.mixins.json")
+    }
+}
+
 repositories {
     maven("https://maven.minecraftforge.net/releases")
     maven {

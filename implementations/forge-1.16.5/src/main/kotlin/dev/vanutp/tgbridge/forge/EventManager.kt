@@ -9,8 +9,6 @@ import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.server.command.CommandManager
 import net.minecraft.server.command.ServerCommandSource
 import net.minecraft.text.LiteralText
-import net.minecraft.text.Text
-import net.minecraft.text.TranslatableText
 import net.minecraftforge.common.MinecraftForge.EVENT_BUS
 import net.minecraftforge.event.RegisterCommandsEvent
 import net.minecraftforge.event.ServerChatEvent
@@ -57,11 +55,7 @@ class EventManager(private val tgbridge: ForgeTelegramBridge) {
 
     private fun registerPlayerJoinListener() {
         EVENT_BUS.addListener { e: PlayerEvent.PlayerLoggedInEvent ->
-            val hasPlayedBefore = e.player.persistentData.run {
-                getBoolean("hasPlayedBefore").also {
-                    putBoolean("hasPlayedBefore", true)
-                }
-            }
+            val hasPlayedBefore = (e.player as IHasPlayedBefore).`tgbridge$getHasPlayedBefore`()
             tgbridge.onPlayerJoin(
                 getPlayerName(e.player).string,
                 hasPlayedBefore,

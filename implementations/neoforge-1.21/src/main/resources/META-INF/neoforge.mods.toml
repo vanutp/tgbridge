@@ -12,6 +12,9 @@ logoFile = "icon.png"
 displayURL = "https://github.com/vanutp/tgbridge"
 displayTest = "IGNORE_ALL_VERSION"
 
+[[mixins]]
+config = "tgbridge.mixins.json"
+
 [[dependencies.tgbridge]]
 modId = "neoforge"
 type = "required"
