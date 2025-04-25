@@ -1,3 +1,11 @@
+### 0.7.1
+
+- Fix first time join message displaying more than once on (Neo)Forge
+- Respect `messages.useRealUsername` config option for death messages
+- 1.21.5 support
+- paper: Add temporary /tghide and /tgshow commands (by @RedstoneFX)
+
+
 ### 0.7.0
 
 - New docs website: https://tgbridge.vanutp.dev
