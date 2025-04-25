@@ -1,18 +1,17 @@
 package dev.vanutp.tgbridge.fabric
 
-import dev.vanutp.tgbridge.fabric.CustomEvents.*
 import net.fabricmc.fabric.api.event.EventFactory
+import net.minecraft.advancement.AdvancementDisplay
 import net.minecraft.entity.damage.DamageSource
 import net.minecraft.server.network.ServerPlayerEntity
-import net.minecraft.text.Text
 
 
 class CustomEvents {
     companion object {
         val ADVANCEMENT_EARN_EVENT = EventFactory.createArrayBacked(AdvancementEarn::class.java) { handlers ->
-            AdvancementEarn { player, advancementType, advancementNameComponent ->
+            AdvancementEarn { player, display ->
                 for (handler in handlers) {
-                    handler.onAdvancementEarn(player, advancementType, advancementNameComponent)
+                    handler.onAdvancementEarn(player, display)
                 }
             }
         }
@@ -40,7 +39,7 @@ class CustomEvents {
     }
 
     fun interface AdvancementEarn {
-        fun onAdvancementEarn(player: ServerPlayerEntity, advancementType: String, advancementNameComponent: Text): Unit
+        fun onAdvancementEarn(player: ServerPlayerEntity, display: AdvancementDisplay): Unit
     }
 
     fun interface PlayerJoin {

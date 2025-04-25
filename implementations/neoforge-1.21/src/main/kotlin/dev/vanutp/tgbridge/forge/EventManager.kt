@@ -1,6 +1,7 @@
 package dev.vanutp.tgbridge.forge
 
 import com.mojang.brigadier.context.CommandContext
+import dev.vanutp.tgbridge.common.models.TBAdvancementEvent
 import dev.vanutp.tgbridge.common.models.TBCommandContext
 import dev.vanutp.tgbridge.common.models.TBPlayerEventData
 import net.minecraft.entity.player.PlayerEntity
@@ -81,13 +82,13 @@ object EventManager {
             if (display == null || !display.shouldAnnounceToChat()) {
                 return@addListener
             }
-            val advancementTypeKey = "chat.type.advancement." + (display.frame?.name?.lowercase() ?: return@addListener)
-            val advancementText =
-                Text.translatable(advancementTypeKey, getPlayerName(e.entity), advancement.name.get())
+            val type = display.frame?.name?.lowercase() ?: return@addListener
             NeoForgeTelegramBridge.onPlayerAdvancement(
-                TBPlayerEventData(
+                TBAdvancementEvent(
                     getPlayerName(e.entity).string,
-                    advancementText.toAdventure(),
+                    type,
+                    display.title.toAdventure(),
+                    display.description.toAdventure(),
                 )
             )
         }

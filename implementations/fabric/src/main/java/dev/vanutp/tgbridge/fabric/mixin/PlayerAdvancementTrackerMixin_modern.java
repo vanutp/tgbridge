@@ -12,7 +12,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(PlayerAdvancementTracker.class)
 abstract class PlayerAdvancementTrackerMixin_modern {
-    @Shadow private ServerPlayerEntity owner;
+    @Shadow
+    private ServerPlayerEntity owner;
 
     @Inject(
         method = "grantCriterion",
@@ -25,14 +26,9 @@ abstract class PlayerAdvancementTrackerMixin_modern {
     private void grantCriterion(AdvancementEntry _advancement, String criterionName, CallbackInfoReturnable<Boolean> cir) {
         final var advancement = _advancement.value();
         final var display = advancement.display().orElse(null);
-        if (display == null || !display.shouldAnnounceToChat()) {
+        if (display == null) {
             return;
         }
-        final var frame = display.getFrame();
-        if (frame == null) {
-            return;
-        }
-        final var type = frame.name().toLowerCase();
-        CustomEvents.Companion.getADVANCEMENT_EARN_EVENT().invoker().onAdvancementEarn(owner, type, advancement.name().get());
+        CustomEvents.Companion.getADVANCEMENT_EARN_EVENT().invoker().onAdvancementEarn(owner, display);
     }
 }

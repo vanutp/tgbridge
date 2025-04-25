@@ -5,7 +5,6 @@ import net.minecraft.advancement.Advancement;
 import net.minecraft.advancement.AdvancementDisplay;
 import net.minecraft.advancement.PlayerAdvancementTracker;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -31,17 +30,9 @@ abstract class PlayerAdvancementTrackerMixin_201 {
     )
     private void grantCriterion(Advancement advancement, String criterionName, CallbackInfoReturnable<Boolean> cir) throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         final var display = (AdvancementDisplay) Advancement.class.getMethod("method_686").invoke(advancement);
-        if (display == null || !display.shouldAnnounceToChat()) {
+        if (display == null) {
             return;
         }
-        final var frame = display.getFrame();
-        if (frame == null) {
-            return;
-        }
-        final var type = frame.name().toLowerCase();
-
-        final var toHoverableText = Advancement.class.getMethod("method_684");
-        final var name = (Text) toHoverableText.invoke(advancement);
-        CustomEvents.Companion.getADVANCEMENT_EARN_EVENT().invoker().onAdvancementEarn(owner, type, name);
+        CustomEvents.Companion.getADVANCEMENT_EARN_EVENT().invoker().onAdvancementEarn(owner, display);
     }
 }

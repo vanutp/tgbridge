@@ -6,3 +6,10 @@ data class TBPlayerEventData(
     val username: String,
     val text: Component,
 )
+
+data class TBAdvancementEvent(
+    val username: String,
+    val type: String,
+    val title: Component,
+    val description: Component,
+)

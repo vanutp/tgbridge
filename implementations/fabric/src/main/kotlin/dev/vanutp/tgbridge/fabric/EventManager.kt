@@ -1,6 +1,7 @@
 package dev.vanutp.tgbridge.fabric
 
 import com.mojang.brigadier.context.CommandContext
+import dev.vanutp.tgbridge.common.models.TBAdvancementEvent
 import dev.vanutp.tgbridge.common.models.TBCommandContext
 import dev.vanutp.tgbridge.common.models.TBPlayerEventData
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
@@ -77,17 +78,17 @@ object EventManager {
     }
 
     private fun registerPlayerAdvancementListener() {
-        CustomEvents.ADVANCEMENT_EARN_EVENT.register { player, advancementType, advancementNameComponent ->
-            if (player.isVanished()) {
+        CustomEvents.ADVANCEMENT_EARN_EVENT.register { player, display ->
+            if (player.isVanished() || !display.shouldAnnounceToChat()) {
                 return@register
             }
-            val advancementTypeKey = "chat.type.advancement.$advancementType"
-            val advancementText =
-                Text.translatable(advancementTypeKey, getPlayerName(player), advancementNameComponent)
+            val type = display.frame?.name?.lowercase() ?: return@register
             FabricTelegramBridge.onPlayerAdvancement(
-                TBPlayerEventData(
+                TBAdvancementEvent(
                     getPlayerName(player).string,
-                    advancementText.toAdventure()
+                    type,
+                    display.title.toAdventure(),
+                    display.description.toAdventure(),
                 )
             )
         }

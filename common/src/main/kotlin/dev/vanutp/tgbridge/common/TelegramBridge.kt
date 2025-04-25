@@ -7,6 +7,7 @@ import dev.vanutp.tgbridge.common.converters.TelegramFormattedText
 import dev.vanutp.tgbridge.common.converters.TelegramToMinecraftConverter
 import dev.vanutp.tgbridge.common.models.LastMessage
 import dev.vanutp.tgbridge.common.models.LastMessageType
+import dev.vanutp.tgbridge.common.models.TBAdvancementEvent
 import dev.vanutp.tgbridge.common.models.TBCommandContext
 import dev.vanutp.tgbridge.common.models.TBPlayerEventData
 import kotlinx.coroutines.*
@@ -265,44 +266,34 @@ abstract class TelegramBridge {
         )
     }
 
-    fun onPlayerAdvancement(e: TBPlayerEventData) = wrapMinecraftHandler {
+    fun onPlayerAdvancement(e: TBAdvancementEvent) = wrapMinecraftHandler {
         val advancementsCfg = config.events.advancementMessages
         if (!advancementsCfg.enable) {
             return@wrapMinecraftHandler
         }
-        val component = e.text as TranslatableComponent
-        val advancementTypeKey = component.key()
-        val squareBracketsComponent = component.args()[1] as TranslatableComponent
-        val advancementNameComponent = squareBracketsComponent.args()[0]
-        val advancementName = advancementNameComponent.asString()
+        val advancementName = e.title.asString()
         val advancementDescription = if (advancementsCfg.showDescription) {
-            advancementNameComponent.style().hoverEvent()?.let {
-                val advancementTooltipComponent = it.value() as Component
-                if (advancementTooltipComponent.children().size < 2) {
-                    return@let null
-                }
-                advancementTooltipComponent.children()[1].asString()
-            } ?: ""
+            e.description.asString()
         } else {
             ""
         }
-        val langKey = when (advancementTypeKey) {
-            "chat.type.advancement.task" -> {
+        val langKey = when (e.type) {
+            "task" -> {
                 if (!advancementsCfg.enableTask) return@wrapMinecraftHandler
                 lang.telegram.advancements.regular
             }
 
-            "chat.type.advancement.goal" -> {
+            "goal" -> {
                 if (!advancementsCfg.enableGoal) return@wrapMinecraftHandler
                 lang.telegram.advancements.goal
             }
 
-            "chat.type.advancement.challenge" -> {
+            "challenge" -> {
                 if (!advancementsCfg.enableChallenge) return@wrapMinecraftHandler
                 lang.telegram.advancements.challenge
             }
 
-            else -> throw TBAssertionFailed("Unknown advancement type $advancementTypeKey.")
+            else -> throw TBAssertionFailed("Unknown advancement type ${e.type}.")
         }
         sendMessage(
             langKey.formatLang(

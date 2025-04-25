@@ -1,5 +1,6 @@
 package dev.vanutp.tgbridge.paper
 
+import dev.vanutp.tgbridge.common.models.TBAdvancementEvent
 import dev.vanutp.tgbridge.common.models.TBCommandContext
 import dev.vanutp.tgbridge.common.models.TBPlayerEventData
 import dev.vanutp.tgbridge.paper.compat.EssentialsVanishCompat
@@ -47,7 +48,19 @@ class EventManager(private val plugin: PaperBootstrap) : Listener {
         if (e.player.isVanished()) {
             return
         }
-        plugin.tgbridge.onPlayerAdvancement(TBPlayerEventData(getPlayerName(e.player), e.message() ?: return))
+        val display = e.advancement.display
+        if (display == null || !display.doesAnnounceToChat()) {
+            return
+        }
+        val type = display.frame().name.lowercase()
+        plugin.tgbridge.onPlayerAdvancement(
+            TBAdvancementEvent(
+                getPlayerName(e.player),
+                type,
+                display.title(),
+                display.description(),
+            )
+        )
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
