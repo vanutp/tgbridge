@@ -16,7 +16,7 @@ abstract class ServerPlayerEntityMixin implements IHasPlayedBefore {
     @Unique
     private boolean hasPlayedBefore = false;
 
-    @Inject(method = "onDeath", at = @At("HEAD"))
+    @Inject(method = "onDeath", at = @At("TAIL"))
     private void onDeath(DamageSource damageSource, CallbackInfo ci) {
         CustomEvents.Companion.getPLAYER_DEATH_EVENT().invoker().onPlayerDeath((ServerPlayerEntity)(Object)this, damageSource);
     }
