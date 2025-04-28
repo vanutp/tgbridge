@@ -224,7 +224,6 @@ abstract class TelegramBridge {
         }
         val message = e.text.let {
             if (it is TranslatableComponent) {
-                Component.translatable()
                 val args = mutableListOf<Component>(Component.text(e.username))
                 args.addAll(it.arguments().map { it.asComponent() }.drop(1))
                 it.arguments(args)
