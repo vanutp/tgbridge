@@ -14,7 +14,7 @@ telegram:
     goal: "🎯 <b>{username} достиг цели {title}</b>\n\n<i>{description}</i>"
     challenge: "🏅 <b>{username} завершил испытание {title}</b>\n\n<i>{description}</i>"
   playerList: "📝 <b>Онлайн {count}:</b> {usernames}"
-  playerListZeroOnline: "📝 <b>Онлайн 0</b>"
+  playerListZeroOnline: "📝 <b>Сейчас никто не играет</b>"
   # Available placeholders: tps5s, tps10s, tps1m, tps5m, tps15m,
   # mspt10sAvg, mspt1mAvg, mspt5mAvg
   tps: "📊 <b>TPS:</b> <code>{tps10s}</code>\n⏱️ <b>MSPT:</b> <code>{mspt10sAvg}</code>"
@@ -36,14 +36,14 @@ minecraft:
     audio: "[Аудио]"
     sticker: "[Стикер]"
     video: "[Видео]"
-    videoMessage: "[Видеосообщение]"
+    videoMessage: "[Кружок]"
     voiceMessage: "[Голосовое сообщение]"
     poll: "[Опрос: <title>]"
   messageFormatting:
     linkFormatting: "<#7878ff><underlined><hover:show_text:'<green><url>'><click:open_url:'{url}'><text>"
     mentionFormatting: "<#7878ff><hover:show_text:'<green>Упомянуть (Shift+ЛКМ)'><insert:{username}><text>"
     hashtagFormatting: "<#7878ff><text>"
-    codeFormatting: "<gray><hover:show_text:'<green>Нажми чтобы скопировать'><click:copy_to_clipboard:'{text_plain}'><insert:'{text_plain}'><text>"
+    codeFormatting: "<gray><hover:show_text:'<green>Нажми, чтобы скопировать'><click:copy_to_clipboard:'{text_plain}'><insert:'{text_plain}'><text>"
     quoteFormatting: "<italic><text>"
     spoilerFormatting: "<obfuscated><hover:show_text:'<text>'><text_plain>"
   serviceMessages:
