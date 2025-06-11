@@ -24,8 +24,8 @@ telegram:
 minecraft:
   format: "<aqua>\\<<sender>></aqua> <text>"
   messageMeta:
-    reply: "<blue>[О <sender>: <text>]"
-    replyToMinecraft: "<blue>[О <text>]"
+    reply: "<blue>[Ответ <sender>: <text>]"
+    replyToMinecraft: "<blue>[Ответ <text>]"
     forward: "<gray>[П <from>]"
     pin: "<dark_aqua>[закрепляет сообщение]</dark_aqua> <message>"
     # Wrapper for all media types
