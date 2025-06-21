@@ -8,7 +8,9 @@
     "PlayerAdvancementTrackerMixin_modern",
     "PlayerManagerMixin_201",
     "PlayerManagerMixin_modern",
-    "ServerPlayerEntityMixin"
+    "ServerPlayerEntityMixin",
+    "ServerPlayerEntityMixin_215",
+    "ServerPlayerEntityMixin_modern"
   ],
   "plugin": "dev.vanutp.tgbridge.fabric.TgbridgeMixinPlugin",
   "injectors": {

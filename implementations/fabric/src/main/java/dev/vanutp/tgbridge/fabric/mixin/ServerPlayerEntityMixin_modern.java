@@ -1,10 +1,8 @@
 package dev.vanutp.tgbridge.fabric.mixin;
 
-import dev.vanutp.tgbridge.fabric.CustomEvents;
 import dev.vanutp.tgbridge.fabric.IHasPlayedBefore;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.storage.ReadView;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -12,9 +10,17 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ServerPlayerEntity.class)
-abstract class ServerPlayerEntityMixin {
-    @Inject(method = "onDeath", at = @At("TAIL"))
-    private void onDeath(DamageSource damageSource, CallbackInfo ci) {
-        CustomEvents.Companion.getPLAYER_DEATH_EVENT().invoker().onPlayerDeath((ServerPlayerEntity)(Object)this, damageSource);
+abstract class ServerPlayerEntityMixin_modern implements IHasPlayedBefore {
+    @Unique
+    private boolean hasPlayedBefore = false;
+
+    @Override
+    public boolean tgbridge$getHasPlayedBefore() {
+        return hasPlayedBefore;
+    }
+
+    @Inject(method = "readCustomData", at = @At("HEAD"))
+    private void readCustomData(ReadView view, CallbackInfo ci) {
+        hasPlayedBefore = true;
     }
 }

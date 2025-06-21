@@ -38,11 +38,14 @@ public final class TgbridgeMixinPlugin implements IMixinConfigPlugin {
     }
 
     private static final boolean isLte201 = minor < 20 || minor == 20 && patch <= 1;
+    private static final boolean isLte215 = minor < 21 || minor == 21 && patch <= 5;
     private static final Map<String, Boolean> CONDITIONS = ImmutableMap.of(
         "PlayerManagerMixin_201", isLte201,
         "PlayerManagerMixin_modern", !isLte201,
         "PlayerAdvancementTrackerMixin_201", isLte201,
-        "PlayerAdvancementTrackerMixin_modern", !isLte201
+        "PlayerAdvancementTrackerMixin_modern", !isLte201,
+        "ServerPlayerEntityMixin_215", isLte215,
+        "ServerPlayerEntityMixin_modern", !isLte215
     );
 
     @Override
