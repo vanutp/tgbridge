@@ -163,6 +163,7 @@ export class BotApiMock {
       'api_deleteMessage',
       'api_getUpdates',
       'api_deleteWebhook',
+      'api_setMyCommands',
     ];
     if (allowedMethods.includes(method)) {
       try {
@@ -177,6 +178,7 @@ export class BotApiMock {
         throw e;
       }
     } else {
+      console.warn(`Method ${_method} is not implemented in mock Bot API`);
       return BotApiMock.error(404, 'Not found');
     }
   }
@@ -247,6 +249,10 @@ export class BotApiMock {
   }
 
   private api_deleteWebhook(): boolean {
+    return true;
+  }
+
+  private api_setMyCommands(): boolean {
     return true;
   }
 
