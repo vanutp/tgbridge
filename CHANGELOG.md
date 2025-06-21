@@ -1,10 +1,15 @@
+### 0.7.2
+
+- fabric,paper: 1.21.6 support
+- fabric: Support mods that cancel death events, e.g. Incapacitated
+- paper: Restore console logging for Telegram messages
+
 ### 0.7.1
 
 - Fix first time join message displaying more than once on (Neo)Forge
 - Respect `messages.useRealUsername` config option for death messages
 - 1.21.5 support
 - paper: Add temporary /tghide and /tgshow commands (by @RedstoneFX)
-
 
 ### 0.7.0
 
