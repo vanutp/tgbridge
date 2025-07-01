@@ -1,3 +1,7 @@
+### 0.7.2-p1
+
+- fabric: mark 1.21.7 as supported
+
 ### 0.7.2
 
 - fabric,paper: 1.21.6 support
