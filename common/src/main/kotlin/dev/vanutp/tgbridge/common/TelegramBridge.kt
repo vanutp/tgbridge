@@ -2,14 +2,11 @@ package dev.vanutp.tgbridge.common
 
 import dev.vanutp.tgbridge.common.ConfigManager.config
 import dev.vanutp.tgbridge.common.ConfigManager.lang
+import dev.vanutp.tgbridge.common.compat.*
 import dev.vanutp.tgbridge.common.converters.MinecraftToTelegramConverter
 import dev.vanutp.tgbridge.common.converters.TelegramFormattedText
 import dev.vanutp.tgbridge.common.converters.TelegramToMinecraftConverter
-import dev.vanutp.tgbridge.common.models.LastMessage
-import dev.vanutp.tgbridge.common.models.LastMessageType
-import dev.vanutp.tgbridge.common.models.TBAdvancementEvent
-import dev.vanutp.tgbridge.common.models.TBCommandContext
-import dev.vanutp.tgbridge.common.models.TBPlayerEventData
+import dev.vanutp.tgbridge.common.models.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -22,14 +19,31 @@ import kotlin.math.max
 
 abstract class TelegramBridge {
     private val coroutineScope = CoroutineScope(Dispatchers.IO).plus(SupervisorJob())
-    protected abstract val logger: AbstractLogger
-    protected abstract val platform: Platform
+    protected abstract val logger: ILogger
+    abstract val platform: IPlatform
     private var initialized: Boolean = false
+    private var started: Boolean = false
     private lateinit var bot: TelegramBot
     private var spark: SparkHelper? = null
 
     private var lastMessage: LastMessage? = null
     private val lastMessageLock = Mutex()
+
+    private val availableIntegrations: MutableList<AbstractCompat> = mutableListOf()
+    lateinit var loadedIntegrations: List<AbstractCompat> private set
+
+    companion object {
+        private var _INSTANCE: TelegramBridge? = null
+        val INSTANCE: TelegramBridge
+            get() = _INSTANCE ?: throw UninitializedPropertyAccessException("TelegramBridge is not initialized yet")
+    }
+
+    init {
+        if (_INSTANCE != null) {
+            throw IllegalStateException("TelegramBridge is already initialized")
+        }
+        _INSTANCE = this
+    }
 
     fun init() {
         logger.info("tgbridge starting on ${platform.name}")
@@ -44,18 +58,32 @@ abstract class TelegramBridge {
             bot.init()
         }
         registerTelegramHandlers()
-        coroutineScope.launch {
-            bot.startPolling(coroutineScope)
-        }
+        bot.startPolling(coroutineScope)
         initialized = true
     }
 
-    fun onServerStarted() = wrapMinecraftHandler {
+    fun addIntegration(integration: AbstractCompat) {
+        if (started) {
+            logger.error("Can't add integration ${integration::class.simpleName} after the server has started")
+            return
+        }
+        availableIntegrations.add(integration)
+    }
+
+    fun onServerStarted() {
+        loadedIntegrations = availableIntegrations.filter { it.shouldEnable() }
+        for (integration in loadedIntegrations) {
+            logger.info("Using ${integration::class.simpleName}")
+            integration.enable()
+        }
         // Doing this here to ensure spark is loaded
         spark = SparkHelper.createOrNull()
         if (config.events.enableStartMessages) {
-            sendMessage(lang.telegram.serverStarted)
+            coroutineScope.launch {
+                sendMessage(lang.telegram.serverStarted)
+            }
         }
+        started = true
     }
 
     fun shutdown() {
@@ -107,12 +135,12 @@ abstract class TelegramBridge {
         if (!checkMessageChat(msg)) {
             return
         }
-        val onlinePlayerNames = platform.getOnlinePlayerNames()
-        if (onlinePlayerNames.isNotEmpty()) {
+        val onlinePlayers = platform.getOnlinePlayers().filterNot { it.isVanished() }
+        if (onlinePlayers.isNotEmpty()) {
             sendMessage(
                 lang.telegram.playerList.formatLang(
-                    "count" to onlinePlayerNames.size.toString(),
-                    "usernames" to onlinePlayerNames.joinToString(),
+                    "count" to onlinePlayers.size.toString(),
+                    "usernames" to onlinePlayers.joinToString { it.getName() },
                 )
             )
         } else {
@@ -127,6 +155,7 @@ abstract class TelegramBridge {
         lastMessageLock.withLock {
             lastMessage = null
         }
+        if (TgbridgeEvents.TG_CHAT_MESSAGE.invoke(msg) == EventResult.STOP) return
         platform.broadcastMessage(TelegramToMinecraftConverter.convert(msg, bot.me.id))
     }
 
@@ -167,11 +196,15 @@ abstract class TelegramBridge {
             }
         }
         ctx.reply("Config reloaded. Note that the bot token can't be changed without a restart")
+        coroutineScope.launch {
+            TgbridgeEvents.CONFIG_RELOAD.invoke(Unit)
+        }
         return true
     }
 
-    fun onChatMessage(e: TBPlayerEventData) = wrapMinecraftHandler {
-        var telegramText = MinecraftToTelegramConverter.convert(e.text)
+    fun onChatMessage(e: TgbridgeMcChatMessageEvent) = wrapMinecraftHandler {
+        if (TgbridgeEvents.MC_CHAT_MESSAGE.invoke(e) == EventResult.STOP) return@wrapMinecraftHandler
+        var telegramText = MinecraftToTelegramConverter.convert(e.message)
         val bluemapLink = telegramText.text.asBluemapLinkOrNone()
         val prefix = config.integrations.incompatiblePluginChatPrefix
             ?: config.messages.requirePrefixInMinecraft
@@ -190,7 +223,7 @@ abstract class TelegramBridge {
         }
 
         val tgPrefix = MinecraftToTelegramConverter.convert(
-            lang.telegram.chatMessage.formatMiniMessage(listOf("username" to e.username))
+            lang.telegram.chatMessage.formatMiniMessage(listOf("username" to e.sender.getName()))
                 .append(Component.text(" "))
         )
 
@@ -202,7 +235,7 @@ abstract class TelegramBridge {
             lm != null
             && lm.type == LastMessageType.TEXT
             && (lm.text!! + "\n" + currText).text.length <= 4000
-            && currDate.minus((config.messages.mergeWindow ?: 0).toLong(), ChronoUnit.SECONDS) < lm.date
+            && currDate.minus((config.messages.mergeWindow).toLong(), ChronoUnit.SECONDS) < lm.date
         ) {
             lm.text = lm.text!! + "\n" + currText
             lm.date = currDate
@@ -218,68 +251,81 @@ abstract class TelegramBridge {
         }
     }
 
-    fun onPlayerDeath(e: TBPlayerEventData) = wrapMinecraftHandler {
+    fun onPlayerDeath(e: TgbridgeDeathEvent) = wrapMinecraftHandler {
         if (!config.events.enableDeathMessages) {
             return@wrapMinecraftHandler
         }
-        val message = e.text.let {
-            if (it is TranslatableComponent) {
-                val args = mutableListOf<Component>(Component.text(e.username))
-                args.addAll(it.arguments().map { it.asComponent() }.drop(1))
-                it.arguments(args)
-            } else {
-                it
+        if (TgbridgeEvents.DEATH.invoke(e) == EventResult.STOP) return@wrapMinecraftHandler
+        if (e.player.isVanished()) return@wrapMinecraftHandler
+        val convertedMessage = when (val msg = e.message) {
+            is TranslatableComponent -> {
+                val args = mutableListOf<Component>(Component.text(e.player.getName()))
+                args.addAll(msg.arguments().map { it.asComponent() }.drop(1))
+                msg.arguments(args)
             }
+
+            null -> Component.translatable("death.attack.generic", Component.text(e.player.getName()))
+            else -> msg
         }
         val telegramText = MinecraftToTelegramConverter.convert(
-            lang.telegram.playerDied.formatMiniMessage(listOf(), listOf("death_message" to message))
+            lang.telegram.playerDied.formatMiniMessage(
+                listOf(),
+                listOf("death_message" to convertedMessage),
+            )
         )
         sendMessage(telegramText.text, telegramText.entities)
         lastMessage = null
     }
 
-    fun onPlayerJoin(username: String, hasPlayedBefore: Boolean) = wrapMinecraftHandler {
+    fun onPlayerJoin(e: TgbridgeJoinEvent) = wrapMinecraftHandler {
         if (!config.events.enableJoinMessages) {
             return@wrapMinecraftHandler
         }
+
+        if (TgbridgeEvents.JOIN.invoke(e) == EventResult.STOP) return@wrapMinecraftHandler
+        if (e.player.isVanished()) return@wrapMinecraftHandler
         val lm = lastMessage
         val currDate = Clock.systemUTC().instant()
         if (
             lm != null
             && lm.type == LastMessageType.LEAVE
-            && lm.leftPlayer!! == username
-            && currDate.minus((config.events.leaveJoinMergeWindow ?: 0).toLong(), ChronoUnit.SECONDS) < lm.date
+            && lm.leftPlayer!! == e.player.uuid
+            && currDate.minus((config.events.leaveJoinMergeWindow).toLong(), ChronoUnit.SECONDS) < lm.date
         ) {
             deleteMessage(lm.id)
         } else {
-            val message = if (hasPlayedBefore) {
+            val message = if (e.hasPlayedBefore) {
                 lang.telegram.playerJoined
             } else {
                 lang.telegram.playerJoinedFirstTime
             }
-            sendMessage(message.formatLang("username" to username))
+            sendMessage(message.formatLang("username" to e.player.getName()))
         }
         lastMessage = null
     }
 
-    fun onPlayerLeave(username: String) = wrapMinecraftHandler {
+    fun onPlayerLeave(e: TgbridgeLeaveEvent) = wrapMinecraftHandler {
         if (!config.events.enableLeaveMessages) {
             return@wrapMinecraftHandler
         }
-        val newMsg = sendMessage(lang.telegram.playerLeft.formatLang("username" to username))
+        if (TgbridgeEvents.LEAVE.invoke(e) == EventResult.STOP) return@wrapMinecraftHandler
+        if (e.player.isVanished()) return@wrapMinecraftHandler
+        val newMsg = sendMessage(lang.telegram.playerLeft.formatLang("username" to e.player.getName()))
         lastMessage = LastMessage(
             LastMessageType.LEAVE,
             newMsg.messageId,
             Clock.systemUTC().instant(),
-            leftPlayer = username
+            leftPlayer = e.player.uuid
         )
     }
 
-    fun onPlayerAdvancement(e: TBAdvancementEvent) = wrapMinecraftHandler {
+    fun onPlayerAdvancement(e: TgbridgeAdvancementEvent) = wrapMinecraftHandler {
         val advancementsCfg = config.events.advancementMessages
         if (!advancementsCfg.enable) {
             return@wrapMinecraftHandler
         }
+        if (TgbridgeEvents.ADVANCEMENT.invoke(e) == EventResult.STOP) return@wrapMinecraftHandler
+        if (e.player.isVanished()) return@wrapMinecraftHandler
         val advancementName = e.title.asString()
         val advancementDescription = if (advancementsCfg.showDescription) {
             e.description.asString()
@@ -306,7 +352,7 @@ abstract class TelegramBridge {
         }
         sendMessage(
             langKey.formatLang(
-                "username" to e.username,
+                "username" to e.player.getName(),
                 "title" to advancementName.escapeHTML(),
                 "description" to advancementDescription.escapeHTML(),
             )

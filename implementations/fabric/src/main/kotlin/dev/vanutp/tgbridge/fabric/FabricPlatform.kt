@@ -1,13 +1,14 @@
 package dev.vanutp.tgbridge.fabric
 
-import dev.vanutp.tgbridge.common.Platform
+import dev.vanutp.tgbridge.common.IPlatform
+import dev.vanutp.tgbridge.common.models.TgbridgePlayer
 import dev.vanutp.tgbridge.fabric.FabricTelegramBridge.server
 import net.fabricmc.loader.api.FabricLoader
 import net.kyori.adventure.text.Component
 import net.minecraft.util.Language
 
 
-class FabricPlatform : Platform() {
+class FabricPlatform : IPlatform {
     override val name = "fabric"
     override val configDir = FabricLoader.getInstance().configDir.resolve(FabricTelegramBridge.MOD_ID)
 
@@ -15,11 +16,9 @@ class FabricPlatform : Platform() {
         server.playerManager.broadcast(text.toMinecraft(), false)
     }
 
-    override fun getOnlinePlayerNames(): Array<String> {
+    override fun getOnlinePlayers(): List<TgbridgePlayer> {
         return server.playerManager.playerList
-            .filterNot { it.isVanished() }
-            .map { getPlayerName(it).string }
-            .toTypedArray()
+            .map { it.toTgbridge() }
     }
 
     override fun getLanguageKey(key: String) = with(Language.getInstance()) {
@@ -37,4 +36,7 @@ class FabricPlatform : Platform() {
             null
         }
     }
+
+    override fun isModLoaded(modId: String) =
+        FabricLoader.getInstance().isModLoaded(modId)
 }

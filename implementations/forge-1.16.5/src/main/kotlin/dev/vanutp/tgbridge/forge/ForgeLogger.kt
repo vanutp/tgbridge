@@ -1,9 +1,9 @@
 package dev.vanutp.tgbridge.forge
 
-import dev.vanutp.tgbridge.common.AbstractLogger
+import dev.vanutp.tgbridge.common.ILogger
 import org.apache.logging.log4j.LogManager
 
-class ForgeLogger : AbstractLogger() {
+class ForgeLogger : ILogger {
     private val forgeLogger = LogManager.getLogger(ForgeTelegramBridge.MOD_ID)
     override fun info(message: Any) {
         forgeLogger.info(message)

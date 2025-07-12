@@ -1,9 +1,9 @@
 package dev.vanutp.tgbridge.forge
 
-import dev.vanutp.tgbridge.common.AbstractLogger
+import dev.vanutp.tgbridge.common.ILogger
 import org.apache.logging.log4j.LogManager
 
-class NeoForgeLogger : AbstractLogger() {
+class NeoForgeLogger : ILogger {
     private val forgeLogger = LogManager.getLogger(NeoForgeTelegramBridge.MOD_ID)
     override fun info(message: Any) {
         forgeLogger.info(message)

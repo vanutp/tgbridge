@@ -1,9 +1,7 @@
 package dev.vanutp.tgbridge.fabric
 
 import com.mojang.brigadier.context.CommandContext
-import dev.vanutp.tgbridge.common.models.TBAdvancementEvent
-import dev.vanutp.tgbridge.common.models.TBCommandContext
-import dev.vanutp.tgbridge.common.models.TBPlayerEventData
+import dev.vanutp.tgbridge.common.models.*
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
 import net.fabricmc.fabric.api.message.v1.ServerMessageEvents
 import net.minecraft.network.message.SignedMessage
@@ -22,7 +20,7 @@ object EventManager {
     }
 
     private fun registerChatMessageListener() {
-        ServerMessageEvents.CHAT_MESSAGE.register { message: SignedMessage, sender, _ ->
+        ServerMessageEvents.CHAT_MESSAGE.register { message: SignedMessage, sender, params ->
             val messageContent = if (FabricTelegramBridge.versionInfo.IS_192) {
                 val cls = message.javaClass
                 val getContent = cls.getMethod("method_44125")
@@ -31,9 +29,13 @@ object EventManager {
                 message.content
             }
             FabricTelegramBridge.onChatMessage(
-                TBPlayerEventData(
-                    getPlayerName(sender).string,
+                TgbridgeMcChatMessageEvent(
+                    sender.toTgbridge(),
                     messageContent.toAdventure(),
+                    FabricEventWrapper(
+                        ServerMessageEvents.ChatMessage::class,
+                        listOf(message, sender, params),
+                    ),
                 )
             )
         }
@@ -41,14 +43,14 @@ object EventManager {
 
     private fun registerPlayerDeathListener() {
         CustomEvents.PLAYER_DEATH_EVENT.register { player, damageSource ->
-            if (player.isVanished()) {
-                return@register
-            }
             val deathMessage = damageSource.getDeathMessage(player)
             FabricTelegramBridge.onPlayerDeath(
-                TBPlayerEventData(
-                    getPlayerName(player).string,
+                TgbridgeDeathEvent(
+                    player.toTgbridge(),
                     deathMessage.toAdventure(),
+                    FabricEventWrapper(
+                        CustomEvents.PlayerDeath::class, listOf(player, damageSource)
+                    ),
                 )
             )
         }
@@ -56,39 +58,42 @@ object EventManager {
 
     private fun registerPlayerJoinListener() {
         CustomEvents.PLAYER_JOIN_EVENT.register { player, hasPlayedBefore ->
-            if (player.isVanished()) {
-                return@register
-            }
             FabricTelegramBridge.onPlayerJoin(
-                getPlayerName(player).string,
-                hasPlayedBefore,
+                TgbridgeJoinEvent(
+                    player.toTgbridge(),
+                    hasPlayedBefore,
+                    FabricEventWrapper(
+                        CustomEvents.PlayerJoin::class, listOf(player, hasPlayedBefore)
+                    ),
+                )
             )
         }
     }
 
     private fun registerPlayerLeaveListener() {
         CustomEvents.PLAYER_LEAVE_EVENT.register { player ->
-            if (player.isVanished()) {
-                return@register
-            }
             FabricTelegramBridge.onPlayerLeave(
-                getPlayerName(player).string,
+                TgbridgeLeaveEvent(
+                    player.toTgbridge(),
+                    FabricEventWrapper(CustomEvents.PlayerLeave::class, listOf(player)),
+                )
             )
         }
     }
 
     private fun registerPlayerAdvancementListener() {
         CustomEvents.ADVANCEMENT_EARN_EVENT.register { player, display ->
-            if (player.isVanished() || !display.shouldAnnounceToChat()) {
+            if (!display.shouldAnnounceToChat()) {
                 return@register
             }
             val type = display.frame?.name?.lowercase() ?: return@register
             FabricTelegramBridge.onPlayerAdvancement(
-                TBAdvancementEvent(
-                    getPlayerName(player).string,
+                TgbridgeAdvancementEvent(
+                    player.toTgbridge(),
                     type,
                     display.title.toAdventure(),
                     display.description.toAdventure(),
+                    FabricEventWrapper(CustomEvents.AdvancementEarn::class, listOf(player, display)),
                 )
             )
         }

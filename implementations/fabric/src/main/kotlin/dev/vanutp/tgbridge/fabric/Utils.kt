@@ -3,8 +3,7 @@ package dev.vanutp.tgbridge.fabric
 import com.google.gson.JsonElement
 import com.google.gson.JsonParseException
 import com.mojang.serialization.JsonOps
-import dev.vanutp.tgbridge.common.ConfigManager
-import dev.vanutp.tgbridge.fabric.compat.VanishCompat
+import dev.vanutp.tgbridge.common.models.TgbridgePlayer
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 import net.minecraft.registry.DynamicRegistryManager
@@ -74,17 +73,8 @@ fun Text.toAdventure(): Component {
     }
 }
 
-fun ServerPlayerEntity.isVanished() =
-    FabricTelegramBridge.integrations
-        .find { it is VanishCompat }
-        ?.let {
-            (it as VanishCompat).isVanished(this)
-        }
-        ?: false
-
-fun getPlayerName(player: ServerPlayerEntity): Text =
-    if (ConfigManager.config.messages.useRealUsername) {
-        player.name
-    } else {
-        player.displayName ?: player.name
-    }
+fun ServerPlayerEntity.toTgbridge() = TgbridgePlayer(
+    uuid,
+    name.string,
+    displayName?.string,
+)

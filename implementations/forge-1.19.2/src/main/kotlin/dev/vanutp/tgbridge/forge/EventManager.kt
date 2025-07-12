@@ -1,9 +1,7 @@
 package dev.vanutp.tgbridge.forge
 
 import com.mojang.brigadier.context.CommandContext
-import dev.vanutp.tgbridge.common.models.TBAdvancementEvent
-import dev.vanutp.tgbridge.common.models.TBCommandContext
-import dev.vanutp.tgbridge.common.models.TBPlayerEventData
+import dev.vanutp.tgbridge.common.models.*
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.server.command.CommandManager
 import net.minecraft.server.command.ServerCommandSource
@@ -28,9 +26,8 @@ object EventManager {
     private fun registerChatMessageListener() {
         FORGE_BUS.addListener { e: ServerChatEvent ->
             ForgeTelegramBridge.onChatMessage(
-                TBPlayerEventData(
-                    getPlayerName(e.player).string,
-                    e.message.toAdventure(),
+                TgbridgeMcChatMessageEvent(
+                    e.player.toTgbridge(), e.message.toAdventure(), e,
                 )
             )
         }
@@ -44,9 +41,8 @@ object EventManager {
             }
             val deathMessage = e.source.getDeathMessage(player)
             ForgeTelegramBridge.onPlayerDeath(
-                TBPlayerEventData(
-                    getPlayerName(player).string,
-                    deathMessage.toAdventure(),
+                TgbridgeDeathEvent(
+                    player.toTgbridge(), deathMessage.toAdventure(), e,
                 )
             )
         }
@@ -56,15 +52,14 @@ object EventManager {
         FORGE_BUS.addListener { e: PlayerEvent.PlayerLoggedInEvent ->
             val hasPlayedBefore = (e.entity as IHasPlayedBefore).`tgbridge$getHasPlayedBefore`()
             ForgeTelegramBridge.onPlayerJoin(
-                getPlayerName(e.entity).string,
-                hasPlayedBefore,
+                TgbridgeJoinEvent(e.entity.toTgbridge(), hasPlayedBefore, e)
             )
         }
     }
 
     private fun registerPlayerLeaveListener() {
         FORGE_BUS.addListener { e: PlayerEvent.PlayerLoggedOutEvent ->
-            ForgeTelegramBridge.onPlayerLeave(getPlayerName(e.entity).string)
+            ForgeTelegramBridge.onPlayerLeave(TgbridgeLeaveEvent(e.entity.toTgbridge(), e))
         }
     }
 
@@ -76,11 +71,12 @@ object EventManager {
             }
             val type = display.frame?.id ?: return@addListener
             ForgeTelegramBridge.onPlayerAdvancement(
-                TBAdvancementEvent(
-                    getPlayerName(e.entity).string,
+                TgbridgeAdvancementEvent(
+                    e.entity.toTgbridge(),
                     type,
                     display.title.toAdventure(),
                     display.description.toAdventure(),
+                    e,
                 )
             )
         }

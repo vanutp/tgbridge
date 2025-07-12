@@ -278,7 +278,7 @@ interface TgApi {
 
 const val POLL_TIMEOUT_SECONDS = 60
 
-class TelegramBot(botApiUrl: String, botToken: String, private val logger: AbstractLogger) {
+class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogger) {
     private val okhttpClient = OkHttpClient.Builder()
         .readTimeout(Duration.ofSeconds((POLL_TIMEOUT_SECONDS + 10).toLong()))
         .build()
@@ -300,7 +300,7 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: Abstr
     }
 
     fun registerCommandHandler(command: String, handler: suspend (TgMessage) -> Unit) {
-        val cmdRegex = Regex("^/$command(@${me.username})?(\\s|\$)", RegexOption.IGNORE_CASE)
+        val cmdRegex = Regex("^/$command(@${me.username})?(\\s|$)", RegexOption.IGNORE_CASE)
         commandHandlers.add {
             if (cmdRegex.matches(it.effectiveText ?: "")) {
                 handler(it)
@@ -316,7 +316,7 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: Abstr
         me = call { client.getMe() }
     }
 
-    suspend fun startPolling(scope: CoroutineScope) {
+    fun startPolling(scope: CoroutineScope) {
         if (pollTask != null) {
             throw IllegalStateException("polling already started")
         }

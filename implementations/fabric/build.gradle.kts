@@ -11,7 +11,6 @@ val yarnMappings: String by project
 val fabricLoaderVersion: String by project
 val fabricApiVersion: String by project
 val fabricKotlinVersion: String by project
-val adventureFabricVersion: String by project
 val vanishVersion: String by project
 
 repositories {

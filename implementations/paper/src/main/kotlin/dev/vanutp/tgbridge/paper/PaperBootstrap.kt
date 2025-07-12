@@ -6,7 +6,8 @@ class PaperBootstrap : JavaPlugin() {
     val tgbridge = PaperTelegramBridge(this)
 
     override fun onEnable() {
-        server.scheduler.scheduleSyncDelayedTask(this, tgbridge::asyncInit)
+        EventManager(this).register()
+        server.scheduler.scheduleSyncDelayedTask(this, tgbridge::onServerStarted)
         tgbridge.init()
     }
 

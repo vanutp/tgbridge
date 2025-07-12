@@ -1,12 +1,13 @@
 package dev.vanutp.tgbridge.paper
 
-import dev.vanutp.tgbridge.common.Platform
+import dev.vanutp.tgbridge.common.IPlatform
+import dev.vanutp.tgbridge.common.models.TgbridgePlayer
 import net.kyori.adventure.text.Component
 import net.minecraft.locale.Language
 import org.bukkit.plugin.java.JavaPlugin
 import kotlin.io.path.absolute
 
-class PaperPlatform(private val plugin: JavaPlugin) : Platform() {
+class PaperPlatform(private val plugin: JavaPlugin) : IPlatform {
     override val name = "paper"
     override val configDir = plugin.dataFolder.toPath().absolute()
 
@@ -17,11 +18,8 @@ class PaperPlatform(private val plugin: JavaPlugin) : Platform() {
         }
     }
 
-    override fun getOnlinePlayerNames(): Array<String> {
-        return plugin.server.onlinePlayers
-            .filterNot { it.isVanished() }
-            .map { it.name }
-            .toTypedArray()
+    override fun getOnlinePlayers(): List<TgbridgePlayer> {
+        return plugin.server.onlinePlayers.map { it.toTgbridge() }
     }
 
     override fun getLanguageKey(key: String) = with(Language.getInstance()) {
@@ -31,4 +29,7 @@ class PaperPlatform(private val plugin: JavaPlugin) : Platform() {
             null
         }
     }
+
+    override fun isModLoaded(modId: String) =
+        plugin.server.pluginManager.getPlugin(modId)?.isEnabled ?: false
 }

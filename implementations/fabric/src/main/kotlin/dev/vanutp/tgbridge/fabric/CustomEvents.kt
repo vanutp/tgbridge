@@ -39,18 +39,18 @@ class CustomEvents {
     }
 
     fun interface AdvancementEarn {
-        fun onAdvancementEarn(player: ServerPlayerEntity, display: AdvancementDisplay): Unit
+        fun onAdvancementEarn(player: ServerPlayerEntity, display: AdvancementDisplay)
     }
 
     fun interface PlayerJoin {
-        fun onPlayerJoin(player: ServerPlayerEntity, hasPlayedBefore: Boolean): Unit
+        fun onPlayerJoin(player: ServerPlayerEntity, hasPlayedBefore: Boolean)
     }
 
     fun interface PlayerLeave {
-        fun onPlayerLeave(player: ServerPlayerEntity): Unit
+        fun onPlayerLeave(player: ServerPlayerEntity)
     }
 
     fun interface PlayerDeath {
-        fun onPlayerDeath(player: ServerPlayerEntity, damageSource: DamageSource): Unit
+        fun onPlayerDeath(player: ServerPlayerEntity, damageSource: DamageSource)
     }
 }

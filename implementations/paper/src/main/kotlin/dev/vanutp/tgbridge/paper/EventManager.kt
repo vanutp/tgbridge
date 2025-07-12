@@ -1,12 +1,7 @@
 package dev.vanutp.tgbridge.paper
 
-import dev.vanutp.tgbridge.common.models.TBAdvancementEvent
-import dev.vanutp.tgbridge.common.models.TBCommandContext
-import dev.vanutp.tgbridge.common.models.TBPlayerEventData
-import dev.vanutp.tgbridge.paper.compat.EssentialsVanishCompat
-import dev.vanutp.tgbridge.paper.compat.IChatCompat
+import dev.vanutp.tgbridge.common.models.*
 import io.papermc.paper.event.player.AsyncChatEvent
-import net.kyori.adventure.text.Component
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -23,78 +18,58 @@ class EventManager(private val plugin: PaperBootstrap) : Listener {
         plugin.server.pluginManager.registerEvents(this, plugin)
     }
 
-    private fun registerPaperChatListener() {
+    private fun registerChatMessageListener() {
         plugin.server.pluginManager.registerEvents(object : Listener {
             @EventHandler(priority = EventPriority.MONITOR)
             fun onMessage(e: AsyncChatEvent) {
                 if (e.isCancelled) {
                     return
                 }
-                plugin.tgbridge.onChatMessage(TBPlayerEventData(getPlayerName(e.player), e.message()))
+                plugin.tgbridge.onChatMessage(TgbridgeMcChatMessageEvent(e.player.toTgbridge(), e.message(), e))
             }
         }, plugin)
     }
 
-    private fun registerChatMessageListener() {
-        if (plugin.tgbridge.integrations.any { it is IChatCompat }) {
-            plugin.logger.info("Not using chat listener because a chat plugin integration is active")
-            return
-        }
-        registerPaperChatListener()
-    }
-
     @EventHandler(priority = EventPriority.MONITOR)
     fun onPlayerAdvancement(e: PlayerAdvancementDoneEvent) {
-        if (e.player.isVanished()) {
-            return
-        }
         val display = e.advancement.display
         if (display == null || !display.doesAnnounceToChat()) {
             return
         }
         val type = display.frame().name.lowercase()
         plugin.tgbridge.onPlayerAdvancement(
-            TBAdvancementEvent(
-                getPlayerName(e.player),
+            TgbridgeAdvancementEvent(
+                e.player.toTgbridge(),
                 type,
                 display.title(),
                 display.description(),
+                e,
             )
         )
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     fun onPlayerDeath(e: PlayerDeathEvent) {
-        if (e.player.isVanished()) {
-            return
-        }
-        val username = getPlayerName(e.entity)
-        val msg = e.deathMessage() ?: Component.translatable("death.attack.generic", Component.text(username))
-        plugin.tgbridge.onPlayerDeath(TBPlayerEventData(username, msg))
+        val msg = e.deathMessage()
+        plugin.tgbridge.onPlayerDeath(TgbridgeDeathEvent(e.player.toTgbridge(), msg, e))
     }
 
     private fun registerJoinLeaveListener() {
-        if (plugin.tgbridge.integrations.any { it is EssentialsVanishCompat }) {
-            return
-        }
         plugin.server.pluginManager.registerEvents(object : Listener {
             @EventHandler(priority = EventPriority.MONITOR)
             fun onPlayerJoin(e: PlayerJoinEvent) {
-                if (e.player.isVanished()) {
-                    return
-                }
                 plugin.tgbridge.onPlayerJoin(
-                    getPlayerName(e.player),
-                    e.player.hasPlayedBefore(),
+                    TgbridgeJoinEvent(
+                        e.player.toTgbridge(),
+                        e.player.hasPlayedBefore(),
+                        e,
+                    )
                 )
             }
 
             @EventHandler(priority = EventPriority.MONITOR)
             fun onPlayerQuit(e: PlayerQuitEvent) {
-                if (e.player.isVanished()) {
-                    return
-                }
-                plugin.tgbridge.onPlayerLeave(getPlayerName(e.player))
+                plugin.tgbridge.onPlayerLeave(TgbridgeLeaveEvent(e.player.toTgbridge(), e))
             }
         }, plugin)
     }
@@ -114,12 +89,12 @@ class EventManager(private val plugin: PaperBootstrap) : Listener {
         }
 
         plugin.getCommand("tgshow")!!.setExecutor { commandSender, _, _, args ->
-            commandSender.getServer().getPlayer(commandSender.getName())?.removeScoreboardTag("hidden-telegram")
+            commandSender.server.getPlayer(commandSender.name)?.removeScoreboardTag("hidden-telegram")
             return@setExecutor true
         }
 
         plugin.getCommand("tghide")!!.setExecutor { commandSender, _, _, args ->
-            commandSender.getServer().getPlayer(commandSender.getName())?.addScoreboardTag("hidden-telegram")
+            commandSender.server.getPlayer(commandSender.name)?.addScoreboardTag("hidden-telegram")
             return@setExecutor true
         }
     }

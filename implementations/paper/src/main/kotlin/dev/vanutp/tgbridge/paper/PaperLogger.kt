@@ -1,10 +1,10 @@
 package dev.vanutp.tgbridge.paper
 
-import dev.vanutp.tgbridge.common.AbstractLogger
+import dev.vanutp.tgbridge.common.ILogger
 import org.bukkit.plugin.java.JavaPlugin
 import java.util.logging.Level
 
-class PaperLogger(private val plugin: JavaPlugin) : AbstractLogger() {
+class PaperLogger(private val plugin: JavaPlugin) : ILogger {
     override fun info(message: Any) {
         plugin.logger.info(message.toString())
     }

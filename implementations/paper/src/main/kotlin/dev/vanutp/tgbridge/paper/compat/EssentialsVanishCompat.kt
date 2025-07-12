@@ -1,43 +1,66 @@
 package dev.vanutp.tgbridge.paper.compat
 
 import com.earth2me.essentials.Essentials
-import dev.vanutp.tgbridge.paper.PaperBootstrap
-import dev.vanutp.tgbridge.paper.getPlayerName
+import dev.vanutp.tgbridge.common.EventResult
+import dev.vanutp.tgbridge.common.TgbridgeEvents
+import dev.vanutp.tgbridge.common.models.TgbridgeJoinEvent
+import dev.vanutp.tgbridge.common.models.TgbridgeLeaveEvent
+import dev.vanutp.tgbridge.paper.PaperTelegramBridge
+import dev.vanutp.tgbridge.paper.toTgbridge
 import net.ess3.api.events.VanishStatusChangeEvent
 import net.essentialsx.api.v2.events.AsyncUserDataLoadEvent
 import org.bukkit.event.EventHandler
-import org.bukkit.event.EventPriority
-import org.bukkit.event.player.PlayerQuitEvent
 
-class EssentialsVanishCompat(bootstrap: PaperBootstrap) : IVanishCompat, AbstractCompat(bootstrap) {
-    override val pluginId = "Essentials"
+class EssentialsVanishCompat(bridge: PaperTelegramBridge) :
+    AbstractPaperCompat(bridge) {
+    override val paperId = "Essentials"
 
     @EventHandler
     fun onPlayerJoin(e: AsyncUserDataLoadEvent) {
         if (!e.user.isHidden) {
-            bootstrap.tgbridge.onPlayerJoin(
-                getPlayerName(e.user.base),
-                e.user.base.hasPlayedBefore(),
+            bridge.onPlayerJoin(
+                TgbridgeJoinEvent(
+                    e.user.base.toTgbridge(),
+                    e.user.base.hasPlayedBefore(),
+                    e,
+                )
             )
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
-    fun onPlayerQuit(e: PlayerQuitEvent) {
-        val ess = bootstrap.server.pluginManager.getPlugin(pluginId) as Essentials
-        val user = ess.getUser(e.player)
-        if (!user.isHidden && !user.isLeavingHidden) {
-            bootstrap.tgbridge.onPlayerLeave(getPlayerName(e.player))
+    override fun enable() {
+        super.enable()
+        TgbridgeEvents.JOIN.addListener { e ->
+            if (e.originalEvent is AsyncUserDataLoadEvent) {
+                EventResult.CONTINUE
+            } else {
+                EventResult.STOP
+            }
+        }
+        TgbridgeEvents.LEAVE.addListener { e ->
+            if (e.originalEvent is VanishStatusChangeEvent) {
+                return@addListener EventResult.CONTINUE
+            }
+            val ess = bridge.plugin.server.pluginManager.getPlugin(paperId) as Essentials
+            val user = ess.getUser(e.player.uuid)
+            if (user == null) {
+                return@addListener EventResult.CONTINUE
+            }
+            if (user.isHidden || user.isLeavingHidden) {
+                EventResult.STOP
+            } else {
+                EventResult.CONTINUE
+            }
         }
     }
 
     @EventHandler
     fun onVanishStatusChange(e: VanishStatusChangeEvent) {
-        val username = getPlayerName(e.affected.base)
+        val player = e.affected.base.toTgbridge()
         if (e.value) {
-            bootstrap.tgbridge.onPlayerLeave(username)
+            bridge.onPlayerLeave(TgbridgeLeaveEvent(player, e))
         } else {
-            bootstrap.tgbridge.onPlayerJoin(username, true)
+            bridge.onPlayerJoin(TgbridgeJoinEvent(player, true, e))
         }
     }
 }

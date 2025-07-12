@@ -1,17 +1,18 @@
 package dev.vanutp.tgbridge.paper.compat
 
 import dev.vanutp.tgbridge.common.ConfigManager.config
-import dev.vanutp.tgbridge.common.models.TBPlayerEventData
-import dev.vanutp.tgbridge.paper.PaperBootstrap
-import dev.vanutp.tgbridge.paper.getPlayerName
+import dev.vanutp.tgbridge.common.EventResult
+import dev.vanutp.tgbridge.common.TgbridgeEvents
+import dev.vanutp.tgbridge.common.models.TgbridgeMcChatMessageEvent
+import dev.vanutp.tgbridge.paper.PaperTelegramBridge
+import dev.vanutp.tgbridge.paper.toTgbridge
+import io.papermc.paper.event.player.AsyncChatEvent
 import net.kyori.adventure.text.Component
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.player.AsyncPlayerChatEvent
 
-class UnsupportedChatPluginCompat(bootstrap: PaperBootstrap) : IChatCompat, AbstractCompat(bootstrap) {
-    override val pluginId = null
-
+class UnsupportedChatPluginCompat(bridge: PaperTelegramBridge) : AbstractPaperCompat(bridge) {
     override fun shouldEnable(): Boolean {
         return config.integrations.incompatiblePluginChatPrefix != null
     }
@@ -21,6 +22,23 @@ class UnsupportedChatPluginCompat(bootstrap: PaperBootstrap) : IChatCompat, Abst
         if (e.isCancelled) {
             return
         }
-        bootstrap.tgbridge.onChatMessage(TBPlayerEventData(getPlayerName(e.player), Component.text(e.message)))
+        bridge.onChatMessage(
+            TgbridgeMcChatMessageEvent(
+                e.player.toTgbridge(),
+                Component.text(e.message),
+                e,
+            )
+        )
+    }
+
+    override fun enable() {
+        super.enable()
+        TgbridgeEvents.MC_CHAT_MESSAGE.addListener { e ->
+            if (e.originalEvent is AsyncChatEvent) {
+                EventResult.STOP
+            } else {
+                EventResult.CONTINUE
+            }
+        }
     }
 }

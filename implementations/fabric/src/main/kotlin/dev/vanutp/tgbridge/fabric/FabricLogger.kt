@@ -1,9 +1,9 @@
 package dev.vanutp.tgbridge.fabric
 
-import dev.vanutp.tgbridge.common.AbstractLogger
+import dev.vanutp.tgbridge.common.ILogger
 import org.slf4j.LoggerFactory
 
-class FabricLogger : AbstractLogger() {
+class FabricLogger : ILogger {
     private val fabricLogger = LoggerFactory.getLogger(FabricTelegramBridge.MOD_ID)
     override fun info(message: Any) {
         fabricLogger.info(message.toString())
