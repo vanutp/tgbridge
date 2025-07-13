@@ -38,6 +38,17 @@
 - [SuperVanish](https://www.spigotmc.org/resources/supervanish-be-invisible.1331/)
 - [Fabric Vanish](https://modrinth.com/mod/vanish)
 
+## Клиентские моды для эмодзи/замена текста
+
+::: info Поведение
+Заменяет паттерны текста в сообщениях, пересылаемых из Minecraft в Telegram,
+используя правила из файла `replacements.json`.
+:::
+
+По умолчанию `replacements.json` содержит список частых эмодзи-шорткатов, таких как `:fox:` или `:skull:`.
+Он должен быть совместим с большинством модов, которые заменяют шорткаты на клиенте.
+Также можно настроить замену любого текста на любой другой текст.
+
 ## Другие
 
 - [BlueMap](https://modrinth.com/plugin/bluemap) +

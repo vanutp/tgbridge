@@ -36,6 +36,17 @@ Works out of the box with:
 - [SuperVanish](https://www.spigotmc.org/resources/supervanish-be-invisible.1331/)
 - [Fabric Vanish](https://modrinth.com/mod/vanish)
 
+## Client-side emoji mods/text replacement
+
+::: info Integration behaviour
+Replaces text patterns in messages forwarded from Minecraft to Telegram
+using rules in the `replacements.json` config file.
+:::
+
+By default, `replacements.json` contains a list of common emoji shortcodes like `:fox:` or `:skull:`.
+It should cover most mods that replace shortcodes with emojis on the client.
+Can also be configured to replace any text with any other text.
+
 ## Other
 
 - [BlueMap](https://modrinth.com/plugin/bluemap) +

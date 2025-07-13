@@ -1,15 +1,9 @@
-[tool.poetry]
-name = "tgbridge-codegen"
+[project]
+name = "codegen"
 version = "0.1.0"
-description = ""
-authors = ["Ivan Filipenkov <hello@vanutp.dev>"]
-readme = "README.md"
-
-[tool.poetry.dependencies]
-python = "^3.12"
-pyyaml = "^6.0.2"
-pydantic = "^2.10.6"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires-python = ">=3.12"
+dependencies = [
+    "httpx>=0.28.1",
+    "pydantic>=2.11.7",
+    "pyyaml>=6.0.2",
+]

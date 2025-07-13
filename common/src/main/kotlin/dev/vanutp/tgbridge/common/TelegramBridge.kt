@@ -2,7 +2,8 @@ package dev.vanutp.tgbridge.common
 
 import dev.vanutp.tgbridge.common.ConfigManager.config
 import dev.vanutp.tgbridge.common.ConfigManager.lang
-import dev.vanutp.tgbridge.common.compat.*
+import dev.vanutp.tgbridge.common.compat.AbstractCompat
+import dev.vanutp.tgbridge.common.compat.ReplacementsCompat
 import dev.vanutp.tgbridge.common.converters.MinecraftToTelegramConverter
 import dev.vanutp.tgbridge.common.converters.TelegramFormattedText
 import dev.vanutp.tgbridge.common.converters.TelegramToMinecraftConverter
@@ -29,7 +30,9 @@ abstract class TelegramBridge {
     private var lastMessage: LastMessage? = null
     private val lastMessageLock = Mutex()
 
-    private val availableIntegrations: MutableList<AbstractCompat> = mutableListOf()
+    private val availableIntegrations: MutableList<AbstractCompat> = mutableListOf(
+        ReplacementsCompat(this),
+    )
     lateinit var loadedIntegrations: List<AbstractCompat> private set
 
     companion object {
@@ -73,9 +76,9 @@ abstract class TelegramBridge {
     fun onServerStarted() {
         loadedIntegrations = availableIntegrations.filter { it.shouldEnable() }
         for (integration in loadedIntegrations) {
-            logger.info("Using ${integration::class.simpleName}")
             integration.enable()
         }
+        logger.info("Loaded integrations: ${loadedIntegrations.joinToString { it::class.simpleName ?: "unknown" }}")
         // Doing this here to ensure spark is loaded
         spark = SparkHelper.createOrNull()
         if (config.events.enableStartMessages) {
