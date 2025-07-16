@@ -7,6 +7,7 @@ import dev.vanutp.tgbridge.common.models.Config
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
+import java.io.InputStream
 
 fun String.escapeHTML(): String = this
     .replace("&", "&amp;")

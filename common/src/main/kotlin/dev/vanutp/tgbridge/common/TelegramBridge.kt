@@ -4,6 +4,7 @@ import dev.vanutp.tgbridge.common.ConfigManager.config
 import dev.vanutp.tgbridge.common.ConfigManager.lang
 import dev.vanutp.tgbridge.common.compat.AbstractCompat
 import dev.vanutp.tgbridge.common.compat.ReplacementsCompat
+import dev.vanutp.tgbridge.common.compat.VoiceMessagesCompat
 import dev.vanutp.tgbridge.common.converters.MinecraftToTelegramConverter
 import dev.vanutp.tgbridge.common.converters.TelegramFormattedText
 import dev.vanutp.tgbridge.common.converters.TelegramToMinecraftConverter
@@ -19,20 +20,19 @@ import kotlin.math.max
 
 
 abstract class TelegramBridge {
-    private val coroutineScope = CoroutineScope(Dispatchers.IO).plus(SupervisorJob())
+    internal val coroutineScope = CoroutineScope(Dispatchers.IO).plus(SupervisorJob())
     protected abstract val logger: ILogger
     abstract val platform: IPlatform
     private var initialized: Boolean = false
     private var started: Boolean = false
-    private lateinit var bot: TelegramBot
+    lateinit var bot: TelegramBot private set
     private var spark: SparkHelper? = null
 
-    private var lastMessage: LastMessage? = null
+    // TODO: automate this better somehow
+    internal var lastMessage: LastMessage? = null
     private val lastMessageLock = Mutex()
 
-    private val availableIntegrations: MutableList<AbstractCompat> = mutableListOf(
-        ReplacementsCompat(this),
-    )
+    private val availableIntegrations: MutableList<AbstractCompat> = mutableListOf()
     lateinit var loadedIntegrations: List<AbstractCompat> private set
 
     companion object {
@@ -56,12 +56,13 @@ abstract class TelegramBridge {
             return
         }
         bot = TelegramBot(config.advanced.botApiUrl, config.general.botToken, logger)
-
         runBlocking {
             bot.init()
         }
         registerTelegramHandlers()
         bot.startPolling(coroutineScope)
+        addIntegration(ReplacementsCompat(this))
+        addIntegration(VoiceMessagesCompat(this))
         initialized = true
     }
 
