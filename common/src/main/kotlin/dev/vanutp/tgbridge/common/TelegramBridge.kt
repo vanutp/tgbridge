@@ -57,12 +57,20 @@ abstract class TelegramBridge {
         }
         bot = TelegramBot(config.advanced.botApiUrl, config.general.botToken, logger)
 
-        runBlocking {
-            bot.init()
+        val retryConf = config.connectionRetry
+        coroutineScope.launch {
+            withRetry(
+                maxAttempts = retryConf.maxAttempts,
+                initialDelay = retryConf.initialDelay,
+                maxDelay = retryConf.maxDelay
+            ) {
+                bot.init()
+                registerTelegramHandlers()
+                bot.startPolling(coroutineScope)
+                initialized = true
+                logger.info("Successfully connected to Telegram API")
+            }
         }
-        registerTelegramHandlers()
-        bot.startPolling(coroutineScope)
-        initialized = true
     }
 
     fun addIntegration(integration: AbstractCompat) {
@@ -396,5 +404,35 @@ abstract class TelegramBridge {
 
     private suspend fun deleteMessage(messageId: Int) {
         bot.deleteMessage(config.general.chatId, messageId)
+    }
+
+    private suspend fun <T> withRetry(
+        maxAttempts: Int = 3,
+        initialDelay: Long = 1000L,
+        maxDelay: Long = 300000L,
+        operation: suspend () -> T
+    ): T? {
+        var attempt = 0
+        val infiniteRetries = maxAttempts <= 0
+
+        while (true) {
+            try {
+                return operation()
+            } catch (e: Exception) {
+                attempt++
+
+                if (!infiniteRetries && attempt >= maxAttempts) {
+                    logger.error("Operation failed after $maxAttempts attempts: ${e.message}")
+                    break
+                }
+
+                val delay = minOf(initialDelay * (1L shl (attempt - 1)), maxDelay)
+                val attemptText = if (infiniteRetries) "attempt $attempt" else "attempt $attempt/$maxAttempts"
+                logger.warn("Operation failed ($attemptText), retrying in ${delay / 1000} seconds: ${e.message}")
+                delay(delay)
+            }
+        }
+
+        return null
     }
 }

@@ -126,6 +126,24 @@ options:
     type: string
     default: '"https://api.telegram.org"'
 
+  connectionRetry.maxAttempts:
+    type: number
+    default: 10
+    description: |
+      Максимальное количество попыток подключения. При значении меньше 1 количество попыток бесконечно
+
+  connectionRetry.initialDelay:
+    type: number
+    default: 1000
+    description: |
+      Задержка перед первой попыткой повторного подключения в миллисекундах
+
+  connectionRetry.maxDelay:
+    type: number
+    default: 300000
+    description: |
+      Максимальная задержка между попытками повторного подключения в миллисекундах
+
   version:
     type: number
     default: 1

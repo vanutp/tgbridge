@@ -170,6 +170,29 @@ Whether to send a Telegram message when the server stops
 
 - **Type:** `string`
 
+## connectionRetry
+
+### maxAttempts
+
+- **Type:** `number`
+- **Default:** `10`
+
+Max amount of connection retries. If the value is less than 1 the number of attempts is infinite
+
+### initialDelay
+
+- **Type:** `number`
+- **Default:** `1000`
+
+Delay before first reconnect attempt in milliseconds
+
+### maxDelay
+
+- **Type:** `number`
+- **Default:** `300000`
+
+Maximum delay between reconnection attempts in milliseconds
+
 ## version
 
 - **Type:** `number`
