@@ -1,6 +1,7 @@
 package dev.vanutp.tgbridge.forge
 
 import com.mojang.brigadier.context.CommandContext
+import dev.vanutp.tgbridge.common.MutedUsers
 import dev.vanutp.tgbridge.common.models.*
 import net.kyori.adventure.text.Component
 import net.minecraft.entity.player.PlayerEntity
@@ -102,6 +103,22 @@ class EventManager(private val tgbridge: ForgeTelegramBridge) {
                         .requires { it.hasPermissionLevel(4) }
                         .executes(::onReloadCommand)
                 )
+            )
+            e.dispatcher.register(
+                CommandManager.literal("tgshow")
+                    .executes {
+                        val player = it.source.player?.uuid ?: return@executes -1
+                        MutedUsers.unmute(player)
+                        return@executes 1
+                    }
+            )
+            e.dispatcher.register(
+                CommandManager.literal("tghide")
+                    .executes {
+                        val player = it.source.player?.uuid ?: return@executes -1
+                        MutedUsers.mute(player)
+                        return@executes 1
+                    }
             )
         }
     }

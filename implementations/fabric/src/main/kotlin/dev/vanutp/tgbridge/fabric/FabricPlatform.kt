@@ -1,6 +1,7 @@
 package dev.vanutp.tgbridge.fabric
 
 import dev.vanutp.tgbridge.common.IPlatform
+import dev.vanutp.tgbridge.common.MutedUsers
 import dev.vanutp.tgbridge.common.models.TgbridgePlayer
 import dev.vanutp.tgbridge.fabric.FabricTelegramBridge.server
 import net.fabricmc.loader.api.FabricLoader
@@ -13,7 +14,13 @@ class FabricPlatform : IPlatform {
     override val configDir = FabricLoader.getInstance().configDir.resolve(FabricTelegramBridge.MOD_ID)
 
     override fun broadcastMessage(text: Component) {
-        server.playerManager.broadcast(text.toMinecraft(), false)
+        val playerManager = server.playerManager
+        val players = playerManager.playerList.filterNot { MutedUsers.isMuted(it.uuid) }
+        val message = text.toMinecraft()
+        server.sendMessage(message)
+        for (player in players) {
+            player.sendMessageToClient(message, false)
+        }
     }
 
     override fun getOnlinePlayers(): List<TgbridgePlayer> {
