@@ -51,6 +51,7 @@ abstract class TelegramBridge {
     fun init() {
         logger.info("tgbridge starting on ${platform.name}")
         ConfigManager.init(platform.configDir, platform::getLanguageKey)
+        MuteService.init(platform.configDir)
         if (config.hasDefaultValues()) {
             logger.warn("Can't start with default config values: please fill in botToken and chatId, then run /tgbridge reload")
             return
@@ -94,6 +95,7 @@ abstract class TelegramBridge {
             return
         }
         runBlocking {
+            MuteService.shutdown()
             if (config.events.enableStopMessages) {
                 sendMessage(lang.telegram.serverStopped)
             }

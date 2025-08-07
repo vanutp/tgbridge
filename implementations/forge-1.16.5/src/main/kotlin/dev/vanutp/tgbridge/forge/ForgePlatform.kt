@@ -1,7 +1,7 @@
 package dev.vanutp.tgbridge.forge
 
 import dev.vanutp.tgbridge.common.IPlatform
-import dev.vanutp.tgbridge.common.MutedUsers
+import dev.vanutp.tgbridge.common.MuteService
 import dev.vanutp.tgbridge.common.models.TgbridgePlayer
 import net.kyori.adventure.text.Component
 import net.minecraft.network.MessageType
@@ -19,7 +19,7 @@ class ForgePlatform : IPlatform {
     override fun broadcastMessage(text: Component) {
         val currentServer = ServerLifecycleHooks.getCurrentServer()
         val playerManager = currentServer.playerManager
-        val players = playerManager.playerList.filterNot { MutedUsers.isMuted(it.uuid) }
+        val players = playerManager.playerList.filterNot { MuteService.isMuted(it.uuid) }
         val message = text.toMinecraft()
         val sender = NIL_UUID
         val packet = GameMessageS2CPacket(

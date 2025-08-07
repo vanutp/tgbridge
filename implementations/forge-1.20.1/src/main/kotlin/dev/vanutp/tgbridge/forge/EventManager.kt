@@ -1,7 +1,7 @@
 package dev.vanutp.tgbridge.forge
 
 import com.mojang.brigadier.context.CommandContext
-import dev.vanutp.tgbridge.common.MutedUsers
+import dev.vanutp.tgbridge.common.MuteService
 import dev.vanutp.tgbridge.common.models.*
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.server.command.CommandManager
@@ -107,7 +107,7 @@ object EventManager {
                 CommandManager.literal("tgshow")
                     .executes {
                         val player = it.source.player?.uuid ?: return@executes -1
-                        MutedUsers.unmute(player)
+                        MuteService.unmute(player)
                         return@executes 1
                     }
             )
@@ -115,7 +115,7 @@ object EventManager {
                 CommandManager.literal("tghide")
                     .executes {
                         val player = it.source.player?.uuid ?: return@executes -1
-                        MutedUsers.mute(player)
+                        MuteService.mute(player)
                         return@executes 1
                     }
             )

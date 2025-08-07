@@ -1,7 +1,7 @@
 package dev.vanutp.tgbridge.fabric
 
 import dev.vanutp.tgbridge.common.IPlatform
-import dev.vanutp.tgbridge.common.MutedUsers
+import dev.vanutp.tgbridge.common.MuteService
 import dev.vanutp.tgbridge.common.models.TgbridgePlayer
 import dev.vanutp.tgbridge.fabric.FabricTelegramBridge.server
 import net.fabricmc.loader.api.FabricLoader
@@ -15,7 +15,7 @@ class FabricPlatform : IPlatform {
 
     override fun broadcastMessage(text: Component) {
         val playerManager = server.playerManager
-        val players = playerManager.playerList.filterNot { MutedUsers.isMuted(it.uuid) }
+        val players = playerManager.playerList.filterNot { MuteService.isMuted(it.uuid) }
         val message = text.toMinecraft()
         server.sendMessage(message)
         for (player in players) {

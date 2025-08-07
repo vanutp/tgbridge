@@ -1,6 +1,6 @@
 package dev.vanutp.tgbridge.paper
 
-import dev.vanutp.tgbridge.common.MutedUsers
+import dev.vanutp.tgbridge.common.MuteService
 import dev.vanutp.tgbridge.common.models.*
 import io.papermc.paper.event.player.AsyncChatEvent
 import org.bukkit.event.EventHandler
@@ -91,13 +91,13 @@ class EventManager(private val plugin: PaperBootstrap) : Listener {
 
         plugin.getCommand("tgshow")!!.setExecutor { commandSender, _, _, _ ->
             val player = commandSender.server.getPlayer(commandSender.name) ?: return@setExecutor false
-            MutedUsers.unmute(player.uniqueId)
+            MuteService.unmute(player.uniqueId)
             return@setExecutor true
         }
 
         plugin.getCommand("tghide")!!.setExecutor { commandSender, _, _, _ ->
             val player = commandSender.server.getPlayer(commandSender.name) ?: return@setExecutor false
-            MutedUsers.mute(player.uniqueId)
+            MuteService.mute(player.uniqueId)
             return@setExecutor true
         }
     }
