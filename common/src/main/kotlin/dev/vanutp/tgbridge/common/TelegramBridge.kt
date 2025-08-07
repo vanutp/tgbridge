@@ -422,13 +422,13 @@ abstract class TelegramBridge {
                 attempt++
 
                 if (!infiniteRetries && attempt >= maxAttempts) {
-                    logger.error("Operation failed after $maxAttempts attempts: ${e.message}")
+                    logger.error("Operation failed after $maxAttempts attempts", e)
                     break
                 }
 
                 val delay = minOf(initialDelay * (1L shl (attempt - 1)), maxDelay)
                 val attemptText = if (infiniteRetries) "attempt $attempt" else "attempt $attempt/$maxAttempts"
-                logger.warn("Operation failed ($attemptText), retrying in ${delay / 1000} seconds: ${e.message}")
+                logger.warn("Operation failed ($attemptText), retrying in ${delay / 1000} seconds: ${e.javaClass.canonicalName}: ${e.message}")
                 delay(delay)
             }
         }
