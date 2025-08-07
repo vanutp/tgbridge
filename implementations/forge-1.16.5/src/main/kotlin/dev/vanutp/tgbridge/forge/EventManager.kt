@@ -1,7 +1,6 @@
 package dev.vanutp.tgbridge.forge
 
 import com.mojang.brigadier.context.CommandContext
-import dev.vanutp.tgbridge.common.MuteService
 import dev.vanutp.tgbridge.common.models.*
 import net.kyori.adventure.text.Component
 import net.minecraft.entity.player.PlayerEntity
@@ -87,11 +86,41 @@ class EventManager(private val tgbridge: ForgeTelegramBridge) {
     private fun onReloadCommand(ctx: CommandContext<ServerCommandSource>): Int {
         val res = tgbridge.onReloadCommand(
             TBCommandContext(
+                source = ctx.source.player?.toTgbridge(),
                 reply = { text ->
-                    ctx.source.sendFeedback(LiteralText(text), false)
+                    reply(ctx, text)
                 }
             ))
         return if (res) 1 else -1
+    }
+
+    private fun onMuteCommand(ctx: CommandContext<ServerCommandSource>): Int {
+        val res = tgbridge.onMuteCommand(
+            TBCommandContext(
+                source = ctx.source.player?.toTgbridge(),
+                reply = { text ->
+                    reply(ctx, text)
+                }
+            ))
+        return if (res) 1 else -1
+    }
+
+    private fun onUnmuteCommand(ctx: CommandContext<ServerCommandSource>): Int {
+        val res = tgbridge.onUnmuteCommand(
+            TBCommandContext(
+                source = ctx.source.player?.toTgbridge(),
+                reply = { text ->
+                    reply(ctx, text)
+                }
+            ))
+        return if (res) 1 else -1
+    }
+
+    private fun reply(
+        ctx: CommandContext<ServerCommandSource>,
+        text: String
+    ) {
+        ctx.source.sendFeedback(LiteralText(text), false)
     }
 
     private fun registerCommandHandlers() {
@@ -106,19 +135,11 @@ class EventManager(private val tgbridge: ForgeTelegramBridge) {
             )
             e.dispatcher.register(
                 CommandManager.literal("tgshow")
-                    .executes {
-                        val player = it.source.player?.uuid ?: return@executes -1
-                        MuteService.unmute(player)
-                        return@executes 1
-                    }
+                    .executes(::onUnmuteCommand)
             )
             e.dispatcher.register(
                 CommandManager.literal("tghide")
-                    .executes {
-                        val player = it.source.player?.uuid ?: return@executes -1
-                        MuteService.mute(player)
-                        return@executes 1
-                    }
+                    .executes(::onMuteCommand)
             )
         }
     }

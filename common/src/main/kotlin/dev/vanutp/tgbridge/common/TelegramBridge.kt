@@ -207,6 +207,24 @@ abstract class TelegramBridge {
         return true
     }
 
+    fun onMuteCommand(ctx: TBCommandContext): Boolean {
+        val player = ctx.source?.uuid ?: return false
+        if (MuteService.mute(player)) {
+            ctx.reply("${ctx.source.username} was muted")
+            return true
+        }
+        return false
+    }
+
+    fun onUnmuteCommand(ctx: TBCommandContext): Boolean {
+        val player = ctx.source?.uuid ?: return false
+        if (MuteService.unmute(player)) {
+            ctx.reply("${ctx.source.username} was unmuted")
+            return true
+        }
+        return false
+    }
+
     fun onChatMessage(e: TgbridgeMcChatMessageEvent) = wrapMinecraftHandler {
         if (TgbridgeEvents.MC_CHAT_MESSAGE.invoke(e) == EventResult.STOP) return@wrapMinecraftHandler
         var telegramText = MinecraftToTelegramConverter.convert(e.message)

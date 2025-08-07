@@ -1,7 +1,6 @@
 package dev.vanutp.tgbridge.fabric
 
 import com.mojang.brigadier.context.CommandContext
-import dev.vanutp.tgbridge.common.MuteService
 import dev.vanutp.tgbridge.common.models.*
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
 import net.fabricmc.fabric.api.message.v1.ServerMessageEvents
@@ -103,22 +102,52 @@ object EventManager {
     private fun onReloadCommand(ctx: CommandContext<ServerCommandSource>): Int {
         val res = FabricTelegramBridge.onReloadCommand(
             TBCommandContext(
+                source = ctx.source.player?.toTgbridge(),
                 reply = { text ->
-                    val textComponent = Text.literal(text)
-                    if (FabricTelegramBridge.versionInfo.IS_19) {
-                        val cls = ctx.source.javaClass
-                        val sendFeedback = cls.getMethod(
-                            "method_9226",
-                            Text::class.java,
-                            Boolean::class.javaPrimitiveType
-                        )
-                        sendFeedback.invoke(ctx.source, textComponent, false)
-                    } else {
-                        ctx.source.sendFeedback({ textComponent }, false)
-                    }
+                    reply(ctx, text)
                 }
             ))
         return if (res) 1 else -1
+    }
+
+    private fun onMuteCommand(ctx: CommandContext<ServerCommandSource>): Int {
+        val res = FabricTelegramBridge.onMuteCommand(
+            TBCommandContext(
+                source = ctx.source.player?.toTgbridge(),
+                reply = { text ->
+                    reply(ctx, text)
+                }
+            ))
+        return if (res) 1 else -1
+    }
+
+    private fun onUnmuteCommand(ctx: CommandContext<ServerCommandSource>): Int {
+        val res = FabricTelegramBridge.onUnmuteCommand(
+            TBCommandContext(
+                source = ctx.source.player?.toTgbridge(),
+                reply = { text ->
+                    reply(ctx, text)
+                }
+            ))
+        return if (res) 1 else -1
+    }
+
+    private fun reply(
+        ctx: CommandContext<ServerCommandSource>,
+        text: String
+    ) {
+        val textComponent = Text.literal(text)
+        if (FabricTelegramBridge.versionInfo.IS_19) {
+            val cls = ctx.source.javaClass
+            val sendFeedback = cls.getMethod(
+                "method_9226",
+                Text::class.java,
+                Boolean::class.javaPrimitiveType
+            )
+            sendFeedback.invoke(ctx.source, textComponent, false)
+        } else {
+            ctx.source.sendFeedback({ textComponent }, false)
+        }
     }
 
     private fun registerCommandHandlers() {
@@ -133,19 +162,11 @@ object EventManager {
             )
             dispatcher.register(
                 CommandManager.literal("tgshow")
-                    .executes {
-                        val player = it.source.player?.uuid ?: return@executes -1
-                        MuteService.unmute(player)
-                        return@executes 1
-                    }
+                    .executes(::onUnmuteCommand)
             )
             dispatcher.register(
                 CommandManager.literal("tghide")
-                    .executes {
-                        val player = it.source.player?.uuid ?: return@executes -1
-                        MuteService.mute(player)
-                        return@executes 1
-                    }
+                    .executes(::onMuteCommand)
             )
         }
     }

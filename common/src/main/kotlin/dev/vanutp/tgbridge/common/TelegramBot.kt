@@ -322,6 +322,7 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
         }
         pollTask = scope.launch {
             var offset = -1
+            logger.info("pollTask started")
             while (true) {
                 try {
                     val updates = call {

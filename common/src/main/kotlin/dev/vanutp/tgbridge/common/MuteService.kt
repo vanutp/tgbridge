@@ -17,18 +17,26 @@ object MuteService {
 
     /**
      * Mute user
+     * @return true if user was successfully muted, false otherwise
      */
-    fun mute(uuid: UUID) {
-        mutedUsers.add(uuid)
-        saveAsync()
+    fun mute(uuid: UUID): Boolean {
+        if (mutedUsers.add(uuid)) {
+            saveAsync()
+            return true
+        }
+        return false
     }
 
     /**
      * Unmute user
+     * @return true if user was successfully unmuted, false otherwise
      */
-    fun unmute(uuid: UUID) {
-        mutedUsers.remove(uuid)
-        saveAsync()
+    fun unmute(uuid: UUID): Boolean {
+        if (mutedUsers.remove(uuid)) {
+            saveAsync()
+            return true
+        }
+        return false
     }
 
     /**
