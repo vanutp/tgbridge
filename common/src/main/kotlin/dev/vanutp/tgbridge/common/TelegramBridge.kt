@@ -210,7 +210,7 @@ abstract class TelegramBridge {
     fun onMuteCommand(ctx: TBCommandContext): Boolean {
         val player = ctx.source?.uuid ?: return false
         if (MuteService.mute(player)) {
-            ctx.reply("${ctx.source.username} was muted")
+            ctx.reply(lang.minecraft.serviceMessages.mute.muted)
             return true
         }
         return false
@@ -219,7 +219,7 @@ abstract class TelegramBridge {
     fun onUnmuteCommand(ctx: TBCommandContext): Boolean {
         val player = ctx.source?.uuid ?: return false
         if (MuteService.unmute(player)) {
-            ctx.reply("${ctx.source.username} was unmuted")
+            ctx.reply(lang.minecraft.serviceMessages.mute.unmuted)
             return true
         }
         return false
