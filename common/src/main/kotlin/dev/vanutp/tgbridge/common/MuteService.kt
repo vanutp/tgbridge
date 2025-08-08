@@ -14,6 +14,7 @@ object MuteService {
     private val executor: ExecutorService = Executors.newSingleThreadExecutor()
 
     private lateinit var filePath: Path
+    private lateinit var logger: ILogger
 
     /**
      * Mute user
@@ -47,8 +48,12 @@ object MuteService {
     /**
      * Initialize storage
      */
-    fun init(configPath: Path) {
-        filePath = configPath.resolve("muted_users.json")
+    fun init(
+        logger: ILogger,
+        configPath: Path
+    ) {
+        this.logger = logger
+        this.filePath = configPath.resolve("muted_users.json")
         if (!Files.exists(filePath)) return
 
         try {
@@ -58,7 +63,7 @@ object MuteService {
                 mutedUsers.addAll(loaded)
             }
         } catch (e: Exception) {
-            println("Failed to load muted users: ${e.message}")
+            logger.error("Failed to load muted users: ${e.message}", e)
         }
     }
 
@@ -75,7 +80,7 @@ object MuteService {
                     gson.toJson(snapshot, writer)
                 }
             } catch (e: Exception) {
-                println("Failed to save muted users: ${e.message}")
+                logger.error("Failed to save muted users: ${e.message}", e)
             }
         }
     }
