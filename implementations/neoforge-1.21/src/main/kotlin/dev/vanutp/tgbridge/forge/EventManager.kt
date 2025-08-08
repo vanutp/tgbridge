@@ -88,13 +88,8 @@ object EventManager {
         return if (res) 1 else -1
     }
 
-    private fun onMuteCommand(ctx: CommandContext<ServerCommandSource>): Int {
-        val res = NeoForgeTelegramBridge.onMuteCommand(ctx.toTgbridge())
-        return if (res) 1 else -1
-    }
-
-    private fun onUnmuteCommand(ctx: CommandContext<ServerCommandSource>): Int {
-        val res = NeoForgeTelegramBridge.onUnmuteCommand(ctx.toTgbridge())
+    private fun onToggleMuteCommand(ctx: CommandContext<ServerCommandSource>): Int {
+        val res = NeoForgeTelegramBridge.onToggleMuteCommand(ctx.toTgbridge())
         return if (res) 1 else -1
     }
 
@@ -102,19 +97,16 @@ object EventManager {
         // TODO: get rid of code duplication between versions and loaders
         FORGE_BUS.addListener { e: RegisterCommandsEvent ->
             e.dispatcher.register(
-                CommandManager.literal("tgbridge").then(
-                    CommandManager.literal("reload")
-                        .requires { it.hasPermissionLevel(4) }
-                        .executes(::onReloadCommand)
-                )
-            )
-            e.dispatcher.register(
-                CommandManager.literal("tgshow")
-                    .executes(::onUnmuteCommand)
-            )
-            e.dispatcher.register(
-                CommandManager.literal("tghide")
-                    .executes(::onMuteCommand)
+                CommandManager.literal("tgbridge")
+                    .then(
+                        CommandManager.literal("reload")
+                            .requires { it.hasPermissionLevel(4) }
+                            .executes(::onReloadCommand)
+                    )
+                    .then(
+                        CommandManager.literal("toggle")
+                            .executes(::onToggleMuteCommand)
+                    )
             )
         }
     }

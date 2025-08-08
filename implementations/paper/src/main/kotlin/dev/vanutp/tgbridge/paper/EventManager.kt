@@ -76,18 +76,16 @@ class EventManager(private val plugin: PaperBootstrap) : Listener {
 
     private fun registerCommandHandlers() {
         plugin.getCommand("tgbridge")!!.setExecutor { commandSender, _, _, args ->
-            if (args.toList() != listOf("reload")) {
-                return@setExecutor false
+            if (args.contentDeepEquals(arrayOf("reload"))) {
+                if (!commandSender.isOp) {
+                    return@setExecutor false
+                }
+                return@setExecutor plugin.tgbridge.onReloadCommand(commandSender.toTgbridge())
             }
-            return@setExecutor plugin.tgbridge.onReloadCommand(commandSender.toTgbridge())
-        }
-
-        plugin.getCommand("tgshow")!!.setExecutor { commandSender, _, _, _ ->
-            return@setExecutor plugin.tgbridge.onUnmuteCommand(commandSender.toTgbridge())
-        }
-
-        plugin.getCommand("tghide")!!.setExecutor { commandSender, _, _, _ ->
-            return@setExecutor plugin.tgbridge.onMuteCommand(commandSender.toTgbridge())
+            if (args.contentDeepEquals(arrayOf("toggle"))) {
+                return@setExecutor plugin.tgbridge.onToggleMuteCommand(commandSender.toTgbridge())
+            }
+            return@setExecutor false
         }
     }
 }

@@ -87,13 +87,8 @@ class EventManager(private val tgbridge: ForgeTelegramBridge) {
         return if (res) 1 else -1
     }
 
-    private fun onMuteCommand(ctx: CommandContext<ServerCommandSource>): Int {
-        val res = tgbridge.onMuteCommand(ctx.toTgbridge())
-        return if (res) 1 else -1
-    }
-
-    private fun onUnmuteCommand(ctx: CommandContext<ServerCommandSource>): Int {
-        val res = tgbridge.onUnmuteCommand(ctx.toTgbridge())
+    private fun onToggleMuteCommand(ctx: CommandContext<ServerCommandSource>): Int {
+        val res = tgbridge.onToggleMuteCommand(ctx.toTgbridge())
         return if (res) 1 else -1
     }
 
@@ -101,19 +96,16 @@ class EventManager(private val tgbridge: ForgeTelegramBridge) {
         // TODO: get rid of code duplication between versions and loaders
         EVENT_BUS.addListener { e: RegisterCommandsEvent ->
             e.dispatcher.register(
-                CommandManager.literal("tgbridge").then(
-                    CommandManager.literal("reload")
-                        .requires { it.hasPermissionLevel(4) }
-                        .executes(::onReloadCommand)
-                )
-            )
-            e.dispatcher.register(
-                CommandManager.literal("tgshow")
-                    .executes(::onUnmuteCommand)
-            )
-            e.dispatcher.register(
-                CommandManager.literal("tghide")
-                    .executes(::onMuteCommand)
+                CommandManager.literal("tgbridge")
+                    .then(
+                        CommandManager.literal("reload")
+                            .requires { it.hasPermissionLevel(4) }
+                            .executes(::onReloadCommand)
+                    )
+                    .then(
+                        CommandManager.literal("toggle")
+                            .executes(::onToggleMuteCommand)
+                    )
             )
         }
     }

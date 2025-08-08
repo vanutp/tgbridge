@@ -1,7 +1,7 @@
 import { delay } from '@std/async';
 import { Server } from './server.ts'
 import { assert } from './utils.ts'
-import {Client} from "./client.ts";
+import { Client } from "./client.ts";
 
 async function minecraftToTelegram(server: Server) {
   const text = 'test minecraftToTelegram'
@@ -32,8 +32,22 @@ async function reloadCommand(server: Server) {
   assert(resp.includes('Config reloaded.'))
 }
 
+async function reloadCommandFromOp(server: Server) {
+  await server.rcon.send(`op ${server.client.username}`)
+  server.client.sendCommand('tgbridge reload')
+  await delay(200)
+  assert(server.client.findMessage(msg => JSON.stringify(msg.json).includes("Config reloaded.")))
+}
+
+async function reloadCommandFromOrdinary(server: Server) {
+  await server.rcon.send(`deop ${server.client.username}`)
+  server.client.sendCommand('tgbridge reload')
+  await delay(200)
+  assert(!server.client.findMessage(msg => JSON.stringify(msg.json).includes("Config reloaded.")))
+}
+
 async function muteUnmuteCommand(server: Server) {
-  server.client.sendCommand('tghide')
+  server.client.sendCommand('tgbridge toggle')
   await delay(200)
 
   const textMuted = 'test muted message'
@@ -41,7 +55,7 @@ async function muteUnmuteCommand(server: Server) {
   await delay(200)
   assert(!server.client.findMessage(msg => JSON.stringify(msg.json).includes(textMuted)))
 
-  server.client.sendCommand('tgshow')
+  server.client.sendCommand('tgbridge toggle')
   await delay(200)
 
   const textUnmuted = 'test unmuted message'
@@ -67,6 +81,8 @@ export const TESTS: ((server: Server) => any)[] = [
   telegramToMinecraft,
   advancement,
   reloadCommand,
+  reloadCommandFromOp,
+  reloadCommandFromOrdinary,
   joinAndLeavePlayer,
   muteUnmuteCommand
 ]

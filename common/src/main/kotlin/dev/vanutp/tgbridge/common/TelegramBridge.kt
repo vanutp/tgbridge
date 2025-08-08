@@ -207,19 +207,15 @@ abstract class TelegramBridge {
         return true
     }
 
-    fun onMuteCommand(ctx: TBCommandContext): Boolean {
+    fun onToggleMuteCommand(ctx: TBCommandContext): Boolean {
         val player = ctx.source?.uuid ?: return false
-        if (MuteService.mute(player)) {
+        if (MuteService.isMuted(player)) {
+            if (MuteService.unmute(player)) {
+                ctx.reply(lang.minecraft.serviceMessages.mute.unmuted)
+                return true
+            }
+        } else if (MuteService.mute(player)) {
             ctx.reply(lang.minecraft.serviceMessages.mute.muted)
-            return true
-        }
-        return false
-    }
-
-    fun onUnmuteCommand(ctx: TBCommandContext): Boolean {
-        val player = ctx.source?.uuid ?: return false
-        if (MuteService.unmute(player)) {
-            ctx.reply(lang.minecraft.serviceMessages.mute.unmuted)
             return true
         }
         return false
