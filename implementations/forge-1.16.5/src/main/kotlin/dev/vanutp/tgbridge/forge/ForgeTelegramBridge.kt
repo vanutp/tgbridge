@@ -69,9 +69,14 @@ class ForgeTelegramBridge : TelegramBridge() {
     private fun onClientSetup(event: FMLClientSetupEvent) {
         EVENT_BUS.addListener { e: RegisterCommandsEvent ->
             e.dispatcher.register(
-                LiteralArgumentBuilder.literal<ServerCommandSource>("tgbridge").then(
-                    LiteralArgumentBuilder.literal<ServerCommandSource>("dump_lang").executes(::onDumpLangCommand)
-                )
+                LiteralArgumentBuilder.literal<ServerCommandSource>("tgbridge")
+                    .then(
+                        LiteralArgumentBuilder.literal<ServerCommandSource>("dump_lang")
+                            .executes(::onDumpLangCommand)
+                    )
+                    .then(
+                        LiteralArgumentBuilder.literal("toggle")
+                    )
             )
         }
     }

@@ -27,11 +27,15 @@ object FabricTelegramBridgeClient : ClientModInitializer {
     override fun onInitializeClient() {
         ClientCommandRegistrationCallback.EVENT.register { dispatcher, _ ->
             dispatcher.register(
-                ClientCommandManager.literal("tgbridge").then(
-                    ClientCommandManager.literal("dump_lang").executes(::onDumpLangCommand)
-                )
+                ClientCommandManager.literal("tgbridge")
+                    .then(
+                        ClientCommandManager.literal("dump_lang")
+                            .executes(::onDumpLangCommand)
+                    )
+                    .then(
+                        ClientCommandManager.literal("toggle")
+                    )
             )
-
         }
     }
 }
