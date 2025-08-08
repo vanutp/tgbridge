@@ -7,7 +7,7 @@ plugins {
     id("org.jetbrains.kotlin.jvm") version "2.0.21"
     id("org.jetbrains.kotlin.plugin.serialization") version "2.0.21" apply false
     id("com.gradleup.shadow") version "8.3.4"
-    id("io.papermc.paperweight.userdev") version "1.7.4" apply false
+    id("io.papermc.paperweight.userdev") version "1.7.7" apply false
     id("xyz.jpenilla.run-paper") version "2.3.1" apply false
     id("dev.architectury.loom") version "1.10-SNAPSHOT" apply false
     id("com.modrinth.minotaur") version "2.+"

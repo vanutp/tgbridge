@@ -1,6 +1,7 @@
 package dev.vanutp.tgbridge.paper
 
 import dev.vanutp.tgbridge.common.IPlatform
+import dev.vanutp.tgbridge.common.MuteService
 import dev.vanutp.tgbridge.common.models.TgbridgePlayer
 import net.kyori.adventure.text.Component
 import net.minecraft.locale.Language
@@ -14,7 +15,7 @@ class PaperPlatform(private val plugin: JavaPlugin) : IPlatform {
 
     override fun broadcastMessage(text: Component) {
         plugin.server.consoleSender.sendMessage(text)
-        for (p in plugin.server.onlinePlayers.filterNot { it.scoreboardTags.contains("hidden-telegram") }) {
+        for (p in plugin.server.onlinePlayers.filterNot { MuteService.isMuted(it.uniqueId) }) {
             p.sendMessage(text)
         }
     }

@@ -6,13 +6,4 @@ folia-supported: true
 commands:
   tgbridge:
     description: Minecraft Telegram Bridge
-    usage: /<command>
-    permission: tgbridge.command
-  tghide:
-    description: Hides all messages from telegram
-    usage: /<command>
-    permission: tgbridge.command.hide
-  tgshow:
-    description: Brings Telegram messages back if you hidden it by /tghide
-    usage: /<command>
-    permission: tgbridge.command.show
+    usage: /tgbridge <reload|toggle>

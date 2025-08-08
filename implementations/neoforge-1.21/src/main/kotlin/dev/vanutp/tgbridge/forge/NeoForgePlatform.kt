@@ -1,6 +1,7 @@
 package dev.vanutp.tgbridge.forge
 
 import dev.vanutp.tgbridge.common.IPlatform
+import dev.vanutp.tgbridge.common.MuteService
 import dev.vanutp.tgbridge.common.models.TgbridgePlayer
 import net.kyori.adventure.text.Component
 import net.minecraft.entity.player.PlayerEntity
@@ -14,7 +15,14 @@ class NeoForgePlatform : IPlatform {
     override val configDir = FMLPaths.CONFIGDIR.get().resolve(NeoForgeTelegramBridge.MOD_ID)
 
     override fun broadcastMessage(text: Component) {
-        ServerLifecycleHooks.getCurrentServer()!!.playerManager.broadcast(text.toMinecraft(), false)
+        val currentServer = ServerLifecycleHooks.getCurrentServer() ?: return
+        val playerManager = currentServer.playerManager
+        val players = playerManager.playerList.filterNot { MuteService.isMuted(it.uuid) }
+        val message = text.toMinecraft()
+        currentServer.sendMessage(message)
+        for (player in players) {
+            player.sendMessageToClient(message, false)
+        }
     }
 
     override fun getOnlinePlayers(): List<TgbridgePlayer> {

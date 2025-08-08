@@ -51,6 +51,7 @@ abstract class TelegramBridge {
     fun init() {
         logger.info("tgbridge starting on ${platform.name}")
         ConfigManager.init(platform.configDir, platform::getLanguageKey)
+        MuteService.init(logger, platform.configDir)
         if (config.hasDefaultValues()) {
             logger.warn("Can't start with default config values: please fill in botToken and chatId, then run /tgbridge reload")
             return
@@ -95,6 +96,7 @@ abstract class TelegramBridge {
             return
         }
         runBlocking {
+            MuteService.shutdown()
             if (config.events.enableStopMessages) {
                 sendMessage(lang.telegram.serverStopped)
             }
@@ -204,6 +206,20 @@ abstract class TelegramBridge {
             TgbridgeEvents.CONFIG_RELOAD.invoke(Unit)
         }
         return true
+    }
+
+    fun onToggleMuteCommand(ctx: TBCommandContext): Boolean {
+        val player = ctx.source?.uuid ?: return false
+        if (MuteService.isMuted(player)) {
+            if (MuteService.unmute(player)) {
+                ctx.reply(lang.minecraft.serviceMessages.mute.unmuted)
+                return true
+            }
+        } else if (MuteService.mute(player)) {
+            ctx.reply(lang.minecraft.serviceMessages.mute.muted)
+            return true
+        }
+        return false
     }
 
     fun onChatMessage(e: TgbridgeMcChatMessageEvent) = wrapMinecraftHandler {

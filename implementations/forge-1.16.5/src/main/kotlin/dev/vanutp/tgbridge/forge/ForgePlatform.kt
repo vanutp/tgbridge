@@ -1,11 +1,14 @@
 package dev.vanutp.tgbridge.forge
 
 import dev.vanutp.tgbridge.common.IPlatform
+import dev.vanutp.tgbridge.common.MuteService
 import dev.vanutp.tgbridge.common.models.TgbridgePlayer
 import net.kyori.adventure.text.Component
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.network.MessageType
+import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
 import net.minecraft.util.Language
+import net.minecraft.util.Util.NIL_UUID
 import net.minecraftforge.fml.ModList
 import net.minecraftforge.fml.loading.FMLPaths
 import net.minecraftforge.fml.server.ServerLifecycleHooks
@@ -15,11 +18,20 @@ class ForgePlatform : IPlatform {
     override val configDir = FMLPaths.CONFIGDIR.get().resolve(ForgeTelegramBridge.MOD_ID)
 
     override fun broadcastMessage(text: Component) {
-        ServerLifecycleHooks.getCurrentServer().playerManager.broadcastChatMessage(
-            text.toMinecraft(),
+        val currentServer = ServerLifecycleHooks.getCurrentServer()
+        val playerManager = currentServer.playerManager
+        val players = playerManager.playerList.filterNot { MuteService.isMuted(it.uuid) }
+        val message = text.toMinecraft()
+        val sender = NIL_UUID
+        val packet = GameMessageS2CPacket(
+            message,
             MessageType.CHAT,
-            net.minecraft.util.Util.NIL_UUID
+            sender
         )
+        currentServer.sendSystemMessage(message, sender)
+        for (player in players) {
+            player.networkHandler.sendPacket(packet)
+        }
     }
 
     override fun getOnlinePlayers(): List<TgbridgePlayer> {

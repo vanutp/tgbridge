@@ -57,5 +57,8 @@ minecraft:
       started: "<light_purple>[начал видеочат]"
       ended: "<light_purple>[завершил видеочат]"
       invited: "<light_purple>[пригласил <users> в видеочат]"
+    mute:
+      muted: "Вы не будете получать новые сообщения от Telegram"
+      unmuted: "Вы будете получать новые сообщения от Telegram"
 # Don't change the version manually
 version: 3

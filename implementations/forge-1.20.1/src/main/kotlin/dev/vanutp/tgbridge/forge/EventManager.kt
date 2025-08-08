@@ -5,7 +5,6 @@ import dev.vanutp.tgbridge.common.models.*
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.server.command.CommandManager
 import net.minecraft.server.command.ServerCommandSource
-import net.minecraft.text.Text
 import net.minecraftforge.event.RegisterCommandsEvent
 import net.minecraftforge.event.ServerChatEvent
 import net.minecraftforge.event.entity.living.LivingDeathEvent
@@ -83,12 +82,12 @@ object EventManager {
     }
 
     private fun onReloadCommand(ctx: CommandContext<ServerCommandSource>): Int {
-        val res = ForgeTelegramBridge.onReloadCommand(
-            TBCommandContext(
-                reply = { text ->
-                    ctx.source.sendFeedback({ Text.literal(text) }, false)
-                }
-            ))
+        val res = ForgeTelegramBridge.onReloadCommand(ctx.toTgbridge())
+        return if (res) 1 else -1
+    }
+
+    private fun onToggleMuteCommand(ctx: CommandContext<ServerCommandSource>): Int {
+        val res = ForgeTelegramBridge.onToggleMuteCommand(ctx.toTgbridge())
         return if (res) 1 else -1
     }
 
@@ -96,11 +95,16 @@ object EventManager {
         // TODO: get rid of code duplication between versions and loaders
         FORGE_BUS.addListener { e: RegisterCommandsEvent ->
             e.dispatcher.register(
-                CommandManager.literal("tgbridge").then(
-                    CommandManager.literal("reload")
-                        .requires { it.hasPermissionLevel(4) }
-                        .executes(::onReloadCommand)
-                )
+                CommandManager.literal("tgbridge")
+                    .then(
+                        CommandManager.literal("reload")
+                            .requires { it.hasPermissionLevel(4) }
+                            .executes(::onReloadCommand)
+                    )
+                    .then(
+                        CommandManager.literal("toggle")
+                            .executes(::onToggleMuteCommand)
+                    )
             )
         }
     }

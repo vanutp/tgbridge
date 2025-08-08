@@ -13,7 +13,7 @@ export abstract class Server {
   abstract get type(): ServerType;
   readonly version: string;
 
-  private readonly port: number;
+  readonly port: number;
   private readonly rconPort: number;
   private readonly rconPassword: string;
   private readonly gradleProject: string;
@@ -191,7 +191,7 @@ simulation-distance=2
     }
 
     try {
-      this._client = new Client(this.port);
+      this._client = new Client(this.port, '1st_user');
     } catch {
       if (this.hasStopped) {
         throw new Error('Failed to start the server');

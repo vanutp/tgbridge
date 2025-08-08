@@ -9,9 +9,9 @@ export class Client {
   private chatMessages: ChatMessage[];
   readonly username: string;
 
-  constructor(port: number) {
+  constructor(port: number, username: string) {
     this.port = port;
-    this.username = 'test_user';
+    this.username = username;
     this.bot = createBot({
       host: 'localhost',
       port,
@@ -49,6 +49,10 @@ export class Client {
         resolve();
       });
     });
+  }
+
+  sendCommand(text: string) {
+    this.bot.chat(`/${text}`);
   }
 
   stop() {

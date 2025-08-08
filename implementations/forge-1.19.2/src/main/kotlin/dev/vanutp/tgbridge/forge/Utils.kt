@@ -1,9 +1,12 @@
 package dev.vanutp.tgbridge.forge
 
+import com.mojang.brigadier.context.CommandContext
+import dev.vanutp.tgbridge.common.models.TBCommandContext
 import dev.vanutp.tgbridge.common.models.TgbridgePlayer
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 import net.minecraft.entity.player.PlayerEntity
+import net.minecraft.server.command.ServerCommandSource
 import net.minecraft.text.Text
 
 
@@ -20,3 +23,14 @@ fun PlayerEntity.toTgbridge() = TgbridgePlayer(
     name.string,
     displayName?.string,
 )
+
+fun CommandContext<ServerCommandSource>.toTgbridge() = TBCommandContext(
+    source = source.player?.toTgbridge(),
+    reply = this::reply
+)
+
+fun CommandContext<ServerCommandSource>.reply(
+    text: String
+) {
+    source.sendFeedback(Text.literal(text), false)
+}

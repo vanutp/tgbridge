@@ -53,6 +53,12 @@ data class VideoChatService(
 )
 
 @Serializable
+data class MuteService(
+    val muted: String = "You won't receive messages from Telegram anymore",
+    val unmuted: String = "You will receive new messages from Telegram",
+)
+
+@Serializable
 data class MessageMeta(
     val reply: String = "<blue>[R <sender>: <text>]",
     val replyToMinecraft: String = "<blue>[R <text>]",
@@ -95,6 +101,7 @@ data class MessageFormatting(
 data class ServiceMessages(
     val members: MembersService = MembersService(),
     val videoChat: VideoChatService = VideoChatService(),
+    val mute: MuteService = MuteService(),
 )
 
 @Serializable

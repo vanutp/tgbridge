@@ -9,6 +9,7 @@ import net.minecraft.server.command.CommandManager
 import net.minecraft.server.command.ServerCommandSource
 import net.minecraft.text.Text
 
+
 object EventManager {
     fun register() {
         registerChatMessageListener()
@@ -100,23 +101,12 @@ object EventManager {
     }
 
     private fun onReloadCommand(ctx: CommandContext<ServerCommandSource>): Int {
-        val res = FabricTelegramBridge.onReloadCommand(
-            TBCommandContext(
-                reply = { text ->
-                    val textComponent = Text.literal(text)
-                    if (FabricTelegramBridge.versionInfo.IS_19) {
-                        val cls = ctx.source.javaClass
-                        val sendFeedback = cls.getMethod(
-                            "method_9226",
-                            Text::class.java,
-                            Boolean::class.javaPrimitiveType
-                        )
-                        sendFeedback.invoke(ctx.source, textComponent, false)
-                    } else {
-                        ctx.source.sendFeedback({ textComponent }, false)
-                    }
-                }
-            ))
+        val res = FabricTelegramBridge.onReloadCommand(ctx.toTgbridge())
+        return if (res) 1 else -1
+    }
+
+    private fun onToggleMuteCommand(ctx: CommandContext<ServerCommandSource>): Int {
+        val res = FabricTelegramBridge.onToggleMuteCommand(ctx.toTgbridge())
         return if (res) 1 else -1
     }
 
@@ -124,11 +114,16 @@ object EventManager {
         // TODO: get rid of code duplication between versions and loaders
         CommandRegistrationCallback.EVENT.register { dispatcher, _, _ ->
             dispatcher.register(
-                CommandManager.literal("tgbridge").then(
-                    CommandManager.literal("reload")
-                        .requires { it.hasPermissionLevel(4) }
-                        .executes(::onReloadCommand)
-                )
+                CommandManager.literal("tgbridge")
+                    .then(
+                        CommandManager.literal("reload")
+                            .requires { it.hasPermissionLevel(4) }
+                            .executes(::onReloadCommand)
+                    )
+                    .then(
+                        CommandManager.literal("toggle")
+                            .executes(::onToggleMuteCommand)
+                    )
             )
         }
     }

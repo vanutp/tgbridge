@@ -6,7 +6,6 @@ import net.kyori.adventure.text.Component
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.server.command.CommandManager
 import net.minecraft.server.command.ServerCommandSource
-import net.minecraft.text.LiteralText
 import net.minecraftforge.common.MinecraftForge.EVENT_BUS
 import net.minecraftforge.event.RegisterCommandsEvent
 import net.minecraftforge.event.ServerChatEvent
@@ -84,12 +83,12 @@ class EventManager(private val tgbridge: ForgeTelegramBridge) {
     }
 
     private fun onReloadCommand(ctx: CommandContext<ServerCommandSource>): Int {
-        val res = tgbridge.onReloadCommand(
-            TBCommandContext(
-                reply = { text ->
-                    ctx.source.sendFeedback(LiteralText(text), false)
-                }
-            ))
+        val res = tgbridge.onReloadCommand(ctx.toTgbridge())
+        return if (res) 1 else -1
+    }
+
+    private fun onToggleMuteCommand(ctx: CommandContext<ServerCommandSource>): Int {
+        val res = tgbridge.onToggleMuteCommand(ctx.toTgbridge())
         return if (res) 1 else -1
     }
 
@@ -97,11 +96,16 @@ class EventManager(private val tgbridge: ForgeTelegramBridge) {
         // TODO: get rid of code duplication between versions and loaders
         EVENT_BUS.addListener { e: RegisterCommandsEvent ->
             e.dispatcher.register(
-                CommandManager.literal("tgbridge").then(
-                    CommandManager.literal("reload")
-                        .requires { it.hasPermissionLevel(4) }
-                        .executes(::onReloadCommand)
-                )
+                CommandManager.literal("tgbridge")
+                    .then(
+                        CommandManager.literal("reload")
+                            .requires { it.hasPermissionLevel(4) }
+                            .executes(::onReloadCommand)
+                    )
+                    .then(
+                        CommandManager.literal("toggle")
+                            .executes(::onToggleMuteCommand)
+                    )
             )
         }
     }
