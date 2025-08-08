@@ -1,3 +1,10 @@
+### 0.8.0
+
+- 1.21.8 support
+- Voice Messages integration
+- Add `/tgbridge toggle` command allowing to toggle Telegram message visibility for yourself
+- Retry failed Telegram API requests (fixes startup errors when Telegram API is unreachable)
+
 ### 0.7.2-p1
 
 - fabric: mark 1.21.7 as supported
