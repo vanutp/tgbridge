@@ -57,15 +57,15 @@ abstract class TelegramBridge {
             return
         }
         bot = TelegramBot(config.advanced.botApiUrl, config.general.botToken, logger)
-        runBlocking {
-            bot.init()
-        }
-        registerTelegramHandlers()
-        bot.startPolling(coroutineScope)
         addIntegration(ReplacementsCompat(this))
         addIntegration(VoiceMessagesCompat(this))
-        initialized = true
-        logger.info("Successfully connected to Telegram API")
+        coroutineScope.launch {
+            bot.init()
+            registerTelegramHandlers()
+            bot.startPolling(coroutineScope)
+            initialized = true
+            logger.info("Successfully connected to Telegram API")
+        }
     }
 
     fun addIntegration(integration: AbstractCompat) {
