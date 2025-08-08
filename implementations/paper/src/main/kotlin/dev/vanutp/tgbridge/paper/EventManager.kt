@@ -2,7 +2,6 @@ package dev.vanutp.tgbridge.paper
 
 import dev.vanutp.tgbridge.common.models.*
 import io.papermc.paper.event.player.AsyncChatEvent
-import org.bukkit.command.CommandSender
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -80,22 +79,15 @@ class EventManager(private val plugin: PaperBootstrap) : Listener {
             if (args.toList() != listOf("reload")) {
                 return@setExecutor false
             }
-            return@setExecutor plugin.tgbridge.onReloadCommand(buildContext(commandSender))
+            return@setExecutor plugin.tgbridge.onReloadCommand(commandSender.toTgbridge())
         }
 
         plugin.getCommand("tgshow")!!.setExecutor { commandSender, _, _, _ ->
-            return@setExecutor plugin.tgbridge.onUnmuteCommand(buildContext(commandSender))
+            return@setExecutor plugin.tgbridge.onUnmuteCommand(commandSender.toTgbridge())
         }
 
         plugin.getCommand("tghide")!!.setExecutor { commandSender, _, _, _ ->
-            return@setExecutor plugin.tgbridge.onMuteCommand(buildContext(commandSender))
+            return@setExecutor plugin.tgbridge.onMuteCommand(commandSender.toTgbridge())
         }
     }
-
-    private fun buildContext(commandSender: CommandSender) = TBCommandContext(
-        source = commandSender.server.getPlayer(commandSender.name)?.toTgbridge(),
-        reply = { text ->
-            commandSender.sendMessage(text)
-        }
-    )
 }

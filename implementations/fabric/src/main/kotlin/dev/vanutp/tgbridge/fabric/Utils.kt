@@ -2,13 +2,16 @@ package dev.vanutp.tgbridge.fabric
 
 import com.google.gson.JsonElement
 import com.google.gson.JsonParseException
+import com.mojang.brigadier.context.CommandContext
 import com.mojang.serialization.JsonOps
+import dev.vanutp.tgbridge.common.models.TBCommandContext
 import dev.vanutp.tgbridge.common.models.TgbridgePlayer
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 import net.minecraft.registry.DynamicRegistryManager
 import net.minecraft.registry.Registries
 import net.minecraft.registry.RegistryWrapper
+import net.minecraft.server.command.ServerCommandSource
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.Text
 import net.minecraft.text.TextCodecs
@@ -78,3 +81,25 @@ fun ServerPlayerEntity.toTgbridge() = TgbridgePlayer(
     name.string,
     displayName?.string,
 )
+
+fun CommandContext<ServerCommandSource>.toTgbridge() = TBCommandContext(
+    source = source.player?.toTgbridge(),
+    reply = this::reply
+)
+
+fun CommandContext<ServerCommandSource>.reply(
+    text: String
+) {
+    val textComponent = Text.literal(text)
+    if (FabricTelegramBridge.versionInfo.IS_19) {
+        val cls = source.javaClass
+        val sendFeedback = cls.getMethod(
+            "method_9226",
+            Text::class.java,
+            Boolean::class.javaPrimitiveType
+        )
+        sendFeedback.invoke(source, textComponent, false)
+    } else {
+        source.sendFeedback({ textComponent }, false)
+    }
+}

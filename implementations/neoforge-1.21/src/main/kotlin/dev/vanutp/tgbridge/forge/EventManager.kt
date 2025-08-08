@@ -5,7 +5,6 @@ import dev.vanutp.tgbridge.common.models.*
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.server.command.CommandManager
 import net.minecraft.server.command.ServerCommandSource
-import net.minecraft.text.Text
 import net.neoforged.neoforge.event.RegisterCommandsEvent
 import net.neoforged.neoforge.event.ServerChatEvent
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent
@@ -85,43 +84,18 @@ object EventManager {
     }
 
     private fun onReloadCommand(ctx: CommandContext<ServerCommandSource>): Int {
-        val res = NeoForgeTelegramBridge.onReloadCommand(
-            TBCommandContext(
-                source = ctx.source.player?.toTgbridge(),
-                reply = { text ->
-                    reply(ctx, text)
-                }
-            ))
+        val res = NeoForgeTelegramBridge.onReloadCommand(ctx.toTgbridge())
         return if (res) 1 else -1
     }
 
     private fun onMuteCommand(ctx: CommandContext<ServerCommandSource>): Int {
-        val res = NeoForgeTelegramBridge.onMuteCommand(
-            TBCommandContext(
-                source = ctx.source.player?.toTgbridge(),
-                reply = { text ->
-                    reply(ctx, text)
-                }
-            ))
+        val res = NeoForgeTelegramBridge.onMuteCommand(ctx.toTgbridge())
         return if (res) 1 else -1
     }
 
     private fun onUnmuteCommand(ctx: CommandContext<ServerCommandSource>): Int {
-        val res = NeoForgeTelegramBridge.onUnmuteCommand(
-            TBCommandContext(
-                source = ctx.source.player?.toTgbridge(),
-                reply = { text ->
-                    reply(ctx, text)
-                }
-            ))
+        val res = NeoForgeTelegramBridge.onUnmuteCommand(ctx.toTgbridge())
         return if (res) 1 else -1
-    }
-
-    private fun reply(
-        ctx: CommandContext<ServerCommandSource>,
-        text: String
-    ) {
-        ctx.source.sendFeedback({ Text.literal(text) }, false)
     }
 
     private fun registerCommandHandlers() {

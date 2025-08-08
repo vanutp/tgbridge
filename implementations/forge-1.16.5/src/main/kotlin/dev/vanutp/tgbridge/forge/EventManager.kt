@@ -6,7 +6,6 @@ import net.kyori.adventure.text.Component
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.server.command.CommandManager
 import net.minecraft.server.command.ServerCommandSource
-import net.minecraft.text.LiteralText
 import net.minecraftforge.common.MinecraftForge.EVENT_BUS
 import net.minecraftforge.event.RegisterCommandsEvent
 import net.minecraftforge.event.ServerChatEvent
@@ -84,43 +83,18 @@ class EventManager(private val tgbridge: ForgeTelegramBridge) {
     }
 
     private fun onReloadCommand(ctx: CommandContext<ServerCommandSource>): Int {
-        val res = tgbridge.onReloadCommand(
-            TBCommandContext(
-                source = ctx.source.player?.toTgbridge(),
-                reply = { text ->
-                    reply(ctx, text)
-                }
-            ))
+        val res = tgbridge.onReloadCommand(ctx.toTgbridge())
         return if (res) 1 else -1
     }
 
     private fun onMuteCommand(ctx: CommandContext<ServerCommandSource>): Int {
-        val res = tgbridge.onMuteCommand(
-            TBCommandContext(
-                source = ctx.source.player?.toTgbridge(),
-                reply = { text ->
-                    reply(ctx, text)
-                }
-            ))
+        val res = tgbridge.onMuteCommand(ctx.toTgbridge())
         return if (res) 1 else -1
     }
 
     private fun onUnmuteCommand(ctx: CommandContext<ServerCommandSource>): Int {
-        val res = tgbridge.onUnmuteCommand(
-            TBCommandContext(
-                source = ctx.source.player?.toTgbridge(),
-                reply = { text ->
-                    reply(ctx, text)
-                }
-            ))
+        val res = tgbridge.onUnmuteCommand(ctx.toTgbridge())
         return if (res) 1 else -1
-    }
-
-    private fun reply(
-        ctx: CommandContext<ServerCommandSource>,
-        text: String
-    ) {
-        ctx.source.sendFeedback(LiteralText(text), false)
     }
 
     private fun registerCommandHandlers() {

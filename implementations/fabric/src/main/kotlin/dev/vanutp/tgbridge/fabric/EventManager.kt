@@ -100,54 +100,18 @@ object EventManager {
     }
 
     private fun onReloadCommand(ctx: CommandContext<ServerCommandSource>): Int {
-        val res = FabricTelegramBridge.onReloadCommand(
-            TBCommandContext(
-                source = ctx.source.player?.toTgbridge(),
-                reply = { text ->
-                    reply(ctx, text)
-                }
-            ))
+        val res = FabricTelegramBridge.onReloadCommand(ctx.toTgbridge())
         return if (res) 1 else -1
     }
 
     private fun onMuteCommand(ctx: CommandContext<ServerCommandSource>): Int {
-        val res = FabricTelegramBridge.onMuteCommand(
-            TBCommandContext(
-                source = ctx.source.player?.toTgbridge(),
-                reply = { text ->
-                    reply(ctx, text)
-                }
-            ))
+        val res = FabricTelegramBridge.onMuteCommand(ctx.toTgbridge())
         return if (res) 1 else -1
     }
 
     private fun onUnmuteCommand(ctx: CommandContext<ServerCommandSource>): Int {
-        val res = FabricTelegramBridge.onUnmuteCommand(
-            TBCommandContext(
-                source = ctx.source.player?.toTgbridge(),
-                reply = { text ->
-                    reply(ctx, text)
-                }
-            ))
+        val res = FabricTelegramBridge.onUnmuteCommand(ctx.toTgbridge())
         return if (res) 1 else -1
-    }
-
-    private fun reply(
-        ctx: CommandContext<ServerCommandSource>,
-        text: String
-    ) {
-        val textComponent = Text.literal(text)
-        if (FabricTelegramBridge.versionInfo.IS_19) {
-            val cls = ctx.source.javaClass
-            val sendFeedback = cls.getMethod(
-                "method_9226",
-                Text::class.java,
-                Boolean::class.javaPrimitiveType
-            )
-            sendFeedback.invoke(ctx.source, textComponent, false)
-        } else {
-            ctx.source.sendFeedback({ textComponent }, false)
-        }
     }
 
     private fun registerCommandHandlers() {
