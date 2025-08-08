@@ -16,7 +16,6 @@ data class Config(
     val integrations: IntegrationsConfig = IntegrationsConfig(),
     val events: EventsConfig = EventsConfig(),
     val advanced: AdvancedConfig = AdvancedConfig(),
-    val connectionRetry: RetryConfig = RetryConfig(),
     @YamlComment(
         "Config file version. Don't change manually",
     )
@@ -134,6 +133,7 @@ data class EventsAdvancementmessagesConfig(
 @Serializable
 data class AdvancedConfig(
     val botApiUrl: String = "https://api.telegram.org",
+    val connectionRetry: RetryConfig = RetryConfig(),
 )
 
 @Serializable
