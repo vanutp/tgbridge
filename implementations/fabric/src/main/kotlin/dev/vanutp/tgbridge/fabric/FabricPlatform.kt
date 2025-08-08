@@ -6,6 +6,7 @@ import dev.vanutp.tgbridge.common.models.TgbridgePlayer
 import dev.vanutp.tgbridge.fabric.FabricTelegramBridge.server
 import net.fabricmc.loader.api.FabricLoader
 import net.kyori.adventure.text.Component
+import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.util.Language
 
 
@@ -46,4 +47,6 @@ class FabricPlatform : IPlatform {
 
     override fun isModLoaded(modId: String) =
         FabricLoader.getInstance().isModLoaded(modId)
+
+    override fun playerToTgbridge(player: Any) = (player as PlayerEntity).toTgbridge()
 }

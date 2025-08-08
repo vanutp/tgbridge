@@ -5,6 +5,7 @@ import dev.vanutp.tgbridge.common.MuteService
 import dev.vanutp.tgbridge.common.models.TgbridgePlayer
 import net.kyori.adventure.text.Component
 import net.minecraft.locale.Language
+import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
 import kotlin.io.path.absolute
 
@@ -33,4 +34,6 @@ class PaperPlatform(private val plugin: JavaPlugin) : IPlatform {
 
     override fun isModLoaded(modId: String) =
         plugin.server.pluginManager.getPlugin(modId)?.isEnabled ?: false
+
+    override fun playerToTgbridge(player: Any) = (player as Player).toTgbridge()
 }

@@ -42,6 +42,7 @@ class CancellableEventHandler<E> internal constructor() {
 }
 
 object TgbridgeEvents {
+    // TODO: move TG_CHAT_MESSAGE to bot api layer
     val TG_CHAT_MESSAGE = CancellableEventHandler<TgMessage>()
     val MC_CHAT_MESSAGE = CancellableEventHandler<TgbridgeMcChatMessageEvent>()
     val DEATH = CancellableEventHandler<TgbridgeDeathEvent>()

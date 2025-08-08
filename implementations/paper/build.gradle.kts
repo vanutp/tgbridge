@@ -37,6 +37,12 @@ repositories {
             includeGroup("ru.mrbrikster")
         }
     }
+    maven {
+        url = uri("https://maven.maxhenkel.de/repository/public")
+        content {
+            includeGroup("de.maxhenkel.voicechat")
+        }
+    }
 }
 
 dependencies {
@@ -49,6 +55,7 @@ dependencies {
     compileOnly("net.essentialsx:EssentialsX:$essentialsXVersion")
     compileOnly("ru.brikster:chatty-api:3.0.0-20240908.194144-1")
     compileOnly("ru.mrbrikster:chatty-api:2.19.13")
+    compileOnly("de.maxhenkel.voicechat:voicechat-api:2.5.31")
 }
 
 

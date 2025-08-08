@@ -1,5 +1,7 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
+import org.jetbrains.kotlin.gradle.utils.extendsFrom
 
 plugins {
     id("org.jetbrains.kotlin.jvm") version "2.0.21"
@@ -41,32 +43,46 @@ subprojects {
     }
 
     dependencies {
+        val KOTLIN_LIBS = listOf(
+            "org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}",
+            "org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}",
+            "org.jetbrains.kotlinx:kotlinx-coroutines-core:${kotlinxCoroutinesVersion}",
+            "org.jetbrains.kotlinx:kotlinx-serialization-core:${kotlinxSerializationVersion}",
+            "org.jetbrains.kotlinx:kotlinx-serialization-json:${kotlinxSerializationVersion}"
+        )
+        val ADVENTURE_LIBS = listOf(
+            "net.kyori:adventure-api:${adventureVersion}",
+            "net.kyori:adventure-text-serializer-gson:${adventureVersion}",
+            "net.kyori:adventure-text-minimessage:${adventureVersion}",
+        )
+
+        (KOTLIN_LIBS + ADVENTURE_LIBS).forEach {
+            testImplementation(it)
+        }
         if (checkBundleKotlin(project.name)) {
-            shadow(implementation("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")!!)
-            shadow(implementation("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")!!)
-            shadow(implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${kotlinxCoroutinesVersion}")!!)
-            shadow(implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${kotlinxSerializationVersion}")!!)
-            shadow(implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${kotlinxSerializationVersion}")!!)
+            KOTLIN_LIBS.forEach { lib ->
+                shadow(implementation(lib)!!)
+            }
         } else {
-            compileOnly("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
-            compileOnly("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
-            compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:${kotlinxCoroutinesVersion}")
-            compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-core:${kotlinxSerializationVersion}")
-            compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:${kotlinxSerializationVersion}")
+            KOTLIN_LIBS.forEach { lib ->
+                compileOnly(lib)
+            }
         }
 
         if (project.name == "paper" || project.name == "common") {
-            compileOnly("net.kyori:adventure-api:${adventureVersion}")
-            compileOnly("net.kyori:adventure-text-serializer-gson:${adventureVersion}") {
-                exclude(module = "gson")
+            ADVENTURE_LIBS.forEach {
+                compileOnly(it) {
+                    // technically needs to be excluded only for text-serializer-gson,
+                    // but idk how to do this easily
+                    exclude(module = "gson")
+                }
             }
-            compileOnly("net.kyori:adventure-text-minimessage:${adventureVersion}")
         } else {
-            shadow(implementation("net.kyori:adventure-api:${adventureVersion}")!!)
-            shadow(implementation("net.kyori:adventure-text-serializer-gson:${adventureVersion}") {
-                exclude(module = "gson")
-            })
-            shadow(implementation("net.kyori:adventure-text-minimessage:${adventureVersion}")!!)
+            ADVENTURE_LIBS.forEach { lib ->
+                shadow(implementation(lib) {
+                    exclude(module = "gson")
+                })
+            }
         }
 
         // gson is available in all loaders at runtime
@@ -79,19 +95,24 @@ subprojects {
         toolchain.languageVersion = JavaLanguageVersion.of(21)
     }
 
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
+        }
+    }
+
     tasks {
         withType<JavaCompile> {
             options.encoding = "UTF-8"
             options.release = 17
         }
 
-        named<KotlinJvmCompile>("compileKotlin") {
-            kotlinOptions.jvmTarget = "17"
-        }
-
         named<ShadowJar>("shadowJar") {
-            from("LICENSE") {
-                rename { "${it}_${project.base.archivesName.get()}" }
+            from(rootDir.resolve("LICENSE")) {
+                rename { "${it}_${rootProject.name}" }
+            }
+            from(rootDir.resolve("LICENSE")) {
+                rename { "${it}_${rootProject.name}" }
             }
             relocate("okio", "tgbridge.shaded.okio")
             relocate("okhttp3", "tgbridge.shaded.okhttp3")

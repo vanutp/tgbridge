@@ -4,6 +4,7 @@ import dev.vanutp.tgbridge.common.IPlatform
 import dev.vanutp.tgbridge.common.MuteService
 import dev.vanutp.tgbridge.common.models.TgbridgePlayer
 import net.kyori.adventure.text.Component
+import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.network.MessageType
 import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
 import net.minecraft.util.Language
@@ -47,4 +48,6 @@ class ForgePlatform : IPlatform {
     }
 
     override fun isModLoaded(modId: String) = ModList.get().isLoaded(modId)
+
+    override fun playerToTgbridge(player: Any) = (player as PlayerEntity).toTgbridge()
 }

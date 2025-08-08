@@ -8,11 +8,11 @@ import dev.vanutp.tgbridge.common.models.TBCommandContext
 import dev.vanutp.tgbridge.common.models.TgbridgePlayer
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
+import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.registry.DynamicRegistryManager
 import net.minecraft.registry.Registries
 import net.minecraft.registry.RegistryWrapper
 import net.minecraft.server.command.ServerCommandSource
-import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.Text
 import net.minecraft.text.TextCodecs
 
@@ -76,7 +76,7 @@ fun Text.toAdventure(): Component {
     }
 }
 
-fun ServerPlayerEntity.toTgbridge() = TgbridgePlayer(
+fun PlayerEntity.toTgbridge() = TgbridgePlayer(
     uuid,
     name.string,
     displayName?.string,

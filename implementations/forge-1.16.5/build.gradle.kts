@@ -1,5 +1,6 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import net.fabricmc.loom.task.RemapJarTask
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 plugins {
@@ -35,14 +36,16 @@ java {
     toolchain.languageVersion = JavaLanguageVersion.of(21)
 }
 
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_1_8)
+    }
+}
+
 tasks {
     withType<JavaCompile> {
         options.encoding = "UTF-8"
         options.release = 8
-    }
-
-    named<KotlinJvmCompile>("compileKotlin") {
-        kotlinOptions.jvmTarget = "1.8"
     }
 
     named<ProcessResources>("processResources") {
