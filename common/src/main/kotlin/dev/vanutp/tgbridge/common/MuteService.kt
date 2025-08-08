@@ -47,8 +47,8 @@ object MuteService {
     /**
      * Initialize storage
      */
-    fun init(path: Path) {
-        filePath = path.resolve("muted_users.json")
+    fun init(configPath: Path) {
+        filePath = configPath.resolve("muted_users.json")
         if (!Files.exists(filePath)) return
 
         try {
