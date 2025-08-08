@@ -13,6 +13,11 @@ interface IPlatform {
     fun getLanguageKey(key: String): String?
     fun isModLoaded(modId: String): Boolean
 
+    /**
+     * Converts a native player object to a TgbridgePlayer.
+     */
+    fun playerToTgbridge(player: Any): TgbridgePlayer?
+
     fun isModLoadedMulti(fabricId: String?, forgeId: String?, paperId: String?): Boolean {
         return when (this.name) {
             "fabric" -> fabricId != null && isModLoaded(fabricId)

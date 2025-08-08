@@ -1,5 +1,6 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import net.fabricmc.loom.task.RemapJarTask
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("dev.architectury.loom")
@@ -40,12 +41,15 @@ java {
     toolchain.languageVersion = JavaLanguageVersion.of(21)
 }
 
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_21)
+    }
+}
+
 tasks {
     compileJava {
         options.release = 21
-    }
-    compileKotlin {
-        kotlinOptions.jvmTarget = "21"
     }
 
     named<ProcessResources>("processResources") {

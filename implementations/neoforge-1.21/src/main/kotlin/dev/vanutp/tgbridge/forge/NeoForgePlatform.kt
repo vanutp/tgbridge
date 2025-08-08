@@ -3,6 +3,7 @@ package dev.vanutp.tgbridge.forge
 import dev.vanutp.tgbridge.common.IPlatform
 import dev.vanutp.tgbridge.common.models.TgbridgePlayer
 import net.kyori.adventure.text.Component
+import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.util.Language
 import net.neoforged.fml.ModList
 import net.neoforged.fml.loading.FMLPaths
@@ -31,4 +32,6 @@ class NeoForgePlatform : IPlatform {
     }
 
     override fun isModLoaded(modId: String) = ModList.get().isLoaded(modId)
+
+    override fun playerToTgbridge(player: Any) = (player as PlayerEntity).toTgbridge()
 }

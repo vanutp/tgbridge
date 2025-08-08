@@ -1,54 +1,82 @@
 package dev.vanutp.tgbridge.common
 
-import com.google.gson.annotations.SerializedName
 import dev.vanutp.tgbridge.common.ConfigManager.config
 import kotlinx.coroutines.*
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.ResponseBody
 import retrofit2.HttpException
+import retrofit2.Response
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.Query
+import retrofit2.converter.kotlinx.serialization.asConverterFactory
+import retrofit2.http.*
 import java.net.ConnectException
 import java.net.SocketException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.time.Duration
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeoutException
 import kotlin.reflect.KClass
 
+
+@Serializable
 data class TgUser(
     val id: Long,
-    @SerializedName("first_name")
+    @SerialName("first_name")
     val firstName: String,
-    @SerializedName("last_name")
-    val lastName: String?,
-    val username: String?,
+    @SerialName("last_name")
+    val lastName: String? = null,
+    val username: String? = null,
 ) {
     val fullName
         get() = (firstName + " " + (lastName ?: "")).trim()
 }
 
+@Serializable
 data class TgChat(
     val id: Long,
     val title: String = "",
     val username: String? = null,
 )
 
+@Serializable
 class TgAny
 
+@Serializable
 data class TgPoll(
     val question: String,
 )
 
+@Serializable
+data class TgVoice(
+    @SerialName("file_id")
+    val fileId: String,
+    @SerialName("file_unique_id")
+    val fileUniqueId: String,
+    @SerialName("duration")
+    val duration: Int,
+    @SerialName("mime_type")
+    val mimeType: String? = null,
+    @SerialName("file_size")
+    val fileSize: Int? = null,
+)
+
+@Serializable
 data class TgMessageOrigin(
-    @SerializedName("sender_user")
+    @SerialName("sender_user")
     val senderUser: TgUser? = null,
-    @SerializedName("sender_user_name")
+    @SerialName("sender_user_name")
     val senderUserName: String? = null,
-    @SerializedName("sender_chat")
+    @SerialName("sender_chat")
     val senderChat: TgChat? = null,
     val chat: TgChat? = null,
 )
@@ -61,10 +89,11 @@ interface TgMessageMedia {
     val sticker: TgAny?
     val video: TgAny?
     val videoNote: TgAny?
-    val voice: TgAny?
+    val voice: TgVoice?
     val poll: TgPoll?
 }
 
+@Serializable
 data class TgExternalReplyInfo(
     val origin: TgMessageOrigin,
     val chat: TgChat? = null,
@@ -74,9 +103,9 @@ data class TgExternalReplyInfo(
     override val document: TgAny? = null,
     override val sticker: TgAny? = null,
     override val video: TgAny? = null,
-    @SerializedName("video_note")
+    @SerialName("video_note")
     override val videoNote: TgAny? = null,
-    override val voice: TgAny? = null,
+    override val voice: TgVoice? = null,
     override val poll: TgPoll? = null,
 ) : TgMessageMedia {
     val senderName
@@ -87,52 +116,73 @@ data class TgExternalReplyInfo(
             ?: ""
 }
 
+@Serializable
 data class TgTextQuote(
     val text: String,
     val entities: List<TgEntity>? = emptyList(),
 )
 
+@Serializable
 enum class TgEntityType {
-    @SerializedName("mention")
+    @SerialName("mention")
     MENTION,
-    @SerializedName("hashtag")
+
+    @SerialName("hashtag")
     HASHTAG,
-    @SerializedName("cashtag")
+
+    @SerialName("cashtag")
     CASHTAG,
-    @SerializedName("bot_command")
+
+    @SerialName("bot_command")
     BOT_COMMAND,
-    @SerializedName("url")
+
+    @SerialName("url")
     URL,
-    @SerializedName("email")
+
+    @SerialName("email")
     EMAIL,
-    @SerializedName("phone_number")
+
+    @SerialName("phone_number")
     PHONE_NUMBER,
-    @SerializedName("bold")
+
+    @SerialName("bold")
     BOLD,
-    @SerializedName("italic")
+
+    @SerialName("italic")
     ITALIC,
-    @SerializedName("underline")
+
+    @SerialName("underline")
     UNDERLINE,
-    @SerializedName("strikethrough")
+
+    @SerialName("strikethrough")
     STRIKETHROUGH,
-    @SerializedName("spoiler")
+
+    @SerialName("spoiler")
     SPOILER,
-    @SerializedName("blockquote")
+
+    @SerialName("blockquote")
     BLOCKQUOTE,
-    @SerializedName("expandable_blockquote")
+
+    @SerialName("expandable_blockquote")
     EXPANDABLE_BLOCKQUOTE,
-    @SerializedName("code")
+
+    @SerialName("code")
     CODE,
-    @SerializedName("pre")
+
+    @SerialName("pre")
     PRE,
-    @SerializedName("text_link")
+
+    @SerialName("text_link")
     TEXT_LINK,
-    @SerializedName("text_mention")
+
+    @SerialName("text_mention")
     TEXT_MENTION,
-    @SerializedName("custom_emoji")
+
+    @SerialName("custom_emoji")
     CUSTOM_EMOJI,
 }
 
+@Serializable
 data class TgEntity(
     val type: TgEntityType,
     val offset: Int,
@@ -140,37 +190,39 @@ data class TgEntity(
     val url: String? = null,
 )
 
+@Serializable
 data class TgVideoChatParticipantsInvited(
     val users: List<TgUser>,
 )
 
+@Serializable
 data class TgMessage(
     val chat: TgChat,
-    @SerializedName("message_id")
+    @SerialName("message_id")
     val messageId: Int,
     val from: TgUser? = null,
-    @SerializedName("sender_chat")
+    @SerialName("sender_chat")
     val senderChat: TgChat? = null,
-    @SerializedName("forward_from")
+    @SerialName("forward_from")
     val forwardFrom: TgUser? = null,
-    @SerializedName("forward_from_chat")
+    @SerialName("forward_from_chat")
     val forwardFromChat: TgChat? = null,
-    @SerializedName("reply_to_message")
+    @SerialName("reply_to_message")
     val replyToMessage: TgMessage? = null,
-    @SerializedName("external_reply")
+    @SerialName("external_reply")
     val externalReply: TgExternalReplyInfo? = null,
     val quote: TgTextQuote? = null,
-    @SerializedName("message_thread_id")
+    @SerialName("message_thread_id")
     val messageThreadId: Int? = null,
-    @SerializedName("is_topic_message")
+    @SerialName("is_topic_message")
     val isTopicMessage: Boolean? = null,
-    @SerializedName("author_signature")
+    @SerialName("author_signature")
     val authorSignature: String? = null,
     val text: String? = null,
-    @SerializedName("entities")
+    @SerialName("entities")
     val textEntities: List<TgEntity>? = null,
     val caption: String? = null,
-    @SerializedName("caption_entities")
+    @SerialName("caption_entities")
     val captionEntities: List<TgEntity>? = null,
     override val animation: TgAny? = null,
     override val photo: List<TgAny>? = null,
@@ -178,25 +230,25 @@ data class TgMessage(
     override val document: TgAny? = null,
     override val sticker: TgAny? = null,
     override val video: TgAny? = null,
-    @SerializedName("video_note")
+    @SerialName("video_note")
     override val videoNote: TgAny? = null,
-    override val voice: TgAny? = null,
+    override val voice: TgVoice? = null,
     override val poll: TgPoll? = null,
-    @SerializedName("pinned_message")
+    @SerialName("pinned_message")
     val pinnedMessage: TgMessage? = null,
 
-    @SerializedName("new_chat_members")
+    @SerialName("new_chat_members")
     val newChatMembers: List<TgUser>? = null,
-    @SerializedName("left_chat_member")
+    @SerialName("left_chat_member")
     val leftChatMember: TgUser? = null,
 
-    @SerializedName("video_chat_scheduled")
+    @SerialName("video_chat_scheduled")
     val videoChatScheduled: TgAny? = null,
-    @SerializedName("video_chat_started")
+    @SerialName("video_chat_started")
     val videoChatStarted: TgAny? = null,
-    @SerializedName("video_chat_ended")
+    @SerialName("video_chat_ended")
     val videoChatEnded: TgAny? = null,
-    @SerializedName("video_chat_participants_invited")
+    @SerialName("video_chat_participants_invited")
     val videoChatParticipantsInvited: TgVideoChatParticipantsInvited? = null,
 ) : TgMessageMedia {
     val senderName
@@ -210,52 +262,69 @@ data class TgMessage(
         get() = textEntities ?: captionEntities ?: emptyList()
 }
 
+@Serializable
+data class TgFile(
+    @SerialName("file_id")
+    val fileId: String,
+    @SerialName("file_unique_id")
+    val fileUniqueId: String,
+    @SerialName("file_size")
+    val fileSize: Int? = null,
+    @SerialName("file_path")
+    val filePath: String? = null,
+)
+
+@Serializable
 data class TgUpdate(
-    @SerializedName("update_id")
+    @SerialName("update_id")
     val updateId: Int,
     val message: TgMessage? = null,
 )
 
+@Serializable
 data class TgResponse<T>(
     val ok: Boolean,
-    val result: T?,
-    val description: String?,
+    val result: T? = null,
+    val description: String? = null,
 )
 
+@Serializable
 data class TgSendMessageRequest(
-    @SerializedName("chat_id")
+    @SerialName("chat_id")
     val chatId: Long,
-    @SerializedName("text")
+    @SerialName("text")
     val text: String,
-    @SerializedName("entities")
+    @SerialName("entities")
     val entities: List<TgEntity>? = null,
-    @SerializedName("reply_to_message_id")
+    @SerialName("reply_to_message_id")
     val replyToMessageId: Int? = null,
-    @SerializedName("parse_mode")
-    val parseMode: String? = "HTML",
-    @SerializedName("disable_web_page_preview")
-    val disableWebPagePreview: Boolean = true,
+    @SerialName("parse_mode")
+    val parseMode: String? = null,
+    @SerialName("disable_web_page_preview")
+    val disableWebPagePreview: Boolean,
 )
 
+@Serializable
 data class TgEditMessageRequest(
-    @SerializedName("chat_id")
+    @SerialName("chat_id")
     val chatId: Long,
-    @SerializedName("message_id")
+    @SerialName("message_id")
     val messageId: Int,
-    @SerializedName("text")
+    @SerialName("text")
     val text: String,
-    @SerializedName("entities")
+    @SerialName("entities")
     val entities: List<TgEntity>? = null,
-    @SerializedName("parse_mode")
-    val parseMode: String? = "HTML",
-    @SerializedName("disable_web_page_preview")
-    val disableWebPagePreview: Boolean = true,
+    @SerialName("parse_mode")
+    val parseMode: String? = null,
+    @SerialName("disable_web_page_preview")
+    val disableWebPagePreview: Boolean,
 )
 
+@Serializable
 data class TgDeleteMessageRequest(
-    @SerializedName("chat_id")
+    @SerialName("chat_id")
     val chatId: Long,
-    @SerializedName("message_id")
+    @SerialName("message_id")
     val messageId: Int,
 )
 
@@ -265,6 +334,17 @@ interface TgApi {
 
     @POST("sendMessage")
     suspend fun sendMessage(@Body data: TgSendMessageRequest): TgResponse<TgMessage>
+
+    @Multipart
+    @POST("sendVoice")
+    suspend fun sendVoice(
+        @Part("chat_id") chatId: RequestBody,
+        @Part voice: MultipartBody.Part,
+        @Part("caption") caption: RequestBody?,
+        @Part("caption_entities") captionEntities: RequestBody?,
+        @Part("reply_to_message_id") replyToMessageId: RequestBody?,
+        @Part("parse_mode") parseMode: RequestBody?,
+    ): TgResponse<TgMessage>
 
     @POST("editMessageText")
     suspend fun editMessageText(@Body data: TgEditMessageRequest): TgResponse<TgMessage>
@@ -281,6 +361,13 @@ interface TgApi {
 
     @POST("deleteWebhook")
     suspend fun deleteWebhook(): TgResponse<Boolean>
+
+    @GET("getFile")
+    suspend fun getFile(@Query("file_id") fileId: String): TgResponse<TgFile>
+
+    @Streaming
+    @GET
+    suspend fun downloadFile(@Url filePath: String): Response<ResponseBody>
 }
 
 const val POLL_TIMEOUT_SECONDS = 60
@@ -289,10 +376,17 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
     private val okhttpClient = OkHttpClient.Builder()
         .readTimeout(Duration.ofSeconds((POLL_TIMEOUT_SECONDS + 10).toLong()))
         .build()
+    private val fileBaseUrl = "$botApiUrl/file/bot$botToken/"
+    private val json = Json {
+        ignoreUnknownKeys = true
+
+    }
     private val client = Retrofit.Builder()
         .client(okhttpClient)
         .baseUrl("$botApiUrl/bot$botToken/")
-        .addConverterFactory(GsonConverterFactory.create())
+        .addConverterFactory(
+            json.asConverterFactory("application/json; charset=UTF8".toMediaType())
+        )
         .build()
         .create(TgApi::class.java)
     private var pollTask: Job? = null
@@ -381,8 +475,8 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
 
     suspend fun shutdown() {
         pollTask?.cancelAndJoin()
-        okhttpClient.dispatcher().executorService().shutdown()
-        okhttpClient.connectionPool().evictAll()
+        okhttpClient.dispatcher.executorService.shutdown()
+        okhttpClient.connectionPool.evictAll()
     }
 
     private suspend fun <T> call(f: suspend () -> TgResponse<T>): T {
@@ -390,6 +484,7 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
             return f().result!!
         } catch (e: HttpException) {
             val resp = e.response() ?: throw e
+            // TODO: replace with custom exception class
             throw Exception("Telegram exception: ${resp.errorBody()?.string() ?: "no response body"}")
         }
     }
@@ -452,7 +547,7 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
         replyToMessageId: Int? = null,
         parseMode: String? = "HTML",
         disableWebPagePreview: Boolean = true,
-    ) = retriableCall {
+    ): TgMessage = retriableCall {
         client.sendMessage(
             TgSendMessageRequest(
                 chatId,
@@ -462,6 +557,38 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
                 parseMode,
                 disableWebPagePreview
             )
+        )
+    }
+
+    // TODO: wtf
+    suspend fun sendVoice(
+        chatId: Long,
+        voice: ByteArray,
+        caption: String? = null,
+        captionEntities: List<TgEntity>? = null,
+        replyToMessageId: Int? = null,
+        parseMode: String? = "HTML",
+    ): TgMessage = retriableCall {
+        val requestVoiceFile = voice.toRequestBody(MultipartBody.FORM, 0, voice.size)
+        val currentDateString = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"))
+        val requestVoice = MultipartBody.Part.createFormData(
+            "voice",
+            "voice_$currentDateString.ogg",
+            requestVoiceFile
+        )
+        val chatIdBody = chatId.toString().toRequestBody(MultipartBody.FORM)
+        val captionBody = caption?.toRequestBody(MultipartBody.FORM)
+        val captionEntitiesBody =
+            captionEntities?.let { json.encodeToString(it).toRequestBody(MultipartBody.FORM) }
+        val replyToMessageIdBody = replyToMessageId?.toString()?.toRequestBody(MultipartBody.FORM)
+        val parseModeBody = parseMode?.toRequestBody(MultipartBody.FORM)
+        client.sendVoice(
+            chatIdBody,
+            requestVoice,
+            captionBody,
+            captionEntitiesBody,
+            replyToMessageIdBody,
+            parseModeBody,
         )
     }
 
@@ -487,5 +614,15 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
 
     suspend fun deleteMessage(chatId: Long, messageId: Int) = retriableCall {
         client.deleteMessage(TgDeleteMessageRequest(chatId, messageId))
+    }
+
+    suspend fun downloadFile(fileId: String): Response<ResponseBody> {
+        val file = call { client.getFile(fileId) }
+        val filePath = file.filePath
+        if (filePath == null) {
+            // TODO: replace with custom exception class
+            throw Exception("File path is null for $fileId")
+        }
+        return client.downloadFile(fileBaseUrl + filePath)
     }
 }
