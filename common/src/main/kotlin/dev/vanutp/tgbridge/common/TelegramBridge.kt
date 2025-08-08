@@ -65,6 +65,7 @@ abstract class TelegramBridge {
         addIntegration(ReplacementsCompat(this))
         addIntegration(VoiceMessagesCompat(this))
         initialized = true
+        logger.info("Successfully connected to Telegram API")
     }
 
     fun addIntegration(integration: AbstractCompat) {

@@ -1,5 +1,6 @@
 package dev.vanutp.tgbridge.common
 
+import dev.vanutp.tgbridge.common.ConfigManager.config
 import kotlinx.coroutines.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -16,9 +17,15 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import retrofit2.http.*
+import java.net.ConnectException
+import java.net.SocketException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.concurrent.TimeoutException
+import kotlin.reflect.KClass
 
 
 @Serializable
@@ -406,8 +413,8 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
     }
 
     suspend fun init() {
-        call { client.deleteWebhook() }
-        me = call { client.getMe() }
+        retriableCall { client.deleteWebhook() }
+        me = retriableCall { client.getMe() }
     }
 
     fun startPolling(scope: CoroutineScope) {
@@ -483,6 +490,57 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
         }
     }
 
+    private suspend fun <T> retriableCall(f: suspend () -> TgResponse<T>): T {
+        val retryConf = config.advanced.connectionRetry
+        return withRetry(
+            maxAttempts = retryConf.maxAttempts,
+            initialDelay = retryConf.initialDelay,
+            maxDelay = retryConf.maxDelay,
+            retryExceptions = setOf(
+                UnknownHostException::class,
+                ConnectException::class,
+                SocketTimeoutException::class,
+                SocketException::class,
+                TimeoutException::class,
+            )
+        ) {
+            call(f)
+        }
+    }
+
+    private suspend fun <T> withRetry(
+        maxAttempts: Int = 3,
+        initialDelay: Long = 1000L,
+        maxDelay: Long = 300000L,
+        retryExceptions: Set<KClass<out Exception>> = setOf(Exception::class),
+        operation: suspend () -> T
+    ): T {
+        var attempt = 0
+        val infiniteRetries = maxAttempts <= 0
+
+        while (true) {
+            try {
+                return operation()
+            } catch (e: Exception) {
+                if (!retryExceptions.contains(e::class)) {
+                    logger.error("Not retriable exception", e)
+                    throw e
+                }
+                attempt++
+
+                if (!infiniteRetries && attempt >= maxAttempts) {
+                    logger.error("Operation failed after $maxAttempts attempts", e)
+                    throw e
+                }
+
+                val delay = minOf(initialDelay * (1L shl (attempt - 1)), maxDelay)
+                val attemptText = if (infiniteRetries) "attempt $attempt" else "attempt $attempt/$maxAttempts"
+                logger.warn("Operation failed ($attemptText), retrying in ${delay / 1000} seconds: ${e.javaClass.canonicalName}: ${e.message}")
+                delay(delay)
+            }
+        }
+    }
+
     suspend fun sendMessage(
         chatId: Long,
         text: String,
@@ -490,7 +548,7 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
         replyToMessageId: Int? = null,
         parseMode: String? = "HTML",
         disableWebPagePreview: Boolean = true,
-    ): TgMessage = call {
+    ): TgMessage = retriableCall {
         client.sendMessage(
             TgSendMessageRequest(
                 chatId,
@@ -511,7 +569,7 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
         captionEntities: List<TgEntity>? = null,
         replyToMessageId: Int? = null,
         parseMode: String? = "HTML",
-    ): TgMessage = call {
+    ): TgMessage = retriableCall {
         val requestVoiceFile = voice.toRequestBody(MultipartBody.FORM, 0, voice.size)
         val currentDateString = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"))
         val requestVoice = MultipartBody.Part.createFormData(
@@ -519,7 +577,7 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
             "voice_$currentDateString.ogg",
             requestVoiceFile
         )
-        val chatIdBody = chatId.toString().toRequestBody(MultipartBody.FORM, )
+        val chatIdBody = chatId.toString().toRequestBody(MultipartBody.FORM)
         val captionBody = caption?.toRequestBody(MultipartBody.FORM)
         val captionEntitiesBody =
             captionEntities?.let { json.encodeToString(it).toRequestBody(MultipartBody.FORM) }
@@ -542,7 +600,7 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
         entities: List<TgEntity>? = null,
         parseMode: String? = "HTML",
         disableWebPagePreview: Boolean = true,
-    ): TgMessage = call {
+    ) = retriableCall {
         client.editMessageText(
             TgEditMessageRequest(
                 chatId,
@@ -555,7 +613,7 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
         )
     }
 
-    suspend fun deleteMessage(chatId: Long, messageId: Int) = call {
+    suspend fun deleteMessage(chatId: Long, messageId: Int) = retriableCall {
         client.deleteMessage(TgDeleteMessageRequest(chatId, messageId))
     }
 

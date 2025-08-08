@@ -133,4 +133,21 @@ data class EventsAdvancementmessagesConfig(
 @Serializable
 data class AdvancedConfig(
     val botApiUrl: String = "https://api.telegram.org",
+    val connectionRetry: RetryConfig = RetryConfig(),
+)
+
+@Serializable
+data class RetryConfig(
+    @YamlComment(
+        "Max amount of connection retries. If the value is less than 1 the number of attempts is infinite",
+    )
+    val maxAttempts: Int = 10,
+    @YamlComment(
+        "Delay before first reconnect attempt in milliseconds",
+    )
+    val initialDelay: Long = 1000L,
+    @YamlComment(
+        "Maximum delay between reconnection attempts in milliseconds",
+    )
+    val maxDelay: Long = 300000L,
 )
