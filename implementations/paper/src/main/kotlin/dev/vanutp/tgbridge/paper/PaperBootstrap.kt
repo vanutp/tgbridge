@@ -1,5 +1,7 @@
 package dev.vanutp.tgbridge.paper
 
+import java.util.concurrent.TimeUnit
+import org.bukkit.Bukkit
 import org.bukkit.plugin.java.JavaPlugin
 
 class PaperBootstrap : JavaPlugin() {
@@ -7,7 +9,7 @@ class PaperBootstrap : JavaPlugin() {
 
     override fun onEnable() {
         EventManager(this).register()
-        server.scheduler.scheduleSyncDelayedTask(this, tgbridge::onServerStarted)
+        Bukkit.getAsyncScheduler().runDelayed(this, { (tgbridge::onServerStarted)() }, 5, TimeUnit.SECONDS)
         tgbridge.init()
     }
 
