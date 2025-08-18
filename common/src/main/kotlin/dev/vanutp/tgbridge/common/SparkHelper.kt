@@ -10,6 +10,10 @@ class SparkHelper private constructor(private val spark: Spark) {
             val spark = try {
                 SparkProvider.get()
             } catch (ignore: NoClassDefFoundError) {
+                // Spark is not present
+                return null
+            } catch (ignore: IllegalStateException) {
+                // Spark is not loaded
                 return null
             }
             return SparkHelper(spark)
