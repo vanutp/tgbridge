@@ -7,8 +7,10 @@ class PaperBootstrap : JavaPlugin() {
 
     override fun onEnable() {
         EventManager(this).register()
-        server.scheduler.scheduleSyncDelayedTask(this, tgbridge::onServerStarted)
         tgbridge.init()
+        server.asyncScheduler.runNow(this) {
+            tgbridge.onServerStarted()
+        }
     }
 
     override fun onDisable() {
