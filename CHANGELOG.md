@@ -1,3 +1,7 @@
+### 0.8.2
+
+- paper: Use ServerLoadEvent to detect when the server is fully started. Fixes integration initialization
+
 ### 0.8.1
 
 - Fix Folia
