@@ -21,7 +21,7 @@ import kotlin.math.max
 
 abstract class TelegramBridge {
     internal val coroutineScope = CoroutineScope(Dispatchers.IO).plus(SupervisorJob())
-    protected abstract val logger: ILogger
+    abstract val logger: ILogger
     abstract val platform: IPlatform
     private var initialized: Boolean = false
     private var started: Boolean = false

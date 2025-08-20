@@ -9,6 +9,7 @@ import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.player.PlayerAdvancementDoneEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.event.server.ServerLoadEvent
 
 class EventManager(private val plugin: PaperBootstrap) : Listener {
     fun register() {
@@ -16,6 +17,11 @@ class EventManager(private val plugin: PaperBootstrap) : Listener {
         registerJoinLeaveListener()
         registerCommandHandlers()
         plugin.server.pluginManager.registerEvents(this, plugin)
+    }
+
+    @EventHandler()
+    fun onServerLoad(e: ServerLoadEvent) {
+        plugin.tgbridge.onServerStarted()
     }
 
     private fun registerChatMessageListener() {

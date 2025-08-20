@@ -10,10 +10,9 @@ class SparkHelper private constructor(private val spark: Spark) {
             val spark = try {
                 SparkProvider.get()
             } catch (ignore: NoClassDefFoundError) {
-                // Spark is not present
                 return null
             } catch (ignore: IllegalStateException) {
-                // Spark is not loaded
+                TelegramBridge.INSTANCE.logger.warn("Spark is present but not enabled")
                 return null
             }
             return SparkHelper(spark)
