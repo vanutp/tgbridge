@@ -35,6 +35,7 @@ repositories {
         content {
             includeGroup("ru.brikster")
             includeGroup("ru.mrbrikster")
+            includeGroup("com.dthielke.herochat")
         }
     }
     maven {
@@ -56,6 +57,7 @@ dependencies {
     compileOnly("ru.brikster:chatty-api:3.0.0-20240908.194144-1")
     compileOnly("ru.mrbrikster:chatty-api:2.19.13")
     compileOnly("de.maxhenkel.voicechat:voicechat-api:2.5.31")
+    compileOnly("com.dthielke.herochat:Herochat:5.6.5")
 }
 
 
