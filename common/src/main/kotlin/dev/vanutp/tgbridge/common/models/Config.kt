@@ -75,9 +75,9 @@ data class IntegrationsConfig(
     @YamlComment(
         "See also: [Compatibility](https://tgbridge.vanutp.dev/en/compatibility#chat)",
         "Use this if you have an incompatible plugin, such as CMI or AdvancedChat installed.",
-        "Will register a legacy chat listener with LOWEST priority",
+        "Will register a legacy chat listener with LOWEST priority (HIGHEST on Forge/NeoForge)",
         "and only forward messages that start with the specified string.",
-        "Currently this only has an effect on Paper.",
+        "Currently this only has an effect on Paper and Forge/NeoForge.",
         "Example: \"!\" (quotes are required)",
         "Default value: null (disabled)",
     )

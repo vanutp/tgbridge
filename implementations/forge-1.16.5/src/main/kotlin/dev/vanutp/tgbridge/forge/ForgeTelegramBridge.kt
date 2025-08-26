@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import dev.vanutp.tgbridge.common.TelegramBridge
+import dev.vanutp.tgbridge.forge.compat.IncompatibleChatModCompat
 import net.minecraft.client.resource.language.TranslationStorage
 import net.minecraft.server.command.ServerCommandSource
 import net.minecraft.text.LiteralText
@@ -40,6 +41,7 @@ class ForgeTelegramBridge : TelegramBridge() {
             }
 
             Dist.DEDICATED_SERVER -> {
+                addIntegration(IncompatibleChatModCompat(this))
                 EventManager(this).register()
                 EVENT_BUS.addListener { _: FMLServerStartingEvent ->
                     init()

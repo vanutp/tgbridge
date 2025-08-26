@@ -12,7 +12,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.player.AsyncPlayerChatEvent
 
-class UnsupportedChatPluginCompat(bridge: PaperTelegramBridge) : AbstractPaperCompat(bridge) {
+class IncompatibleChatPluginCompat(bridge: PaperTelegramBridge) : AbstractPaperCompat(bridge) {
     override fun shouldEnable(): Boolean {
         return config.integrations.incompatiblePluginChatPrefix != null
     }
