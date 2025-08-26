@@ -1,3 +1,8 @@
+### 0.8.3
+
+- Support `integrations.incompatiblePluginChatPrefix` on (Neo)Forge
+- Support Herochat on Paper
+
 ### 0.8.2
 
 - paper: Use ServerLoadEvent to detect when the server is fully started. Fixes integration initialization
