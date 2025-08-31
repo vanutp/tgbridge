@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="89" height="28" role="img" aria-label="⁣: CHAT">
+    <title>Chat</title>
+    <g shape-rendering="crispEdges">
+        <rect width="32" height="28" fill="#555"/>
+        <rect x="32" width="57" height="28" fill="#26a5e4"/>
+    </g>
+    <g fill="#fff" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif"
+       text-rendering="geometricPrecision" font-size="100">
+        <svg fill="#ffffff" x="7" y="5" width="18px" height="18px" viewBox="0 0 24 24"
+             xmlns="http://www.w3.org/2000/svg">
+            <path d="m20.665 3.717-17.73 6.837c-1.21.486-1.203 1.161-.222 1.462l4.552 1.42 10.532-6.645c.498-.303.953-.14.579.192l-8.533 7.701h-.002l.002.001-.314 4.692c.46 0 .663-.211.921-.46l2.211-2.15 4.599 3.397c.848.467 1.457.227 1.668-.785l3.019-14.228c.309-1.239-.473-1.8-1.282-1.434z"/>
+        </svg>
+        <text transform="scale(.1)" x="607" y="175" textLength="350" fill="#fff" font-weight="bold">CHAT</text>
+    </g>
+</svg>

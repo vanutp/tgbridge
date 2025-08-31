@@ -64,6 +64,7 @@ export default defineConfig({
     socialLinks: [
       {icon: 'github', link: 'https://github.com/vanutp/tgbridge'},
       {icon: 'modrinth', link: 'https://modrinth.com/mod/tgbridge'},
+      {icon: 'telegram', link: 'https://t.me/tgbridge_chat'},
     ],
   },
   sitemap: {

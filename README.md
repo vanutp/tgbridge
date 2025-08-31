@@ -15,6 +15,7 @@ A feature-rich multiloader mod to sync Telegram and Minecraft chats
 
 [![Modrinth - Downloads](https://img.shields.io/modrinth/dt/tgbridge?style=for-the-badge&logo=modrinth&label=Download)](https://modrinth.com/mod/tgbridge)
 [![Docs](https://img.shields.io/website?url=https%3A%2F%2Ftgbridge.vanutp.dev&style=for-the-badge&label=Docs&color=%238b00dd)](https://tgbridge.vanutp.dev/)
+[![Telegram chat](https://raw.githubusercontent.com/vanutp/tgbridge/refs/heads/master/docs/public/chat-badge.svg)](https://t.me/tgbridge_chat)
 </div>
 
 https://github.com/vanutp/tgbridge/assets/11143488/697a6d5d-1f2c-4156-bf8d-140446a83f5e
@@ -36,9 +37,8 @@ See https://tgbridge.vanutp.dev/en/quickstart
 Want to help the project? Here's how you can help:
 
 - **⭐️ the repository**: Your support is important to me :)
-- **Open an issue**: Open an issue to suggest improvements or report bugs
+- **Open an issue**: Open an issue to suggest improvements or report bugs. You can also post suggestions in the [Telegram chat](https://t.me/tgbridge_chat)
 - **Vote for features**: Leave a 👍 on an issue if you are interested in the feature
-- **Send a PR**: Look for issues labeled "help wanted" if you want to contribute
 - Before working on a pull request, please discuss your proposed 
   changes in an issue first — this helps avoid duplicate work and ensures your contribution
   aligns with the project goals
