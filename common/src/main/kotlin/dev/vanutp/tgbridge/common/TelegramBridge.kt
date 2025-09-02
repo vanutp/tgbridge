@@ -2,7 +2,7 @@ package dev.vanutp.tgbridge.common
 
 import dev.vanutp.tgbridge.common.ConfigManager.config
 import dev.vanutp.tgbridge.common.ConfigManager.lang
-import dev.vanutp.tgbridge.common.compat.AbstractCompat
+import dev.vanutp.tgbridge.common.compat.ITgbridgeCompat
 import dev.vanutp.tgbridge.common.compat.ReplacementsCompat
 import dev.vanutp.tgbridge.common.compat.VoiceMessagesCompat
 import dev.vanutp.tgbridge.common.converters.MinecraftToTelegramConverter
@@ -32,8 +32,8 @@ abstract class TelegramBridge {
     internal var lastMessage: LastMessage? = null
     private val lastMessageLock = Mutex()
 
-    private val availableIntegrations: MutableList<AbstractCompat> = mutableListOf()
-    lateinit var loadedIntegrations: List<AbstractCompat> private set
+    private val availableIntegrations: MutableList<ITgbridgeCompat> = mutableListOf()
+    lateinit var loadedIntegrations: List<ITgbridgeCompat> private set
 
     companion object {
         private var _INSTANCE: TelegramBridge? = null
@@ -68,7 +68,7 @@ abstract class TelegramBridge {
         }
     }
 
-    fun addIntegration(integration: AbstractCompat) {
+    fun addIntegration(integration: ITgbridgeCompat) {
         if (started) {
             logger.error("Can't add integration ${integration::class.simpleName} after the server has started")
             return
