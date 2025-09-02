@@ -18,9 +18,8 @@ class HeroChatCompat(bridge: PaperTelegramBridge) : AbstractPaperCompat(bridge) 
     @EventHandler(priority = EventPriority.MONITOR)
     fun onHeroChatMessage(e: ChannelChatEvent) {
         if (
-            e.channel.name.lowercase() != config.integrations.globalChatName.lowercase()
+            !e.channel.name.equals(config.integrations.globalChatName, ignoreCase = true)
             || e.result != Chatter.Result.ALLOWED
-            || e.message.isEmpty()
         ) {
             return
         }

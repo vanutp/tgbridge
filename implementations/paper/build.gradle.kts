@@ -58,6 +58,7 @@ dependencies {
     compileOnly("ru.mrbrikster:chatty-api:2.19.13")
     compileOnly("de.maxhenkel.voicechat:voicechat-api:2.5.31")
     compileOnly("com.dthielke.herochat:Herochat:5.6.5")
+    compileOnly("de.hexaoxi:carbonchat-api:3.0.0-beta.26")
 }
 
 
@@ -76,6 +77,10 @@ tasks {
 
     assemble {
         dependsOn(reobfJar)
+    }
+
+    runServer {
+        minecraftVersion("1.21.8")
     }
 }
 
