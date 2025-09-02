@@ -9,13 +9,13 @@
 
 ## Плагины чата { #chat }
 
-::: info Поведение
-Только сообщения, отправленные в глобальный чат, будут пересылаться в Telegram
-:::
-
 Работает из коробки с:
 
 - [Chatty](https://www.spigotmc.org/resources/chatty-lightweight-universal-bukkit-chat-system-solution-1-7-10-1-20.59411/)
+- [HeroChat](https://www.spigotmc.org/resources/herochat-pro-multi-server-chat-channels-and-more-50-off.34305/)
+- [Carbon Chat](https://modrinth.com/plugin/carbon)
+
+Убедитесь, что опция [`integrations.globalChatName`](/ru/reference#globalchatname) задана правильно.
 
 Статус поддержки других плагинов: [#71](https://github.com/vanutp/tgbridge/issues/71).
 Если вам нужна поддержка вашего плагина, оставьте комментарий под этим issue.

@@ -135,12 +135,14 @@ options:
   advanced.connectionRetry.initialDelay:
     type: number
     default: 1000
+    kotlin_type: Long
     description: |
       Задержка перед первой попыткой повторного подключения в миллисекундах
 
   advanced.connectionRetry.maxDelay:
     type: number
     default: 300000
+    kotlin_type: Long
     description: |
       Максимальная задержка между попытками повторного подключения в миллисекундах
 

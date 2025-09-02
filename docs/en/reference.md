@@ -35,6 +35,7 @@ If this value is set, messages without specified prefix won't be forwarded to Te
 ### keepPrefix
 
 - **Type:** `boolean`
+- **Default:** `false`
 
 Set to `true` to keep the prefix specified in the above setting in the message
 
@@ -51,6 +52,7 @@ The value is specified in seconds
 ### useRealUsername
 
 - **Type:** `boolean`
+- **Default:** `false`
 
 Set to `true` to use real player username instead of display name in all Telegram messages
 
@@ -70,6 +72,7 @@ as links to a specified BlueMap instance.
 ### globalChatName
 
 - **Type:** `string`
+- **Default:** `"global"`
 
 The chat name to forward messages from.
 Only has an effect when a compatible chat plugin with support for named chats, such as Chatty, is installed.
@@ -169,6 +172,7 @@ Whether to send a Telegram message when the server stops
 ### botApiUrl
 
 - **Type:** `string`
+- **Default:** `"https://api.telegram.org"`
 
 ### connectionRetry
 
@@ -179,6 +183,7 @@ Whether to send a Telegram message when the server stops
 
 Max amount of connection retries. If the value is less than 1 the number of attempts is infinite
 
+
 #### initialDelay
 
 - **Type:** `number`
@@ -186,12 +191,14 @@ Max amount of connection retries. If the value is less than 1 the number of atte
 
 Delay before first reconnect attempt in milliseconds
 
+
 #### maxDelay
 
 - **Type:** `number`
 - **Default:** `300000`
 
 Maximum delay between reconnection attempts in milliseconds
+
 
 ## version
 

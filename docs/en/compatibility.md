@@ -9,13 +9,13 @@ feel free to submit a [feature request](https://github.com/vanutp/tgbridge/issue
 
 ## Chat plugins { #chat }
 
-::: info Integration behaviour
-Only messages sent to the global chat will be forwarded
-:::
-
 Works out of the box with:
 
 - [Chatty](https://www.spigotmc.org/resources/chatty-lightweight-universal-bukkit-chat-system-solution-1-7-10-1-20.59411/)
+- [HeroChat](https://www.spigotmc.org/resources/herochat-pro-multi-server-chat-channels-and-more-50-off.34305/)
+- [Carbon Chat](https://modrinth.com/plugin/carbon)
+
+Make sure that the [`integrations.globalChatName`](/en/reference#globalchatname) option is set correctly.
 
 Support for other plugins is tracked in [#71](https://github.com/vanutp/tgbridge/issues/71).
 If you need support for your plugin, please leave a comment there.
