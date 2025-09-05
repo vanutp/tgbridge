@@ -7,3 +7,5 @@ commands:
   tgbridge:
     description: Minecraft Telegram Bridge
     usage: /tgbridge <reload|toggle>
+loadbefore:
+  - voicemessages

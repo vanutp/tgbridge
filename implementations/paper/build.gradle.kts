@@ -30,12 +30,20 @@ repositories {
         }
     }
     maven {
+        name = "KvotheShaed Releases"
+        url = uri("https://maven.kvotheshaed.ru/releases")
+        content {
+            includeGroup("ru.dimaskama.voicemessages")
+        }
+    }
+    maven {
         name = "scarsz"
         url = uri("https://nexus.scarsz.me/content/groups/public/")
         content {
             includeGroup("ru.brikster")
             includeGroup("ru.mrbrikster")
             includeGroup("com.dthielke.herochat")
+            includeGroup("com.discordsrv")
         }
     }
     maven {
@@ -59,6 +67,7 @@ dependencies {
     compileOnly("de.maxhenkel.voicechat:voicechat-api:2.5.31")
     compileOnly("com.dthielke.herochat:Herochat:5.6.5")
     compileOnly("de.hexaoxi:carbonchat-api:3.0.0-beta.26")
+    compileOnly("ru.dimaskama.voicemessages:voicemessages-api:0.0.1")
 }
 
 

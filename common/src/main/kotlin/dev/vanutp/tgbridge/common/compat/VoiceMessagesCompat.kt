@@ -37,11 +37,18 @@ class VoiceChatPlugin : VoicechatPlugin {
     }
 }
 
+private fun voiceMessagesExists() = try {
+    Class.forName("ru.dimaskama.voicemessages.api.VoiceMessagesApiInitCallback")
+    true
+} catch (_: ClassNotFoundException) {
+    false
+}
+
 class VoiceMessagesCompat(bridge: TelegramBridge) : AbstractCompat(bridge) {
     override val fabricId = "voicemessages"
     override val forgeId = "voicemessages"
     override val paperId = "voicemessages"
-    private var voiceMessages: VoiceMessagesApi? = null
+    private lateinit var voiceMessages: VoiceMessagesApi
 
     private fun transcodeOpus(packets: List<ByteArray>) =
         packets.map {
@@ -49,7 +56,7 @@ class VoiceMessagesCompat(bridge: TelegramBridge) : AbstractCompat(bridge) {
         }
 
     init {
-        if (shouldEnable()) {
+        if (voiceMessagesExists()) {
             VoiceMessagesApiInitCallback.EVENT.register {
                 voiceMessages = it
             }
@@ -72,7 +79,7 @@ class VoiceMessagesCompat(bridge: TelegramBridge) : AbstractCompat(bridge) {
                 listOf("text" to Component.text(""))
             )
             bridge.platform.broadcastMessage(senderNameMsg)
-            voiceMessages!!.sendVoiceMessage(emptyUuid, targetUuids, transcoded, "all")
+            voiceMessages.sendVoiceMessage(emptyUuid, targetUuids, transcoded, "all")
             EventResult.STOP
         }
         VoiceMessageReceivedCallback.EVENT.register { player, message, target ->

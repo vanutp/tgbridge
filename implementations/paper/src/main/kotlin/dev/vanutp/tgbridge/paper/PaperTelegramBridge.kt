@@ -20,5 +20,6 @@ class PaperTelegramBridge(val plugin: PaperBootstrap) : TelegramBridge() {
         addIntegration(GenericVanishCompat(this))
         addIntegration(SuperVanishCompat(this))
         addIntegration(IncompatibleChatPluginCompat(this))
+        addIntegration(VoiceMessagesPaperCompat(this))
     }
 }

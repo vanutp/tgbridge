@@ -33,7 +33,7 @@ class PaperPlatform(private val plugin: JavaPlugin) : IPlatform {
     }
 
     override fun isModLoaded(modId: String) =
-        plugin.server.pluginManager.getPlugin(modId)?.isEnabled ?: false
+        plugin.server.pluginManager.isPluginEnabled(modId)
 
     override fun playerToTgbridge(player: Any) = (player as Player).toTgbridge()
 }
