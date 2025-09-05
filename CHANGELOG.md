@@ -1,3 +1,8 @@
+### 0.8.4
+
+- Fix Voice Messages integration on Paper
+- Support Carbon Chat on Paper
+
 ### 0.8.3
 
 - Support `integrations.incompatiblePluginChatPrefix` on (Neo)Forge
