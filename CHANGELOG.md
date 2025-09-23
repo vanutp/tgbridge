@@ -1,3 +1,8 @@
+### 0.8.5
+
+- NeoForge: fix crash when a player is killed using certain items
+- Fix Fabric Vanish and EssentialsX vanish
+
 ### 0.8.4
 
 - Fix Voice Messages integration on Paper
