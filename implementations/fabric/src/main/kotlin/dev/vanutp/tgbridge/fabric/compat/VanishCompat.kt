@@ -20,11 +20,11 @@ class VanishCompat(override val bridge: FabricTelegramBridge) : AbstractCompat(b
             )
             if (isVanished) {
                 FabricTelegramBridge.onPlayerLeave(
-                    TgbridgeLeaveEvent(player.toTgbridge(), originalEvent)
+                    TgbridgeLeaveEvent(player.toTgbridge(), originalEvent, ignoreVanish = true)
                 )
             } else {
                 FabricTelegramBridge.onPlayerJoin(
-                    TgbridgeJoinEvent(player.toTgbridge(), true, originalEvent)
+                    TgbridgeJoinEvent(player.toTgbridge(), true, originalEvent, ignoreVanish = true)
                 )
             }
         }

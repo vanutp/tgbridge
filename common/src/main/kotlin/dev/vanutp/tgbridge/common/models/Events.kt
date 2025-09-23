@@ -26,12 +26,14 @@ data class TgbridgeJoinEvent(
     var hasPlayedBefore: Boolean,
     override val originalEvent: Any?,
     override val metadata: Map<String, Any> = emptyMap(),
+    var ignoreVanish: Boolean = false,
 ) : TgbridgeEvent
 
 data class TgbridgeLeaveEvent(
     var player: TgbridgePlayer,
     override val originalEvent: Any?,
     override val metadata: Map<String, Any> = emptyMap(),
+    var ignoreVanish: Boolean = false,
 ) : TgbridgeEvent
 
 data class TgbridgeAdvancementEvent(

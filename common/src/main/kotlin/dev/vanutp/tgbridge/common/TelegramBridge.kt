@@ -304,7 +304,7 @@ abstract class TelegramBridge {
         }
 
         if (TgbridgeEvents.JOIN.invoke(e) == EventResult.STOP) return@wrapMinecraftHandler
-        if (e.player.isVanished()) return@wrapMinecraftHandler
+        if (!e.ignoreVanish && e.player.isVanished()) return@wrapMinecraftHandler
         val lm = lastMessage
         val currDate = Clock.systemUTC().instant()
         if (
@@ -330,7 +330,7 @@ abstract class TelegramBridge {
             return@wrapMinecraftHandler
         }
         if (TgbridgeEvents.LEAVE.invoke(e) == EventResult.STOP) return@wrapMinecraftHandler
-        if (e.player.isVanished()) return@wrapMinecraftHandler
+        if (!e.ignoreVanish && e.player.isVanished()) return@wrapMinecraftHandler
         val newMsg = sendMessage(lang.telegram.playerLeft.formatLang("username" to e.player.getName()))
         lastMessage = LastMessage(
             LastMessageType.LEAVE,

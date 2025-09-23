@@ -13,13 +13,13 @@ class SuperVanishCompat(bridge: PaperTelegramBridge) : AbstractPaperCompat(bridg
 
     @EventHandler
     private fun onVanish(e: PlayerHideEvent) {
-        bridge.onPlayerLeave(TgbridgeLeaveEvent(e.player.toTgbridge(), e))
+        bridge.onPlayerLeave(TgbridgeLeaveEvent(e.player.toTgbridge(), e, ignoreVanish = true))
     }
 
     @EventHandler
     private fun onUnvanish(e: PlayerShowEvent) {
         bridge.onPlayerJoin(
-            TgbridgeJoinEvent(e.player.toTgbridge(), true, e)
+            TgbridgeJoinEvent(e.player.toTgbridge(), true, e, ignoreVanish = true)
         )
     }
 }

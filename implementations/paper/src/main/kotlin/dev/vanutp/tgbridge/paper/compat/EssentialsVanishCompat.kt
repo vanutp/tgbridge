@@ -31,7 +31,7 @@ class EssentialsVanishCompat(bridge: PaperTelegramBridge) :
     override fun enable() {
         super.enable()
         TgbridgeEvents.JOIN.addListener { e ->
-            if (e.originalEvent is AsyncUserDataLoadEvent) {
+            if (e.originalEvent is AsyncUserDataLoadEvent || e.originalEvent is VanishStatusChangeEvent) {
                 EventResult.CONTINUE
             } else {
                 EventResult.STOP
@@ -42,10 +42,7 @@ class EssentialsVanishCompat(bridge: PaperTelegramBridge) :
                 return@addListener EventResult.CONTINUE
             }
             val ess = bridge.plugin.server.pluginManager.getPlugin(paperId) as Essentials
-            val user = ess.getUser(e.player.uuid)
-            if (user == null) {
-                return@addListener EventResult.CONTINUE
-            }
+            val user = ess.getUser(e.player.uuid) ?: return@addListener EventResult.CONTINUE
             if (user.isHidden || user.isLeavingHidden) {
                 EventResult.STOP
             } else {
@@ -58,9 +55,9 @@ class EssentialsVanishCompat(bridge: PaperTelegramBridge) :
     fun onVanishStatusChange(e: VanishStatusChangeEvent) {
         val player = e.affected.base.toTgbridge()
         if (e.value) {
-            bridge.onPlayerLeave(TgbridgeLeaveEvent(player, e))
+            bridge.onPlayerLeave(TgbridgeLeaveEvent(player, e, ignoreVanish = true))
         } else {
-            bridge.onPlayerJoin(TgbridgeJoinEvent(player, true, e))
+            bridge.onPlayerJoin(TgbridgeJoinEvent(player, true, e, ignoreVanish = true))
         }
     }
 }
