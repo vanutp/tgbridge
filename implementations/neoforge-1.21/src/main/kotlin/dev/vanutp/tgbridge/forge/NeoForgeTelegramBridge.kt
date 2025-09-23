@@ -6,6 +6,7 @@ import com.mojang.brigadier.context.CommandContext
 import dev.vanutp.tgbridge.common.TelegramBridge
 import dev.vanutp.tgbridge.forge.compat.IncompatibleChatModCompat
 import net.minecraft.client.resource.language.TranslationStorage
+import net.minecraft.registry.RegistryWrapper
 import net.minecraft.server.command.ServerCommandSource
 import net.minecraft.text.Text
 import net.minecraft.util.Language
@@ -16,6 +17,7 @@ import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent
 import net.neoforged.neoforge.event.server.ServerStartedEvent
 import net.neoforged.neoforge.event.server.ServerStartingEvent
 import net.neoforged.neoforge.event.server.ServerStoppingEvent
+import net.neoforged.neoforge.server.ServerLifecycleHooks
 import thedarkcolour.kotlinforforge.neoforge.forge.FORGE_BUS
 import thedarkcolour.kotlinforforge.neoforge.forge.MOD_BUS
 import thedarkcolour.kotlinforforge.neoforge.forge.runForDist
@@ -27,6 +29,9 @@ object NeoForgeTelegramBridge : TelegramBridge() {
     const val MOD_ID = "tgbridge"
     override val logger = NeoForgeLogger()
     override val platform = NeoForgePlatform()
+    val registryManager: RegistryWrapper.WrapperLookup by lazy {
+        ServerLifecycleHooks.getCurrentServer()!!.registryManager
+    }
 
     init {
         runForDist(

@@ -23,7 +23,7 @@ fun Text.toAdventure(): Component {
     return GsonComponentSerializer.gson().deserialize(
         Text.Serialization.toJsonString(
             this,
-            DynamicRegistryManager.of(Registries.REGISTRIES)
+            NeoForgeTelegramBridge.registryManager,
         )
     )
 }
