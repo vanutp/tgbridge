@@ -35,14 +35,14 @@ async function reloadCommand(server: Server) {
 async function reloadCommandFromOp(server: Server) {
   await server.rcon.send(`op ${server.client.username}`)
   server.client.sendCommand('tgbridge reload')
-  await delay(200)
+  await delay(300)
   assert(server.client.findMessage(msg => JSON.stringify(msg.json).includes("Config reloaded.")))
 }
 
 async function reloadCommandFromOrdinary(server: Server) {
   await server.rcon.send(`deop ${server.client.username}`)
   server.client.sendCommand('tgbridge reload')
-  await delay(200)
+  await delay(300)
   assert(!server.client.findMessage(msg => JSON.stringify(msg.json).includes("Config reloaded.")))
 }
 
