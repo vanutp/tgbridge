@@ -8,9 +8,9 @@
     "@std/fs": "jsr:@std/fs@^1.0.11",
     "@std/path": "jsr:@std/path@^1.0.8",
     "@std/regexp": "jsr:@std/regexp@^1.0.1",
-    "mineflayer": "npm:mineflayer@^4.26.0",
+    "mineflayer": "npm:mineflayer@^4.33.0",
     "nanoid": "npm:nanoid@^5.0.9",
-    "prismarine-chat": "npm:prismarine-chat@^1.11.0",
+    "prismarine-chat": "npm:prismarine-chat@^1.12.0",
     "rcon-client": "npm:rcon-client@^4.2.5"
   }
 }
