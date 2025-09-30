@@ -1,3 +1,8 @@
+### 0.8.6
+
+- Support 1.21.9 on Fabric and Paper
+- Fabric: fix crash when a player is killed using certain enchanted items
+
 ### 0.8.5
 
 - NeoForge: fix crash when a player is killed using certain items
