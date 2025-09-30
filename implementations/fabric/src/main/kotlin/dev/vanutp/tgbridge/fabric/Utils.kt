@@ -6,6 +6,7 @@ import com.mojang.brigadier.context.CommandContext
 import com.mojang.serialization.JsonOps
 import dev.vanutp.tgbridge.common.models.TBCommandContext
 import dev.vanutp.tgbridge.common.models.TgbridgePlayer
+import dev.vanutp.tgbridge.fabric.FabricTelegramBridge.server
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 import net.minecraft.entity.player.PlayerEntity
@@ -64,13 +65,13 @@ fun Text.toAdventure(): Component {
         val jsonString = toJsonString(
             null,
             this,
-            DynamicRegistryManager.of(Registries.REGISTRIES)
+            server.registryManager,
         ) as String
         GsonComponentSerializer.gson().deserialize(jsonString)
     } else {
         // 1.21.6+
         val jsonTree = TextCodecs.CODEC
-            .encodeStart(DynamicRegistryManager.of(Registries.REGISTRIES).getOps(JsonOps.INSTANCE), this)
+            .encodeStart(server.registryManager.getOps(JsonOps.INSTANCE), this)
             .getOrThrow(::JsonParseException)
         GsonComponentSerializer.gson().deserializeFromTree(jsonTree)
     }
