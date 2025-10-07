@@ -5,8 +5,8 @@ operator fun String.invoke(): String =
 
 repositories {
     maven {
-        name = "sonatype"
-        url = uri("https://oss.sonatype.org/content/groups/public/")
+        name = "lucko"
+        url = uri("https://repo.lucko.me/")
         content {
             includeGroup("me.lucko")
         }
