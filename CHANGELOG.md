@@ -1,3 +1,7 @@
+### 0.8.6-p2
+
+- fabric: mark 1.21.10 as supported
+
 ### 0.8.6
 
 - Support 1.21.9 on Fabric and Paper
