@@ -1,7 +1,6 @@
 package dev.vanutp.tgbridge.paper.compat
 
 import dev.vanutp.tgbridge.common.ConfigManager.config
-import dev.vanutp.tgbridge.common.EventResult
 import dev.vanutp.tgbridge.common.TgbridgeEvents
 import dev.vanutp.tgbridge.common.models.TgbridgeMcChatMessageEvent
 import dev.vanutp.tgbridge.paper.PaperTelegramBridge
@@ -35,10 +34,8 @@ class ChattyV3Compat(bridge: PaperTelegramBridge) : AbstractPaperCompat(bridge) 
     override fun enable() {
         super.enable()
         TgbridgeEvents.MC_CHAT_MESSAGE.addListener { e ->
-            if (e.originalEvent is ChattyMessageEvent) {
-                EventResult.CONTINUE
-            } else {
-                EventResult.STOP
+            if (e.originalEvent !is ChattyMessageEvent) {
+                e.isCancelled = true
             }
         }
     }

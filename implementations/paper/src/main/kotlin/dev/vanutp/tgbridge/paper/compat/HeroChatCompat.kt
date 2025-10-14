@@ -3,7 +3,6 @@ package dev.vanutp.tgbridge.paper.compat
 import com.dthielke.herochat.ChannelChatEvent
 import com.dthielke.herochat.Chatter
 import dev.vanutp.tgbridge.common.ConfigManager.config
-import dev.vanutp.tgbridge.common.EventResult
 import dev.vanutp.tgbridge.common.TgbridgeEvents
 import dev.vanutp.tgbridge.common.models.TgbridgeMcChatMessageEvent
 import dev.vanutp.tgbridge.paper.PaperTelegramBridge
@@ -35,10 +34,8 @@ class HeroChatCompat(bridge: PaperTelegramBridge) : AbstractPaperCompat(bridge) 
     override fun enable() {
         super.enable()
         TgbridgeEvents.MC_CHAT_MESSAGE.addListener { e ->
-            if (e.originalEvent is ChannelChatEvent) {
-                EventResult.CONTINUE
-            } else {
-                EventResult.STOP
+            if (e.originalEvent !is ChannelChatEvent) {
+                e.isCancelled = true
             }
         }
     }

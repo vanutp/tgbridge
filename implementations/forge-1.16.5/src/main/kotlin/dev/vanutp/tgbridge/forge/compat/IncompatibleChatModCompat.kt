@@ -1,7 +1,6 @@
 package dev.vanutp.tgbridge.forge.compat
 
 import dev.vanutp.tgbridge.common.ConfigManager.config
-import dev.vanutp.tgbridge.common.EventResult
 import dev.vanutp.tgbridge.common.TgbridgeEvents
 import dev.vanutp.tgbridge.common.compat.AbstractCompat
 import dev.vanutp.tgbridge.common.models.TgbridgeMcChatMessageEvent
@@ -34,9 +33,7 @@ class IncompatibleChatModCompat(override val bridge: ForgeTelegramBridge) : Abst
         EVENT_BUS.register(this)
         TgbridgeEvents.MC_CHAT_MESSAGE.addListener { e ->
             if (e.originalEvent is ServerChatEvent && (e.metadata["IncompatibleChatModCompat"] as? Boolean) != true) {
-                EventResult.STOP
-            } else {
-                EventResult.CONTINUE
+                e.isCancelled = true
             }
         }
     }

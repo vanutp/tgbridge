@@ -1,6 +1,5 @@
 package dev.vanutp.tgbridge.common.compat
 
-import dev.vanutp.tgbridge.common.EventResult
 import dev.vanutp.tgbridge.common.TelegramBridge
 import dev.vanutp.tgbridge.common.TgbridgeEvents
 import kotlinx.serialization.json.Json
@@ -32,7 +31,7 @@ class ReplacementsCompat(bridge: TelegramBridge) : AbstractCompat(bridge) {
         loadConfig()
         TgbridgeEvents.CONFIG_RELOAD.addListener { loadConfig() }
         TgbridgeEvents.MC_CHAT_MESSAGE.addListener { e ->
-            val effectivePattern = pattern ?: return@addListener EventResult.CONTINUE
+            val effectivePattern = pattern ?: return@addListener
             e.message = e.message.replaceText {
                 it.match(effectivePattern).replacement { match, _ ->
                     val matchStr = match.group()
@@ -40,7 +39,6 @@ class ReplacementsCompat(bridge: TelegramBridge) : AbstractCompat(bridge) {
                     Component.text(replacement)
                 }
             }
-            EventResult.CONTINUE
         }
     }
 }

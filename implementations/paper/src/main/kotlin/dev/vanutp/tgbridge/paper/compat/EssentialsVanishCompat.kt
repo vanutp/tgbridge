@@ -1,7 +1,6 @@
 package dev.vanutp.tgbridge.paper.compat
 
 import com.earth2me.essentials.Essentials
-import dev.vanutp.tgbridge.common.EventResult
 import dev.vanutp.tgbridge.common.TgbridgeEvents
 import dev.vanutp.tgbridge.common.models.TgbridgeJoinEvent
 import dev.vanutp.tgbridge.common.models.TgbridgeLeaveEvent
@@ -31,22 +30,18 @@ class EssentialsVanishCompat(bridge: PaperTelegramBridge) :
     override fun enable() {
         super.enable()
         TgbridgeEvents.JOIN.addListener { e ->
-            if (e.originalEvent is AsyncUserDataLoadEvent || e.originalEvent is VanishStatusChangeEvent) {
-                EventResult.CONTINUE
-            } else {
-                EventResult.STOP
+            if (e.originalEvent !is AsyncUserDataLoadEvent && e.originalEvent !is VanishStatusChangeEvent) {
+                e.isCancelled = true
             }
         }
         TgbridgeEvents.LEAVE.addListener { e ->
             if (e.originalEvent is VanishStatusChangeEvent) {
-                return@addListener EventResult.CONTINUE
+                return@addListener
             }
             val ess = bridge.plugin.server.pluginManager.getPlugin(paperId) as Essentials
-            val user = ess.getUser(e.player.uuid) ?: return@addListener EventResult.CONTINUE
+            val user = ess.getUser(e.player.uuid) ?: return@addListener
             if (user.isHidden || user.isLeavingHidden) {
-                EventResult.STOP
-            } else {
-                EventResult.CONTINUE
+                e.isCancelled = true
             }
         }
     }

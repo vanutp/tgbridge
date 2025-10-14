@@ -7,7 +7,6 @@ import de.maxhenkel.voicechat.api.opus.OpusDecoder
 import de.maxhenkel.voicechat.api.opus.OpusEncoder
 import dev.vanutp.tgbridge.common.ConfigManager.config
 import dev.vanutp.tgbridge.common.ConfigManager.lang
-import dev.vanutp.tgbridge.common.EventResult
 import dev.vanutp.tgbridge.common.TelegramBridge
 import dev.vanutp.tgbridge.common.TgbridgeEvents
 import dev.vanutp.tgbridge.common.converters.MinecraftToTelegramConverter
@@ -65,7 +64,7 @@ class VoiceMessagesCompat(bridge: TelegramBridge) : AbstractCompat(bridge) {
 
     override fun enable() {
         TgbridgeEvents.TG_CHAT_MESSAGE.addListener { msg ->
-            if (msg.voice?.mimeType != "audio/ogg") return@addListener EventResult.CONTINUE
+            if (msg.voice?.mimeType != "audio/ogg") return@addListener
 
             val fileResponse = bridge.bot.downloadFile(msg.voice.fileId)
             val bytes = fileResponse.body()!!.bytes()
@@ -80,7 +79,7 @@ class VoiceMessagesCompat(bridge: TelegramBridge) : AbstractCompat(bridge) {
             )
             bridge.platform.broadcastMessage(senderNameMsg)
             voiceMessages.sendVoiceMessage(emptyUuid, targetUuids, transcoded, "all")
-            EventResult.STOP
+            e.isCancelled = true
         }
         VoiceMessageReceivedCallback.EVENT.register { player, message, target ->
             if (target != "all") return@register false

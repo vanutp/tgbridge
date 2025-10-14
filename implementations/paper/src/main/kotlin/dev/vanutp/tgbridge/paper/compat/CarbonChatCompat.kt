@@ -1,7 +1,6 @@
 package dev.vanutp.tgbridge.paper.compat
 
 import dev.vanutp.tgbridge.common.ConfigManager.config
-import dev.vanutp.tgbridge.common.EventResult
 import dev.vanutp.tgbridge.common.TgbridgeEvents
 import dev.vanutp.tgbridge.common.asString
 import dev.vanutp.tgbridge.common.models.TgbridgeMcChatMessageEvent
@@ -35,10 +34,8 @@ class CarbonChatCompat(bridge: PaperTelegramBridge) : AbstractPaperCompat(bridge
         super.enable()
         CarbonChatProvider.carbonChat().eventHandler().subscribe(CarbonChatEvent::class.java, this::onCarbonChatMessage)
         TgbridgeEvents.MC_CHAT_MESSAGE.addListener { e ->
-            if (e.originalEvent is CarbonChatEvent) {
-                EventResult.CONTINUE
-            } else {
-                EventResult.STOP
+            if (e.originalEvent !is CarbonChatEvent) {
+                e.isCancelled = true
             }
         }
     }
