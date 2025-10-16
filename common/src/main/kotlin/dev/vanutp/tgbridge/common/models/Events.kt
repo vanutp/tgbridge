@@ -1,11 +1,16 @@
 package dev.vanutp.tgbridge.common.models
 
+import dev.vanutp.tgbridge.common.Placeholders
 import dev.vanutp.tgbridge.common.TgMessage
 import net.kyori.adventure.text.Component
 
 interface MinecraftEvent {
     val originalEvent: Any?
     val metadata: Map<String, Any>
+}
+
+interface MessageProducingEvent {
+    var placeholders: Placeholders
 }
 
 interface Cancellable {
@@ -23,7 +28,8 @@ data class TgbridgeMcChatMessageEvent(
     override val originalEvent: Any?,
     override val metadata: Map<String, Any> = emptyMap(),
     override var isCancelled: Boolean = false,
-) : MinecraftEvent, Cancellable
+    override var placeholders: Placeholders = Placeholders(),
+) : MinecraftEvent, Cancellable, MessageProducingEvent
 
 data class TgbridgeDeathEvent(
     var player: TgbridgePlayer,
@@ -31,7 +37,8 @@ data class TgbridgeDeathEvent(
     override val originalEvent: Any?,
     override val metadata: Map<String, Any> = emptyMap(),
     override var isCancelled: Boolean = false,
-) : MinecraftEvent, Cancellable
+    override var placeholders: Placeholders = Placeholders(),
+) : MinecraftEvent, Cancellable, MessageProducingEvent
 
 data class TgbridgeJoinEvent(
     var player: TgbridgePlayer,
@@ -40,7 +47,8 @@ data class TgbridgeJoinEvent(
     override val metadata: Map<String, Any> = emptyMap(),
     var ignoreVanish: Boolean = false,
     override var isCancelled: Boolean = false,
-) : MinecraftEvent, Cancellable
+    override var placeholders: Placeholders = Placeholders(),
+) : MinecraftEvent, Cancellable, MessageProducingEvent
 
 data class TgbridgeLeaveEvent(
     var player: TgbridgePlayer,
@@ -48,7 +56,8 @@ data class TgbridgeLeaveEvent(
     override val metadata: Map<String, Any> = emptyMap(),
     var ignoreVanish: Boolean = false,
     override var isCancelled: Boolean = false,
-) : MinecraftEvent, Cancellable
+    override var placeholders: Placeholders = Placeholders(),
+) : MinecraftEvent, Cancellable, MessageProducingEvent
 
 data class TgbridgeAdvancementEvent(
     var player: TgbridgePlayer,
@@ -58,4 +67,5 @@ data class TgbridgeAdvancementEvent(
     override val originalEvent: Any?,
     override val metadata: Map<String, Any> = emptyMap(),
     override var isCancelled: Boolean = false,
-) : MinecraftEvent, Cancellable
+    override var placeholders: Placeholders = Placeholders(),
+) : MinecraftEvent, Cancellable, MessageProducingEvent

@@ -7,6 +7,7 @@ import de.maxhenkel.voicechat.api.opus.OpusDecoder
 import de.maxhenkel.voicechat.api.opus.OpusEncoder
 import dev.vanutp.tgbridge.common.ConfigManager.config
 import dev.vanutp.tgbridge.common.ConfigManager.lang
+import dev.vanutp.tgbridge.common.Placeholders
 import dev.vanutp.tgbridge.common.TelegramBridge
 import dev.vanutp.tgbridge.common.TgbridgeEvents
 import dev.vanutp.tgbridge.common.converters.MinecraftToTelegramConverter
@@ -63,7 +64,8 @@ class VoiceMessagesCompat(bridge: TelegramBridge) : AbstractCompat(bridge) {
     }
 
     override fun enable() {
-        TgbridgeEvents.TG_CHAT_MESSAGE.addListener { msg ->
+        TgbridgeEvents.TG_CHAT_MESSAGE.addListener { e ->
+            val msg = e.message
             if (msg.voice?.mimeType != "audio/ogg") return@addListener
 
             val fileResponse = bridge.bot.downloadFile(msg.voice.fileId)
@@ -74,8 +76,10 @@ class VoiceMessagesCompat(bridge: TelegramBridge) : AbstractCompat(bridge) {
             val emptyUuid = UUID.fromString("00000000-0000-0000-0000-000000000000")
             val targetUuids = bridge.platform.getOnlinePlayers().map { it.uuid }
             val senderNameMsg = lang.minecraft.format.formatMiniMessage(
-                listOf("sender" to msg.senderName),
-                listOf("text" to Component.text(""))
+                Placeholders(
+                    mapOf("sender" to msg.senderName),
+                    mapOf("text" to Component.text("")),
+                )
             )
             bridge.platform.broadcastMessage(senderNameMsg)
             voiceMessages.sendVoiceMessage(emptyUuid, targetUuids, transcoded, "all")
@@ -86,7 +90,9 @@ class VoiceMessagesCompat(bridge: TelegramBridge) : AbstractCompat(bridge) {
             val oggData = createOgg(message)
             val tgText = MinecraftToTelegramConverter.convert(
                 lang.telegram.chatMessage.formatMiniMessage(
-                    listOf("username" to (bridge.platform.playerToTgbridge(player)?.getName() ?: "???"))
+                    Placeholders(
+                        mapOf("username" to (bridge.platform.playerToTgbridge(player)?.getName() ?: "???")),
+                    )
                 )
             )
             bridge.coroutineScope.launch {

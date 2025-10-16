@@ -7,7 +7,6 @@ import dev.vanutp.tgbridge.common.models.Config
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
-import java.io.InputStream
 
 fun String.escapeHTML(): String = this
     .replace("&", "&amp;")
@@ -17,28 +16,56 @@ fun String.escapeHTML(): String = this
 
 fun Component.asString() = MinecraftToTelegramConverter.convert(this).text
 
-fun String.formatLang(vararg args: Pair<String, String>): String {
+data class Placeholders(
+    var plain: Map<String, String> = emptyMap(),
+    var component: Map<String, Component> = emptyMap(),
+) {
+    operator fun plus(other: Placeholders) = Placeholders(
+        plain + other.plain,
+        component + other.component
+    )
+
+    @JvmName("addPlain")
+    operator fun plus(other: Pair<String, String>) = Placeholders(
+        plain + mapOf(other),
+        component
+    )
+
+    @JvmName("addComponent")
+    operator fun plus(other: Pair<String, Component>) = Placeholders(
+        plain,
+        component + mapOf(other)
+    )
+
+    fun withDefaults(other: Placeholders): Placeholders {
+        return Placeholders(
+            plain = other.plain + plain,
+            component = other.component + component,
+        )
+    }
+}
+
+
+fun String.formatLang(placeholders: Placeholders = Placeholders()): String {
+    val placeholdersMerged = placeholders.plain + placeholders.component.mapValues { it.value.asString() }
     var res = this
-    args.forEach {
-        res = res.replace("{${it.first}}", it.second)
+    placeholdersMerged.forEach {
+        res = res.replace("{${it.key}}", it.value)
     }
     return res
 }
 
 private val mm = MiniMessage.miniMessage()
 
-fun String.formatMiniMessage(
-    plainPlaceholders: List<Pair<String, String>> = emptyList(),
-    componentPlaceholders: List<Pair<String, Component>> = emptyList(),
-): Component {
+fun String.formatMiniMessage(placeholders: Placeholders = Placeholders()): Component {
     var res = this
-    plainPlaceholders.forEach {
-        res = res.replace("{${it.first}}", mm.escapeTags(it.second))
+    placeholders.plain.forEach {
+        res = res.replace("{${it.key}}", mm.escapeTags(it.value))
     }
     return mm.deserialize(
         res,
-        *plainPlaceholders.map { Placeholder.unparsed(it.first, it.second) }.toTypedArray(),
-        *componentPlaceholders.map { Placeholder.component(it.first, it.second) }.toTypedArray()
+        *placeholders.plain.map { Placeholder.unparsed(it.key, it.value) }.toTypedArray(),
+        *placeholders.component.map { Placeholder.component(it.key, it.value) }.toTypedArray()
     )
 }
 

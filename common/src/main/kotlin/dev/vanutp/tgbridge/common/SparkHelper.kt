@@ -19,7 +19,7 @@ class SparkHelper private constructor(private val spark: Spark) {
         }
     }
 
-    fun getPlaceholders(): Array<Pair<String, String>>? {
+    fun getPlaceholders(): Placeholders? {
         val tpsDurations = mapOf(
             "tps5s" to StatisticWindow.TicksPerSecond.SECONDS_5,
             "tps10s" to StatisticWindow.TicksPerSecond.SECONDS_10,
@@ -28,7 +28,7 @@ class SparkHelper private constructor(private val spark: Spark) {
             "tps15m" to StatisticWindow.TicksPerSecond.MINUTES_15,
         )
         val tps = spark.tps() ?: return null
-        val tpsPlaceholders =tpsDurations.map {
+        val tpsPlaceholders = tpsDurations.map {
             it.key to "%.1f".format(tps.poll(it.value))
         }
 
@@ -38,10 +38,12 @@ class SparkHelper private constructor(private val spark: Spark) {
             "mspt5mAvg" to StatisticWindow.MillisPerTick.MINUTES_5,
         )
         val mspt = spark.mspt() ?: return null
-        val msptPlaceholders =  msptDurations.map {
+        val msptPlaceholders = msptDurations.map {
             it.key to "%.1f".format(mspt.poll(it.value).mean())
         }
 
-        return (tpsPlaceholders + msptPlaceholders).toTypedArray()
+        return Placeholders(
+            (tpsPlaceholders + msptPlaceholders).toMap()
+        )
     }
 }

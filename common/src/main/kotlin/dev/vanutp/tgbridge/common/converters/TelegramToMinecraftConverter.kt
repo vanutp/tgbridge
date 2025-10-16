@@ -20,7 +20,7 @@ object TelegramToMinecraftConverter {
 
     private fun mediaToText(msg: TgMessageMedia): Component? {
         var inner = msg.poll?.let {
-            lang.minecraft.messageMeta.poll.formatMiniMessage(listOf("title" to it.question))
+            lang.minecraft.messageMeta.poll.formatMiniMessage(Placeholders(mapOf("title" to it.question)))
         }
 
         listOf(
@@ -40,7 +40,7 @@ object TelegramToMinecraftConverter {
 
         return inner?.let {
             lang.minecraft.messageMeta.mediaFormatting.formatMiniMessage(
-                componentPlaceholders = listOf("media" to it)
+                Placeholders(component = mapOf("media" to it))
             )
         }
     }
@@ -95,12 +95,14 @@ object TelegramToMinecraftConverter {
             }
             if (it.isReplyToMinecraft) {
                 lang.minecraft.messageMeta.replyToMinecraft.formatMiniMessage(
-                    componentPlaceholders = listOf("text" to fullText)
+                    Placeholders(component = mapOf("text" to fullText))
                 )
             } else {
                 lang.minecraft.messageMeta.reply.formatMiniMessage(
-                    listOf("sender" to it.senderName),
-                    listOf("text" to fullText),
+                    Placeholders(
+                        mapOf("sender" to it.senderName),
+                        mapOf("text" to fullText),
+                    )
                 )
             }
         }
@@ -110,7 +112,7 @@ object TelegramToMinecraftConverter {
         val forwardFromName = msg.forwardFrom?.fullName
             ?: msg.forwardFromChat?.title
         return forwardFromName?.let {
-            lang.minecraft.messageMeta.forward.formatMiniMessage(listOf("from" to it))
+            lang.minecraft.messageMeta.forward.formatMiniMessage(Placeholders(mapOf("from" to it)))
         }
     }
 
@@ -153,26 +155,34 @@ object TelegramToMinecraftConverter {
 
                         TgEntityType.URL ->
                             lang.minecraft.messageFormatting.linkFormatting.formatMiniMessage(
-                                listOf("url" to ensureValidUrl(currText), "text_plain" to currText),
-                                listOf("text" to component),
+                                Placeholders(
+                                    mapOf("url" to ensureValidUrl(currText), "text_plain" to currText),
+                                    mapOf("text" to component),
+                                )
                             )
 
                         TgEntityType.TEXT_LINK ->
                             lang.minecraft.messageFormatting.linkFormatting.formatMiniMessage(
-                                listOf("url" to ensureValidUrl(it.url!!), "text_plain" to currText),
-                                listOf("text" to component),
+                                Placeholders(
+                                    mapOf("url" to ensureValidUrl(it.url!!), "text_plain" to currText),
+                                    mapOf("text" to component),
+                                )
                             )
 
                         TgEntityType.MENTION ->
                             lang.minecraft.messageFormatting.mentionFormatting.formatMiniMessage(
-                                listOf("username" to currText),
-                                listOf("text" to component),
+                                Placeholders(
+                                    mapOf("username" to currText),
+                                    mapOf("text" to component),
+                                )
                             )
 
                         TgEntityType.HASHTAG, TgEntityType.CASHTAG ->
                             lang.minecraft.messageFormatting.hashtagFormatting.formatMiniMessage(
-                                emptyList(),
-                                listOf("text" to component),
+                                Placeholders(
+                                    emptyMap(),
+                                    mapOf("text" to component),
+                                )
                             )
 
                         TgEntityType.SPOILER -> {
@@ -182,14 +192,18 @@ object TelegramToMinecraftConverter {
 
                         TgEntityType.CODE, TgEntityType.PRE ->
                             lang.minecraft.messageFormatting.codeFormatting.formatMiniMessage(
-                                listOf("text_plain" to currText),
-                                listOf("text" to component),
+                                Placeholders(
+                                    mapOf("text_plain" to currText),
+                                    mapOf("text" to component),
+                                )
                             )
 
                         TgEntityType.BLOCKQUOTE, TgEntityType.EXPANDABLE_BLOCKQUOTE ->
                             lang.minecraft.messageFormatting.quoteFormatting.formatMiniMessage(
-                                listOf("text_plain" to currText),
-                                listOf("text" to component),
+                                Placeholders(
+                                    mapOf("text_plain" to currText),
+                                    mapOf("text" to component),
+                                )
                             )
 
                         else -> component
@@ -202,8 +216,10 @@ object TelegramToMinecraftConverter {
                     }
                     prevSpoilerContent = component
                     component = lang.minecraft.messageFormatting.spoilerFormatting.formatMiniMessage(
-                        listOf("text_plain" to component.asString()),
-                        listOf("text" to component),
+                        Placeholders(
+                            mapOf("text_plain" to component.asString()),
+                            mapOf("text" to component),
+                        )
                     )
                 } else {
                     prevSpoilerContent = null
@@ -230,7 +246,9 @@ object TelegramToMinecraftConverter {
         }
         msg.videoChatParticipantsInvited?.let { inv ->
             return vcLang.invited.formatMiniMessage(
-                listOf("users" to inv.users.joinToString(", ") { it.fullName })
+                Placeholders(
+                    mapOf("users" to inv.users.joinToString(", ") { it.fullName })
+                )
             )
         }
 
@@ -240,7 +258,9 @@ object TelegramToMinecraftConverter {
                 membersLang.joined.formatMiniMessage()
             } else {
                 membersLang.added.formatMiniMessage(
-                    listOf("users" to users.joinToString(", ") { it.fullName }),
+                    Placeholders(
+                        mapOf("users" to users.joinToString(", ") { it.fullName }),
+                    )
                 )
             }
         }
@@ -249,7 +269,7 @@ object TelegramToMinecraftConverter {
                 membersLang.left.formatMiniMessage()
             } else {
                 membersLang.removed.formatMiniMessage(
-                    listOf("user" to user.fullName),
+                    Placeholders(mapOf("user" to user.fullName))
                 )
             }
         }
@@ -279,7 +299,7 @@ object TelegramToMinecraftConverter {
                 .build()
             components.add(
                 lang.minecraft.messageMeta.pin.formatMiniMessage(
-                    componentPlaceholders = listOf("message" to pinnedMessageDataComponent)
+                    Placeholders(component = mapOf("message" to pinnedMessageDataComponent))
                 )
             )
         }
@@ -296,8 +316,10 @@ object TelegramToMinecraftConverter {
             .build()
 
         return lang.minecraft.format.formatMiniMessage(
-            listOf("sender" to msg.senderName),
-            listOf("text" to textComponent),
+            Placeholders(
+                mapOf("sender" to msg.senderName),
+                mapOf("text" to textComponent),
+            )
         )
     }
 }

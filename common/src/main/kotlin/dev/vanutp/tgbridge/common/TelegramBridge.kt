@@ -135,7 +135,7 @@ abstract class TelegramBridge {
             logger.error("Unable to get spark data")
             return
         }
-        sendMessage(lang.telegram.tps.formatLang(*durations))
+        sendMessage(lang.telegram.tps.formatLang(durations))
     }
 
     private suspend fun onTelegramListCommand(msg: TgMessage) {
@@ -146,8 +146,12 @@ abstract class TelegramBridge {
         if (onlinePlayers.isNotEmpty()) {
             sendMessage(
                 lang.telegram.playerList.formatLang(
-                    "count" to onlinePlayers.size.toString(),
-                    "usernames" to onlinePlayers.joinToString { it.getName() },
+                    Placeholders(
+                        mapOf(
+                            "count" to onlinePlayers.size.toString(),
+                            "usernames" to onlinePlayers.joinToString { it.getName() },
+                        ),
+                    )
                 )
             )
         } else {
@@ -225,6 +229,9 @@ abstract class TelegramBridge {
     }
 
     fun onChatMessage(e: TgbridgeMcChatMessageEvent) = wrapMinecraftHandler {
+        e.placeholders = e.placeholders.withDefaults(
+            Placeholders(mapOf("username" to e.sender.getName()))
+        )
         if (!TgbridgeEvents.MC_CHAT_MESSAGE.invoke(e)) return@wrapMinecraftHandler
         var telegramText = MinecraftToTelegramConverter.convert(e.message)
         val bluemapLink = telegramText.text.asBluemapLinkOrNone()
@@ -245,7 +252,7 @@ abstract class TelegramBridge {
         }
 
         val tgPrefix = MinecraftToTelegramConverter.convert(
-            lang.telegram.chatMessage.formatMiniMessage(listOf("username" to e.sender.getName()))
+            lang.telegram.chatMessage.formatMiniMessage(e.placeholders)
                 .append(Component.text(" "))
         )
 
@@ -274,11 +281,8 @@ abstract class TelegramBridge {
     }
 
     fun onPlayerDeath(e: TgbridgeDeathEvent) = wrapMinecraftHandler {
-        if (!config.events.enableDeathMessages) {
-            return@wrapMinecraftHandler
-        }
-        if (!TgbridgeEvents.DEATH.invoke(e)) return@wrapMinecraftHandler
-        if (e.player.isVanished()) return@wrapMinecraftHandler
+        if (!config.events.enableDeathMessages) return@wrapMinecraftHandler
+
         val convertedMessage = when (val msg = e.message) {
             is TranslatableComponent -> {
                 val args = mutableListOf<Component>(Component.text(e.player.getName()))
@@ -289,21 +293,25 @@ abstract class TelegramBridge {
             null -> Component.translatable("death.attack.generic", Component.text(e.player.getName()))
             else -> msg
         }
+        e.placeholders = e.placeholders.withDefaults(
+            Placeholders(component = mapOf("death_message" to convertedMessage))
+        )
+
+        if (!TgbridgeEvents.DEATH.invoke(e)) return@wrapMinecraftHandler
+        if (e.player.isVanished()) return@wrapMinecraftHandler
+
         val telegramText = MinecraftToTelegramConverter.convert(
-            lang.telegram.playerDied.formatMiniMessage(
-                listOf(),
-                listOf("death_message" to convertedMessage),
-            )
+            lang.telegram.playerDied.formatMiniMessage(e.placeholders),
         )
         sendMessage(telegramText.text, telegramText.entities)
         lastMessage = null
     }
 
     fun onPlayerJoin(e: TgbridgeJoinEvent) = wrapMinecraftHandler {
-        if (!config.events.enableJoinMessages) {
-            return@wrapMinecraftHandler
-        }
-
+        if (!config.events.enableJoinMessages) return@wrapMinecraftHandler
+        e.placeholders = e.placeholders.withDefaults(
+            Placeholders(mapOf("username" to e.player.getName()))
+        )
         if (!TgbridgeEvents.JOIN.invoke(e)) return@wrapMinecraftHandler
         if (!e.ignoreVanish && e.player.isVanished()) return@wrapMinecraftHandler
         val lm = lastMessage
@@ -321,18 +329,21 @@ abstract class TelegramBridge {
             } else {
                 lang.telegram.playerJoinedFirstTime
             }
-            sendMessage(message.formatLang("username" to e.player.getName()))
+            sendMessage(message.formatLang(e.placeholders))
         }
         lastMessage = null
     }
 
     fun onPlayerLeave(e: TgbridgeLeaveEvent) = wrapMinecraftHandler {
-        if (!config.events.enableLeaveMessages) {
-            return@wrapMinecraftHandler
-        }
+        if (!config.events.enableLeaveMessages) return@wrapMinecraftHandler
+        e.placeholders = e.placeholders.withDefaults(
+            Placeholders(mapOf("username" to e.player.getName()))
+        )
         if (!TgbridgeEvents.LEAVE.invoke(e)) return@wrapMinecraftHandler
         if (!e.ignoreVanish && e.player.isVanished()) return@wrapMinecraftHandler
-        val newMsg = sendMessage(lang.telegram.playerLeft.formatLang("username" to e.player.getName()))
+        val newMsg = sendMessage(
+            lang.telegram.playerLeft.formatLang(e.placeholders),
+        )
         lastMessage = LastMessage(
             LastMessageType.LEAVE,
             newMsg.messageId,
@@ -343,17 +354,27 @@ abstract class TelegramBridge {
 
     fun onPlayerAdvancement(e: TgbridgeAdvancementEvent) = wrapMinecraftHandler {
         val advancementsCfg = config.events.advancementMessages
-        if (!advancementsCfg.enable) {
-            return@wrapMinecraftHandler
-        }
-        if (!TgbridgeEvents.ADVANCEMENT.invoke(e)) return@wrapMinecraftHandler
-        if (e.player.isVanished()) return@wrapMinecraftHandler
+        if (!advancementsCfg.enable) return@wrapMinecraftHandler
+
         val advancementName = e.title.asString()
         val advancementDescription = if (advancementsCfg.showDescription) {
             e.description.asString()
         } else {
             ""
         }
+        e.placeholders = e.placeholders.withDefaults(
+            Placeholders(
+                mapOf(
+                    "username" to e.player.getName(),
+                    "title" to advancementName.escapeHTML(),
+                    "description" to advancementDescription.escapeHTML(),
+                ),
+            ),
+        )
+
+        if (!TgbridgeEvents.ADVANCEMENT.invoke(e)) return@wrapMinecraftHandler
+        if (e.player.isVanished()) return@wrapMinecraftHandler
+
         val langKey = when (e.type) {
             "task" -> {
                 if (!advancementsCfg.enableTask) return@wrapMinecraftHandler
@@ -372,13 +393,7 @@ abstract class TelegramBridge {
 
             else -> throw TBAssertionFailed("Unknown advancement type ${e.type}.")
         }
-        sendMessage(
-            langKey.formatLang(
-                "username" to e.player.getName(),
-                "title" to advancementName.escapeHTML(),
-                "description" to advancementDescription.escapeHTML(),
-            )
-        )
+        sendMessage(langKey.formatLang(e.placeholders))
         lastMessage = null
     }
 
