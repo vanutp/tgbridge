@@ -11,9 +11,10 @@ plugins {
     id("xyz.jpenilla.run-paper") version "2.3.1" apply false
     id("dev.architectury.loom") version "1.11-SNAPSHOT" apply false
     id("com.modrinth.minotaur") version "2.+"
+    `maven-publish`
 }
 
-group = "dev.vanutp"
+group = "dev.vanutp.tgbridge"
 version = property("projectVersion") as String
 
 val kotlinVersion: String by project
@@ -32,6 +33,7 @@ subprojects {
         plugin("org.jetbrains.kotlin.plugin.serialization")
         plugin("com.gradleup.shadow")
         plugin("com.modrinth.minotaur")
+        plugin("maven-publish")
     }
 
     group = rootProject.group
@@ -93,6 +95,7 @@ subprojects {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
         toolchain.languageVersion = JavaLanguageVersion.of(21)
+        withSourcesJar()
     }
 
     kotlin {
@@ -154,9 +157,35 @@ subprojects {
                 .let { x -> "###$x" }
         )
     }
+
+    publishing {
+        if (project.name == "common" || project.name == "paper") {
+            publishing {
+                publications {
+                    create<MavenPublication>("maven") {
+                        groupId = project.group.toString()
+                        artifactId = project.name
+                        version = System.getenv("VERSION") ?: project.version.toString()
+                        from(components["java"])
+                    }
+                }
+            }
+        }
+
+        repositories {
+            maven {
+                name = "GitHubPackages"
+                url = uri("https://maven.pkg.github.com/vanutp/tgbridge")
+                credentials {
+                    username = System.getenv("GITHUB_ACTOR")
+                    password = System.getenv("GITHUB_TOKEN")
+                }
+            }
+        }
+    }
 }
 
-task("publishAll") {
+task("modrinthAll") {
     group = "publishing"
     dependsOn(":fabric:modrinth")
     dependsOn(":forge-1.16.5:modrinth")
