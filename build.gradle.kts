@@ -174,11 +174,11 @@ subprojects {
 
         repositories {
             maven {
-                name = "GitHubPackages"
-                url = uri("https://maven.pkg.github.com/vanutp/tgbridge")
+                name = "vanutp"
+                url = uri("https://mvn.vtp.sh/main")
                 credentials {
-                    username = System.getenv("GITHUB_ACTOR")
-                    password = System.getenv("GITHUB_TOKEN")
+                    username = System.getenv("REGISTRY_USERNAME")
+                    password = System.getenv("REGISTRY_TOKEN")
                 }
             }
         }
