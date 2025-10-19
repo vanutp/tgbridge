@@ -310,16 +310,9 @@ object TelegramToMinecraftConverter {
         mediaToText(msg)?.let { components.add(it) }
         msg.effectiveText?.let { components.add(formattedTextToComponent(it, msg.entities)) }
 
-        val textComponent = components
+        return components
             .flatMap { listOf(it, Component.text(" ")) }
             .fold(Component.text()) { acc, component -> acc.append(component) }
             .build()
-
-        return lang.minecraft.format.formatMiniMessage(
-            Placeholders(
-                mapOf("sender" to msg.senderName),
-                mapOf("text" to textComponent),
-            )
-        )
     }
 }

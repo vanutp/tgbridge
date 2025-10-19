@@ -20,7 +20,8 @@ interface Cancellable {
 data class TgbridgeTgChatMessageEvent(
     var message: TgMessage,
     override var isCancelled: Boolean = false,
-) : Cancellable
+    override var placeholders: Placeholders = Placeholders(),
+) : Cancellable, MessageProducingEvent
 
 data class TgbridgeMcChatMessageEvent(
     var sender: TgbridgePlayer,

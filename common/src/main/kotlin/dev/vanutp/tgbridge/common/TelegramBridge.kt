@@ -166,9 +166,16 @@ abstract class TelegramBridge {
         lastMessageLock.withLock {
             lastMessage = null
         }
-        val event = TgbridgeTgChatMessageEvent(msg)
-        if (!TgbridgeEvents.TG_CHAT_MESSAGE.invoke(event)) return
-        platform.broadcastMessage(TelegramToMinecraftConverter.convert(msg, bot.me.id))
+        val e = TgbridgeTgChatMessageEvent(msg)
+        val textComponent = TelegramToMinecraftConverter.convert(msg, bot.me.id)
+        e.placeholders = e.placeholders.withDefaults(
+            Placeholders(
+                mapOf("sender" to msg.senderName),
+                mapOf("text" to textComponent),
+            )
+        )
+        if (!TgbridgeEvents.TG_CHAT_MESSAGE.invoke(e)) return
+        platform.broadcastMessage(lang.minecraft.format.formatMiniMessage(e.placeholders))
     }
 
     private fun tryReinit(ctx: TBCommandContext): Boolean {
