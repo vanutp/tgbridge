@@ -21,14 +21,13 @@ repositories {
 }
 
 val minecraftVersion: String by project
-val yarnMappings: String by project
 val neoVersion: String by project
 val forgeKotlinVersion: String by project
 
 dependencies {
     minecraft("com.mojang:minecraft:${minecraftVersion}")
     forge("net.neoforged:forge:${minecraftVersion}-${neoVersion}")
-    mappings("net.fabricmc:yarn:${yarnMappings}:v2")
+    mappings(loom.officialMojangMappings())
 
     implementation("thedarkcolour:kotlinforforge:${forgeKotlinVersion}")
 

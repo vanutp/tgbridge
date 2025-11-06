@@ -4,7 +4,7 @@
   "package": "dev.vanutp.tgbridge.forge.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "ServerPlayerEntityMixin"
+    "ServerPlayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

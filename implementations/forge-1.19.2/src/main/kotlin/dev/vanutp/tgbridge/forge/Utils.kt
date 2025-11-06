@@ -5,9 +5,9 @@ import dev.vanutp.tgbridge.common.models.TBCommandContext
 import dev.vanutp.tgbridge.common.models.TgbridgePlayer
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
-import net.minecraft.entity.player.PlayerEntity
-import net.minecraft.server.command.ServerCommandSource
-import net.minecraft.text.Text
+import net.minecraft.commands.CommandSourceStack
+import net.minecraft.world.entity.player.Player
+import net.minecraft.network.chat.Component as Text
 
 
 fun Component.toMinecraft(): Text {
@@ -18,19 +18,19 @@ fun Text.toAdventure(): Component {
     return GsonComponentSerializer.gson().deserializeFromTree(Text.Serializer.toJsonTree(this))
 }
 
-fun PlayerEntity.toTgbridge() = TgbridgePlayer(
+fun Player.toTgbridge() = TgbridgePlayer(
     uuid,
     name.string,
-    displayName?.string,
+    displayName.string,
 )
 
-fun CommandContext<ServerCommandSource>.toTgbridge() = TBCommandContext(
+fun CommandContext<CommandSourceStack>.toTgbridge() = TBCommandContext(
     source = source.player?.toTgbridge(),
     reply = this::reply
 )
 
-fun CommandContext<ServerCommandSource>.reply(
+fun CommandContext<CommandSourceStack>.reply(
     text: String
 ) {
-    source.sendFeedback(Text.literal(text), false)
+    source.sendSuccess(Text.literal(text), false)
 }

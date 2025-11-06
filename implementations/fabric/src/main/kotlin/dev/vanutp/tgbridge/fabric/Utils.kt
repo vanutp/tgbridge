@@ -9,13 +9,11 @@ import dev.vanutp.tgbridge.common.models.TgbridgePlayer
 import dev.vanutp.tgbridge.fabric.FabricTelegramBridge.server
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
-import net.minecraft.entity.player.PlayerEntity
-import net.minecraft.registry.DynamicRegistryManager
-import net.minecraft.registry.Registries
-import net.minecraft.registry.RegistryWrapper
-import net.minecraft.server.command.ServerCommandSource
-import net.minecraft.text.Text
-import net.minecraft.text.TextCodecs
+import net.minecraft.commands.CommandSourceStack
+import net.minecraft.core.HolderLookup
+import net.minecraft.network.chat.ComponentSerialization
+import net.minecraft.world.entity.player.Player
+import net.minecraft.network.chat.Component as Text
 
 
 fun Component.toMinecraft(): Text {
@@ -32,16 +30,16 @@ fun Component.toMinecraft(): Text {
         // net.minecraft.text.Text$Serialization
         val textCls = Class.forName("net.minecraft.class_2561\$class_2562")
         val fromJsonTree =
-            textCls.getMethod("method_10872", JsonElement::class.java, RegistryWrapper.WrapperLookup::class.java)
+            textCls.getMethod("method_10872", JsonElement::class.java, HolderLookup.Provider::class.java)
         fromJsonTree(
             null,
             serializedTree,
-            DynamicRegistryManager.of(Registries.REGISTRIES)
+            server.registryAccess(),
         ) as Text
     } else {
         // 1.21.6+
-        TextCodecs.CODEC
-            .decode(DynamicRegistryManager.of(Registries.REGISTRIES).getOps(JsonOps.INSTANCE), serializedTree)
+        ComponentSerialization.CODEC
+            .decode(server.registryAccess().createSerializationContext(JsonOps.INSTANCE), serializedTree)
             .getOrThrow(::JsonParseException)
             .first
     }
@@ -61,34 +59,34 @@ fun Text.toAdventure(): Component {
         val textCls = Class.forName("net.minecraft.class_2561\$class_2562")
         // TODO: can toJson be used here?
         val toJsonString =
-            textCls.getMethod("method_10867", Text::class.java, RegistryWrapper.WrapperLookup::class.java)
+            textCls.getMethod("method_10867", Text::class.java, HolderLookup.Provider::class.java)
         val jsonString = toJsonString(
             null,
             this,
-            server.registryManager,
+            server.registryAccess(),
         ) as String
         GsonComponentSerializer.gson().deserialize(jsonString)
     } else {
         // 1.21.6+
-        val jsonTree = TextCodecs.CODEC
-            .encodeStart(server.registryManager.getOps(JsonOps.INSTANCE), this)
+        val jsonTree = ComponentSerialization.CODEC
+            .encodeStart(server.registryAccess().createSerializationContext(JsonOps.INSTANCE), this)
             .getOrThrow(::JsonParseException)
         GsonComponentSerializer.gson().deserializeFromTree(jsonTree)
     }
 }
 
-fun PlayerEntity.toTgbridge() = TgbridgePlayer(
+fun Player.toTgbridge() = TgbridgePlayer(
     uuid,
     name.string,
     displayName?.string,
 )
 
-fun CommandContext<ServerCommandSource>.toTgbridge() = TBCommandContext(
+fun CommandContext<CommandSourceStack>.toTgbridge() = TBCommandContext(
     source = source.player?.toTgbridge(),
     reply = this::reply
 )
 
-fun CommandContext<ServerCommandSource>.reply(
+fun CommandContext<CommandSourceStack>.reply(
     text: String
 ) {
     val textComponent = Text.literal(text)
@@ -101,6 +99,6 @@ fun CommandContext<ServerCommandSource>.reply(
         )
         sendFeedback.invoke(source, textComponent, false)
     } else {
-        source.sendFeedback({ textComponent }, false)
+        source.sendSuccess({ textComponent }, false)
     }
 }

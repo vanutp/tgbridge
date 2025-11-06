@@ -4,8 +4,8 @@ import dev.vanutp.tgbridge.common.IPlatform
 import dev.vanutp.tgbridge.common.MuteService
 import dev.vanutp.tgbridge.common.models.TgbridgePlayer
 import net.kyori.adventure.text.Component
-import net.minecraft.entity.player.PlayerEntity
-import net.minecraft.util.Language
+import net.minecraft.locale.Language
+import net.minecraft.world.entity.player.Player
 import net.neoforged.fml.ModList
 import net.neoforged.fml.loading.FMLPaths
 import net.neoforged.neoforge.server.ServerLifecycleHooks
@@ -16,24 +16,24 @@ class NeoForgePlatform : IPlatform {
 
     override fun broadcastMessage(text: Component) {
         val currentServer = ServerLifecycleHooks.getCurrentServer() ?: return
-        val playerManager = currentServer.playerManager
-        val players = playerManager.playerList.filterNot { MuteService.isMuted(it.uuid) }
+        val playerManager = currentServer.playerList
+        val players = playerManager.players.filterNot { MuteService.isMuted(it.uuid) }
         val message = text.toMinecraft()
-        currentServer.sendMessage(message)
+        currentServer.sendSystemMessage(message)
         for (player in players) {
-            player.sendMessageToClient(message, false)
+            player.sendSystemMessage(message, false)
         }
     }
 
     override fun getOnlinePlayers(): List<TgbridgePlayer> {
-        return ServerLifecycleHooks.getCurrentServer()?.playerManager?.playerList
+        return ServerLifecycleHooks.getCurrentServer()?.playerList?.players
             ?.map { it.toTgbridge() }
             ?: emptyList()
     }
 
     override fun getLanguageKey(key: String) = with(Language.getInstance()) {
-        if (hasTranslation(key)) {
-            get(key)
+        if (has(key)) {
+            getOrDefault(key)
         } else {
             null
         }
@@ -41,5 +41,5 @@ class NeoForgePlatform : IPlatform {
 
     override fun isModLoaded(modId: String) = ModList.get().isLoaded(modId)
 
-    override fun playerToTgbridge(player: Any) = (player as PlayerEntity).toTgbridge()
+    override fun playerToTgbridge(player: Any) = (player as Player).toTgbridge()
 }

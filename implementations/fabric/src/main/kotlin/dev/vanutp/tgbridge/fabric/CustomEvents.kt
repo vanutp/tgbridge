@@ -1,9 +1,9 @@
 package dev.vanutp.tgbridge.fabric
 
 import net.fabricmc.fabric.api.event.EventFactory
-import net.minecraft.advancement.AdvancementDisplay
-import net.minecraft.entity.damage.DamageSource
-import net.minecraft.server.network.ServerPlayerEntity
+import net.minecraft.advancements.DisplayInfo
+import net.minecraft.server.level.ServerPlayer
+import net.minecraft.world.damagesource.DamageSource
 
 
 class CustomEvents {
@@ -39,18 +39,18 @@ class CustomEvents {
     }
 
     fun interface AdvancementEarn {
-        fun onAdvancementEarn(player: ServerPlayerEntity, display: AdvancementDisplay)
+        fun onAdvancementEarn(player: ServerPlayer, display: DisplayInfo)
     }
 
     fun interface PlayerJoin {
-        fun onPlayerJoin(player: ServerPlayerEntity, hasPlayedBefore: Boolean)
+        fun onPlayerJoin(player: ServerPlayer, hasPlayedBefore: Boolean)
     }
 
     fun interface PlayerLeave {
-        fun onPlayerLeave(player: ServerPlayerEntity)
+        fun onPlayerLeave(player: ServerPlayer)
     }
 
     fun interface PlayerDeath {
-        fun onPlayerDeath(player: ServerPlayerEntity, damageSource: DamageSource)
+        fun onPlayerDeath(player: ServerPlayer, damageSource: DamageSource)
     }
 }

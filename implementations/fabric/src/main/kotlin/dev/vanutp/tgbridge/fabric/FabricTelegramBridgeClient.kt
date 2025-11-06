@@ -7,18 +7,18 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
 import net.fabricmc.loader.api.FabricLoader
-import net.minecraft.client.resource.language.TranslationStorage
-import net.minecraft.text.Text
-import net.minecraft.util.Language
+import net.minecraft.client.resources.language.ClientLanguage
+import net.minecraft.locale.Language
 import kotlin.io.path.createDirectories
 import kotlin.io.path.writeText
+import net.minecraft.network.chat.Component as Text
 
 object FabricTelegramBridgeClient : ClientModInitializer {
     private fun onDumpLangCommand(ctx: CommandContext<FabricClientCommandSource>): Int {
         val configDir = FabricLoader.getInstance().configDir.resolve(FabricTelegramBridge.MOD_ID)
         configDir.createDirectories()
         val minecraftLangFile = configDir.resolve("minecraft_lang.json")
-        val translations = (Language.getInstance() as TranslationStorage).translations
+        val translations = (Language.getInstance() as ClientLanguage).storage
         minecraftLangFile.writeText(Gson().toJson(translations))
         ctx.source.sendFeedback(Text.literal("minecraft_lang.json created"))
         return 1

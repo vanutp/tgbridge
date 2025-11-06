@@ -4,10 +4,10 @@ import com.mojang.brigadier.context.CommandContext
 import dev.vanutp.tgbridge.common.models.*
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
 import net.fabricmc.fabric.api.message.v1.ServerMessageEvents
-import net.minecraft.network.message.SignedMessage
-import net.minecraft.server.command.CommandManager
-import net.minecraft.server.command.ServerCommandSource
-import net.minecraft.text.Text
+import net.minecraft.commands.CommandSourceStack
+import net.minecraft.commands.Commands
+import net.minecraft.network.chat.PlayerChatMessage
+import net.minecraft.network.chat.Component as Text
 
 
 object EventManager {
@@ -21,13 +21,13 @@ object EventManager {
     }
 
     private fun registerChatMessageListener() {
-        ServerMessageEvents.CHAT_MESSAGE.register { message: SignedMessage, sender, params ->
+        ServerMessageEvents.CHAT_MESSAGE.register { message: PlayerChatMessage, sender, params ->
             val messageContent = if (FabricTelegramBridge.versionInfo.IS_192) {
                 val cls = message.javaClass
                 val getContent = cls.getMethod("method_44125")
                 getContent.invoke(message) as Text
             } else {
-                message.content
+                message.decoratedContent()
             }
             FabricTelegramBridge.onChatMessage(
                 TgbridgeMcChatMessageEvent(
@@ -44,7 +44,7 @@ object EventManager {
 
     private fun registerPlayerDeathListener() {
         CustomEvents.PLAYER_DEATH_EVENT.register { player, damageSource ->
-            val deathMessage = damageSource.getDeathMessage(player)
+            val deathMessage = damageSource.getLocalizedDeathMessage(player)
             FabricTelegramBridge.onPlayerDeath(
                 TgbridgeDeathEvent(
                     player.toTgbridge(),
@@ -84,10 +84,10 @@ object EventManager {
 
     private fun registerPlayerAdvancementListener() {
         CustomEvents.ADVANCEMENT_EARN_EVENT.register { player, display ->
-            if (!display.shouldAnnounceToChat()) {
+            if (!display.shouldAnnounceChat()) {
                 return@register
             }
-            val type = display.frame?.name?.lowercase() ?: return@register
+            val type = display.type?.name?.lowercase() ?: return@register
             FabricTelegramBridge.onPlayerAdvancement(
                 TgbridgeAdvancementEvent(
                     player.toTgbridge(),
@@ -100,12 +100,12 @@ object EventManager {
         }
     }
 
-    private fun onReloadCommand(ctx: CommandContext<ServerCommandSource>): Int {
+    private fun onReloadCommand(ctx: CommandContext<CommandSourceStack>): Int {
         val res = FabricTelegramBridge.onReloadCommand(ctx.toTgbridge())
         return if (res) 1 else -1
     }
 
-    private fun onToggleMuteCommand(ctx: CommandContext<ServerCommandSource>): Int {
+    private fun onToggleMuteCommand(ctx: CommandContext<CommandSourceStack>): Int {
         val res = FabricTelegramBridge.onToggleMuteCommand(ctx.toTgbridge())
         return if (res) 1 else -1
     }
@@ -114,14 +114,14 @@ object EventManager {
         // TODO: get rid of code duplication between versions and loaders
         CommandRegistrationCallback.EVENT.register { dispatcher, _, _ ->
             dispatcher.register(
-                CommandManager.literal("tgbridge")
+                Commands.literal("tgbridge")
                     .then(
-                        CommandManager.literal("reload")
-                            .requires { it.hasPermissionLevel(4) }
+                        Commands.literal("reload")
+                            .requires { it.hasPermission(4) }
                             .executes(::onReloadCommand)
                     )
                     .then(
-                        CommandManager.literal("toggle")
+                        Commands.literal("toggle")
                             .executes(::onToggleMuteCommand)
                     )
             )

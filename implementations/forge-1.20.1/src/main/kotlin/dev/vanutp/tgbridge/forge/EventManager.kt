@@ -2,9 +2,9 @@ package dev.vanutp.tgbridge.forge
 
 import com.mojang.brigadier.context.CommandContext
 import dev.vanutp.tgbridge.common.models.*
-import net.minecraft.entity.player.PlayerEntity
-import net.minecraft.server.command.CommandManager
-import net.minecraft.server.command.ServerCommandSource
+import net.minecraft.commands.CommandSourceStack
+import net.minecraft.commands.Commands
+import net.minecraft.world.entity.player.Player
 import net.minecraftforge.event.RegisterCommandsEvent
 import net.minecraftforge.event.ServerChatEvent
 import net.minecraftforge.event.entity.living.LivingDeathEvent
@@ -35,10 +35,10 @@ object EventManager {
     private fun registerPlayerDeathListener() {
         FORGE_BUS.addListener { e: LivingDeathEvent ->
             val player = e.entity
-            if (player !is PlayerEntity) {
+            if (player !is Player) {
                 return@addListener
             }
-            val deathMessage = e.source.getDeathMessage(player)
+            val deathMessage = e.source.getLocalizedDeathMessage(player)
             ForgeTelegramBridge.onPlayerDeath(
                 TgbridgeDeathEvent(
                     player.toTgbridge(), deathMessage.toAdventure(), e,
@@ -65,10 +65,10 @@ object EventManager {
     private fun registerPlayerAdvancementListener() {
         FORGE_BUS.addListener { e: AdvancementEvent.AdvancementEarnEvent ->
             val display = e.advancement.display
-            if (display == null || !display.shouldAnnounceToChat()) {
+            if (display == null || !display.shouldAnnounceChat()) {
                 return@addListener
             }
-            val type = display.frame?.id ?: return@addListener
+            val type = display.frame.getName()
             ForgeTelegramBridge.onPlayerAdvancement(
                 TgbridgeAdvancementEvent(
                     e.entity.toTgbridge(),
@@ -81,12 +81,12 @@ object EventManager {
         }
     }
 
-    private fun onReloadCommand(ctx: CommandContext<ServerCommandSource>): Int {
+    private fun onReloadCommand(ctx: CommandContext<CommandSourceStack>): Int {
         val res = ForgeTelegramBridge.onReloadCommand(ctx.toTgbridge())
         return if (res) 1 else -1
     }
 
-    private fun onToggleMuteCommand(ctx: CommandContext<ServerCommandSource>): Int {
+    private fun onToggleMuteCommand(ctx: CommandContext<CommandSourceStack>): Int {
         val res = ForgeTelegramBridge.onToggleMuteCommand(ctx.toTgbridge())
         return if (res) 1 else -1
     }
@@ -95,14 +95,14 @@ object EventManager {
         // TODO: get rid of code duplication between versions and loaders
         FORGE_BUS.addListener { e: RegisterCommandsEvent ->
             e.dispatcher.register(
-                CommandManager.literal("tgbridge")
+                Commands.literal("tgbridge")
                     .then(
-                        CommandManager.literal("reload")
-                            .requires { it.hasPermissionLevel(4) }
+                        Commands.literal("reload")
+                            .requires { it.hasPermission(4) }
                             .executes(::onReloadCommand)
                     )
                     .then(
-                        CommandManager.literal("toggle")
+                        Commands.literal("toggle")
                             .executes(::onToggleMuteCommand)
                     )
             )

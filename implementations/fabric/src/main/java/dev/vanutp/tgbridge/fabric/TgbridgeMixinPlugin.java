@@ -2,8 +2,8 @@ package dev.vanutp.tgbridge.fabric;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonParseException;
-import net.minecraft.MinecraftVersion;
-import net.minecraft.util.JsonHelper;
+import net.minecraft.DetectedVersion;
+import net.minecraft.util.GsonHelper;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -20,12 +20,12 @@ public final class TgbridgeMixinPlugin implements IMixinConfigPlugin {
     private static final int patch;
 
     static {
-        try (final var is = MinecraftVersion.class.getResourceAsStream("/version.json")) {
+        try (final var is = DetectedVersion.class.getResourceAsStream("/version.json")) {
             if (is == null) {
                 throw new IllegalStateException("Failed to load Minecraft version");
             }
             try (final var reader = new InputStreamReader(is)) {
-                version = JsonHelper.getString(JsonHelper.deserialize(reader), "name");
+                version = GsonHelper.getAsString(GsonHelper.parse(reader), "name");
             }
         } catch (JsonParseException | IOException exception) {
             throw new IllegalStateException("Failed to load Minecraft version", exception);
@@ -40,12 +40,12 @@ public final class TgbridgeMixinPlugin implements IMixinConfigPlugin {
     private static final boolean isLte201 = minor < 20 || minor == 20 && patch <= 1;
     private static final boolean isLte215 = minor < 21 || minor == 21 && patch <= 5;
     private static final Map<String, Boolean> CONDITIONS = ImmutableMap.of(
-        "PlayerManagerMixin_201", isLte201,
-        "PlayerManagerMixin_modern", !isLte201,
-        "PlayerAdvancementTrackerMixin_201", isLte201,
-        "PlayerAdvancementTrackerMixin_modern", !isLte201,
-        "ServerPlayerEntityMixin_215", isLte215,
-        "ServerPlayerEntityMixin_modern", !isLte215
+        "PlayerListMixin_201", isLte201,
+        "PlayerListMixin_modern", !isLte201,
+        "PlayerAdvancementsMixin_201", isLte201,
+        "PlayerAdvancementsMixin_modern", !isLte201,
+        "ServerPlayerMixin_215", isLte215,
+        "ServerPlayerMixin_modern", !isLte215
     );
 
     @Override

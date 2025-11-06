@@ -1,17 +1,16 @@
 package dev.vanutp.tgbridge.fabric.mixin;
 
 import dev.vanutp.tgbridge.fabric.IHasPlayedBefore;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.server.network.ServerPlayerEntity;
-import org.spongepowered.asm.mixin.Dynamic;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.storage.ValueInput;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(ServerPlayerEntity.class)
-abstract class ServerPlayerEntityMixin_215 implements IHasPlayedBefore {
+@Mixin(ServerPlayer.class)
+abstract class ServerPlayerMixin_modern implements IHasPlayedBefore {
     @Unique
     private boolean hasPlayedBefore = false;
 
@@ -20,9 +19,8 @@ abstract class ServerPlayerEntityMixin_215 implements IHasPlayedBefore {
         return hasPlayedBefore;
     }
 
-    @Dynamic
-    @Inject(method = "method_5749", at = @At("HEAD"))
-    private void readCustomDataFromNbt(NbtCompound nbt, CallbackInfo ci) {
+    @Inject(method = "readAdditionalSaveData", at = @At("HEAD"))
+    private void readAdditionalSaveData(ValueInput view, CallbackInfo ci) {
         hasPlayedBefore = true;
     }
 }

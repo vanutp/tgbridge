@@ -5,10 +5,9 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import dev.vanutp.tgbridge.common.TelegramBridge
 import dev.vanutp.tgbridge.forge.compat.IncompatibleChatModCompat
-import net.minecraft.client.resource.language.TranslationStorage
-import net.minecraft.server.command.ServerCommandSource
-import net.minecraft.text.Text
-import net.minecraft.util.Language
+import net.minecraft.client.resources.language.ClientLanguage
+import net.minecraft.commands.CommandSourceStack
+import net.minecraft.locale.Language
 import net.minecraftforge.client.event.RegisterClientCommandsEvent
 import net.minecraftforge.event.server.ServerStartedEvent
 import net.minecraftforge.event.server.ServerStartingEvent
@@ -21,6 +20,7 @@ import thedarkcolour.kotlinforforge.forge.MOD_BUS
 import thedarkcolour.kotlinforforge.forge.runForDist
 import kotlin.io.path.createDirectories
 import kotlin.io.path.writeText
+import net.minecraft.network.chat.Component as Text
 
 @Mod(ForgeTelegramBridge.MOD_ID)
 object ForgeTelegramBridge : TelegramBridge() {
@@ -49,22 +49,22 @@ object ForgeTelegramBridge : TelegramBridge() {
         )
     }
 
-    private fun onDumpLangCommand(ctx: CommandContext<ServerCommandSource>): Int {
+    private fun onDumpLangCommand(ctx: CommandContext<CommandSourceStack>): Int {
         val configDir = FMLPaths.CONFIGDIR.get().resolve(MOD_ID)
         configDir.createDirectories()
         val minecraftLangFile = configDir.resolve("minecraft_lang.json")
-        val translations = (Language.getInstance() as TranslationStorage).translations
+        val translations = (Language.getInstance() as ClientLanguage).storage
         minecraftLangFile.writeText(Gson().toJson(translations))
-        ctx.source.sendFeedback(Text.literal("minecraft_lang.json created"), false)
+        ctx.source.sendSuccess(Text.literal("minecraft_lang.json created"), false)
         return 1
     }
 
     private fun onClientSetup(event: FMLClientSetupEvent) {
         FORGE_BUS.addListener { e: RegisterClientCommandsEvent ->
             e.dispatcher.register(
-                LiteralArgumentBuilder.literal<ServerCommandSource>("tgbridge")
+                LiteralArgumentBuilder.literal<CommandSourceStack>("tgbridge")
                     .then(
-                        LiteralArgumentBuilder.literal<ServerCommandSource>("dump_lang")
+                        LiteralArgumentBuilder.literal<CommandSourceStack>("dump_lang")
                             .executes(::onDumpLangCommand)
                     )
                     .then(
