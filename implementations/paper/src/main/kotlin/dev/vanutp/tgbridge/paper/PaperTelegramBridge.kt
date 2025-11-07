@@ -11,6 +11,7 @@ class PaperTelegramBridge(val plugin: PaperBootstrap) : TelegramBridge() {
     init {
         val configPath = platform.configDir.resolve("config-paper.yml")
         configPath.deleteIfExists()
+        init()
 
         addIntegration(ChattyV2Compat(this))
         addIntegration(ChattyV3Compat(this))

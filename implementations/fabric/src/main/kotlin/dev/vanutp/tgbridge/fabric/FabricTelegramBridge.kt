@@ -13,13 +13,16 @@ object FabricTelegramBridge : DedicatedServerModInitializer, TelegramBridge() {
     lateinit var versionInfo: ServerVersionInfo private set
     lateinit var server: MinecraftServer private set
 
+    init {
+        init()
+    }
+
     override fun onInitializeServer() {
         addIntegration(VanishCompat(this))
         EventManager.register()
         ServerLifecycleEvents.SERVER_STARTING.register { server ->
             versionInfo = ServerVersionInfo(server)
             this.server = server
-            init()
         }
         ServerLifecycleEvents.SERVER_STARTED.register {
             onServerStarted()

@@ -61,10 +61,10 @@ abstract class TelegramBridge {
         addIntegration(VoiceMessagesCompat(this))
         coroutineScope.launch {
             bot.init()
+            logger.info("Logged in as @${bot.me.username}")
             registerTelegramHandlers()
             bot.startPolling()
             initialized = true
-            logger.info("Successfully connected to Telegram API")
         }
     }
 

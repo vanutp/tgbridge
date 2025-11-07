@@ -36,9 +36,7 @@ object ForgeTelegramBridge : TelegramBridge() {
             serverTarget = {
                 addIntegration(IncompatibleChatModCompat(this))
                 EventManager.register()
-                FORGE_BUS.addListener { _: ServerStartingEvent ->
-                    init()
-                }
+                init()
                 FORGE_BUS.addListener { _: ServerStartedEvent ->
                     onServerStarted()
                 }

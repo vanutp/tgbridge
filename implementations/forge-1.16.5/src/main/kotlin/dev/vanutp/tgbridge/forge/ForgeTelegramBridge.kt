@@ -43,9 +43,7 @@ class ForgeTelegramBridge : TelegramBridge() {
             Dist.DEDICATED_SERVER -> {
                 addIntegration(IncompatibleChatModCompat(this))
                 EventManager(this).register()
-                EVENT_BUS.addListener { _: FMLServerStartingEvent ->
-                    init()
-                }
+                init()
                 EVENT_BUS.addListener { _: FMLServerStartedEvent ->
                     onServerStarted()
                 }
