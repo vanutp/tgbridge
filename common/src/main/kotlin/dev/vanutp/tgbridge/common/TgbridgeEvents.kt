@@ -2,15 +2,11 @@ package dev.vanutp.tgbridge.common
 
 import dev.vanutp.tgbridge.common.models.*
 
-fun interface EventListener<E> {
-    fun onEvent(event: E)
-}
-
 class TgbridgeEventHandler<E> internal constructor() {
     private val listeners = mutableListOf<suspend (E) -> Unit>()
 
-    fun addListener(listener: EventListener<E>) {
-        listeners.add(listener::onEvent)
+    fun addListener(listener: Function1<E>) {
+        listeners.add(listener::apply)
     }
 
     fun addListener(listener: suspend (E) -> Unit) {

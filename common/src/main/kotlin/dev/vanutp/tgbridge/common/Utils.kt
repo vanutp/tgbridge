@@ -8,11 +8,14 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 
+fun interface Function1<A> {
+    fun apply(arg: A)
+}
+
 fun String.escapeHTML(): String = this
     .replace("&", "&amp;")
     .replace(">", "&gt;")
     .replace("<", "&lt;")
-
 
 fun Component.asString() = MinecraftToTelegramConverter.convert(this).text
 

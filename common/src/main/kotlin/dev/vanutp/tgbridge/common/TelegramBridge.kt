@@ -56,13 +56,13 @@ abstract class TelegramBridge {
             logger.warn("Can't start with default config values: please fill in botToken and chatId, then run /tgbridge reload")
             return
         }
-        bot = TelegramBot(config.advanced.botApiUrl, config.general.botToken, logger)
+        bot = TelegramBot(config.advanced.botApiUrl, config.general.botToken, logger, coroutineScope)
         addIntegration(ReplacementsCompat(this))
         addIntegration(VoiceMessagesCompat(this))
         coroutineScope.launch {
             bot.init()
             registerTelegramHandlers()
-            bot.startPolling(coroutineScope)
+            bot.startPolling()
             initialized = true
             logger.info("Successfully connected to Telegram API")
         }
@@ -215,7 +215,7 @@ abstract class TelegramBridge {
             return false
         }
         runBlocking {
-            bot.recoverPolling(coroutineScope)
+            bot.recoverPolling()
             if (lastMessageLock.isLocked) {
                 lastMessageLock.unlock()
             }

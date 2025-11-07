@@ -2,6 +2,7 @@ package dev.vanutp.tgbridge.common
 
 import dev.vanutp.tgbridge.common.ConfigManager.config
 import kotlinx.coroutines.*
+import kotlinx.coroutines.future.future
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
@@ -372,7 +373,7 @@ interface TgApi {
 
 const val POLL_TIMEOUT_SECONDS = 60
 
-class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogger) {
+class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogger, private val scope: CoroutineScope) {
     private val okhttpClient = OkHttpClient.Builder()
         .readTimeout(Duration.ofSeconds((POLL_TIMEOUT_SECONDS + 10).toLong()))
         .build()
@@ -395,9 +396,12 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
     lateinit var me: TgUser
         private set
 
-
     fun registerMessageHandler(handler: suspend (TgMessage) -> Unit) {
         messageHandlers.add(handler)
+    }
+
+    fun registerMessageHandler(handler: Function1<TgMessage>) {
+        messageHandlers.add(handler::apply)
     }
 
     fun registerCommandHandler(command: String, handler: suspend (TgMessage) -> Unit) {
@@ -412,12 +416,17 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
         }
     }
 
+    fun registerCommandHandler(command: String, handler: Function1<TgMessage>) {
+        val suspendHandler: suspend (TgMessage) -> Unit = handler::apply
+        registerCommandHandler(command, suspendHandler)
+    }
+
     suspend fun init() {
         retriableCall { client.deleteWebhook() }
         me = retriableCall { client.getMe() }
     }
 
-    fun startPolling(scope: CoroutineScope) {
+    fun startPolling() {
         if (pollTask != null) {
             throw IllegalStateException("polling already started")
         }
@@ -463,7 +472,7 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
         }
     }
 
-    suspend fun recoverPolling(scope: CoroutineScope) {
+    suspend fun recoverPolling() {
         val task = pollTask
         if (task != null) {
             if (!task.isCompleted) {
@@ -471,7 +480,7 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
             }
             pollTask = null
         }
-        startPolling(scope)
+        startPolling()
     }
 
     suspend fun shutdown() {
@@ -561,6 +570,15 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
         )
     }
 
+    fun sendMessageAsync(
+        chatId: Long,
+        text: String,
+        entities: List<TgEntity>? = null,
+        replyToMessageId: Int? = null,
+        parseMode: String? = "HTML",
+        disableWebPagePreview: Boolean = true,
+    ) = scope.future { sendMessage(chatId, text, entities, replyToMessageId, parseMode, disableWebPagePreview) }
+
     // TODO: wtf
     suspend fun sendVoice(
         chatId: Long,
@@ -613,8 +631,23 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
         )
     }
 
+    fun editMessageTextAsync(
+        chatId: Long,
+        messageId: Int,
+        text: String,
+        entities: List<TgEntity>? = null,
+        parseMode: String? = "HTML",
+        disableWebPagePreview: Boolean = true,
+    ) = scope.future {
+        editMessageText(chatId, messageId, text, entities, parseMode, disableWebPagePreview)
+    }
+
     suspend fun deleteMessage(chatId: Long, messageId: Int) = retriableCall {
         client.deleteMessage(TgDeleteMessageRequest(chatId, messageId))
+    }
+
+    fun deleteMessageAsync(chatId: Long, messageId: Int) = scope.future {
+        deleteMessage(chatId, messageId)
     }
 
     suspend fun downloadFile(fileId: String): Response<ResponseBody> {
@@ -625,5 +658,9 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
             throw Exception("File path is null for $fileId")
         }
         return client.downloadFile(fileBaseUrl + filePath)
+    }
+
+    fun downloadFileAsync(fileId: String) = scope.future {
+        downloadFile(fileId)
     }
 }
