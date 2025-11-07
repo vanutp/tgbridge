@@ -77,6 +77,12 @@ abstract class TelegramBridge {
     }
 
     fun onServerStarted() {
+        if (!initialized) {
+            if (!config.hasDefaultValues()) {
+                logger.error("Error initializing the mod, check the server console for errors")
+            }
+            return
+        }
         loadedIntegrations = availableIntegrations.filter { it.shouldEnable() }
         for (integration in loadedIntegrations) {
             integration.enable()
