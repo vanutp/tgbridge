@@ -60,7 +60,7 @@ object TelegramToMinecraftConverter {
             // Telegram sends reply message when message is pinned
                 msg.pinnedMessage != null
                 // All messages to a topic are sent as replies to a service message
-                || reply.messageId == config.general.topicId
+                || reply.messageId == reply.messageThreadId
             ) {
                 return@let
             }

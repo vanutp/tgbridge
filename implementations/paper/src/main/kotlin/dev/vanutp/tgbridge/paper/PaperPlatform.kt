@@ -2,6 +2,8 @@ package dev.vanutp.tgbridge.paper
 
 import dev.vanutp.tgbridge.common.IPlatform
 import dev.vanutp.tgbridge.common.MuteService
+import dev.vanutp.tgbridge.common.TelegramBridge
+import dev.vanutp.tgbridge.common.models.ChatConfig
 import dev.vanutp.tgbridge.common.models.TgbridgePlayer
 import net.kyori.adventure.text.Component
 import net.minecraft.locale.Language
@@ -13,10 +15,23 @@ class PaperPlatform(private val plugin: JavaPlugin) : IPlatform {
     override val name = "paper"
     override val configDir = plugin.dataFolder.toPath().absolute()
 
-    override fun broadcastMessage(text: Component) {
+    private fun getRecipients(chat: ChatConfig): List<Player>? {
+        val integration = TelegramBridge.INSTANCE.chatIntegration
+        val players = if (integration == null) {
+            plugin.server.onlinePlayers.takeIf { chat.isDefault }?.toList()
+        } else {
+            integration.getChatRecipients(chat, Player::class.java)
+        }
+        return players?.filterNot { MuteService.isMuted(it.uniqueId) }
+    }
+
+    override fun getChatRecipients(chat: ChatConfig) =
+        getRecipients(chat)?.map { it.toTgbridge() }
+
+    override fun broadcastMessage(chat: ChatConfig, text: Component) {
         plugin.server.consoleSender.sendMessage(text)
-        for (p in plugin.server.onlinePlayers.filterNot { MuteService.isMuted(it.uniqueId) }) {
-            p.sendMessage(text)
+        getRecipients(chat)?.forEach { player ->
+            player.sendMessage(text)
         }
     }
 

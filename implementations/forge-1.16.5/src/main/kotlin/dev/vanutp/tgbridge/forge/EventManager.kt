@@ -1,6 +1,7 @@
 package dev.vanutp.tgbridge.forge
 
 import com.mojang.brigadier.context.CommandContext
+import dev.vanutp.tgbridge.common.TelegramBridge
 import dev.vanutp.tgbridge.common.models.*
 import net.kyori.adventure.text.Component
 import net.minecraft.entity.player.PlayerEntity
@@ -25,9 +26,15 @@ class EventManager(private val tgbridge: ForgeTelegramBridge) {
 
     private fun registerChatMessageListener() {
         EVENT_BUS.addListener { e: ServerChatEvent ->
+            if (TelegramBridge.INSTANCE.chatIntegration != null) {
+                return@addListener
+            }
             tgbridge.onChatMessage(
                 TgbridgeMcChatMessageEvent(
-                    e.player.toTgbridge(), Component.text(e.message), e,
+                    e.player.toTgbridge(),
+                    Component.text(e.message),
+                    null,
+                    e,
                 )
             )
         }

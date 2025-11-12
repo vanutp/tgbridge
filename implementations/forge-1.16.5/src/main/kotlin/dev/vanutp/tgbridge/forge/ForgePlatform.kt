@@ -2,11 +2,14 @@ package dev.vanutp.tgbridge.forge
 
 import dev.vanutp.tgbridge.common.IPlatform
 import dev.vanutp.tgbridge.common.MuteService
+import dev.vanutp.tgbridge.common.TelegramBridge
+import dev.vanutp.tgbridge.common.models.ChatConfig
 import dev.vanutp.tgbridge.common.models.TgbridgePlayer
 import net.kyori.adventure.text.Component
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.network.MessageType
 import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
+import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.util.Language
 import net.minecraft.util.Util.NIL_UUID
 import net.minecraftforge.fml.ModList
@@ -17,19 +20,30 @@ class ForgePlatform : IPlatform {
     override val name = "forge"
     override val configDir = FMLPaths.CONFIGDIR.get().resolve(ForgeTelegramBridge.MOD_ID)
 
-    override fun broadcastMessage(text: Component) {
-        val currentServer = ServerLifecycleHooks.getCurrentServer()
-        val playerManager = currentServer.playerManager
-        val players = playerManager.playerList.filterNot { MuteService.isMuted(it.uuid) }
+    private fun getRecipients(chat: ChatConfig): List<ServerPlayerEntity>? {
+        val server = ServerLifecycleHooks.getCurrentServer()
+        val integration = TelegramBridge.INSTANCE.chatIntegration
+        val players = if (integration == null) {
+            server.playerManager.playerList.takeIf { chat.isDefault }
+        } else {
+            integration.getChatRecipients(chat, ServerPlayerEntity::class.java)
+        }
+        return players?.filterNot { MuteService.isMuted(it.uuid) }
+    }
+
+    override fun getChatRecipients(chat: ChatConfig) =
+        getRecipients(chat)?.map { it.toTgbridge() }
+
+    override fun broadcastMessage(chat: ChatConfig, text: Component) {
+        val server = ServerLifecycleHooks.getCurrentServer()
         val message = text.toMinecraft()
-        val sender = NIL_UUID
         val packet = GameMessageS2CPacket(
             message,
             MessageType.CHAT,
-            sender
+            NIL_UUID,
         )
-        currentServer.sendSystemMessage(message, sender)
-        for (player in players) {
+        server.sendSystemMessage(message, NIL_UUID)
+        getRecipients(chat)?.forEach { player ->
             player.networkHandler.sendPacket(packet)
         }
     }

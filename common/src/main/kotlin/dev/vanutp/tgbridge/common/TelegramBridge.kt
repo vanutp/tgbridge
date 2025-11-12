@@ -2,38 +2,35 @@ package dev.vanutp.tgbridge.common
 
 import dev.vanutp.tgbridge.common.ConfigManager.config
 import dev.vanutp.tgbridge.common.ConfigManager.lang
-import dev.vanutp.tgbridge.common.compat.ITgbridgeCompat
-import dev.vanutp.tgbridge.common.compat.ReplacementsCompat
-import dev.vanutp.tgbridge.common.compat.VoiceMessagesCompat
+import dev.vanutp.tgbridge.common.compat.*
 import dev.vanutp.tgbridge.common.converters.MinecraftToTelegramConverter
 import dev.vanutp.tgbridge.common.converters.TelegramFormattedText
 import dev.vanutp.tgbridge.common.converters.TelegramToMinecraftConverter
 import dev.vanutp.tgbridge.common.models.*
 import kotlinx.coroutines.*
-import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TranslatableComponent
 import java.time.Clock
 import java.time.temporal.ChronoUnit
 import kotlin.math.max
-
+import kotlin.time.Duration.Companion.seconds
 
 abstract class TelegramBridge {
     internal val coroutineScope = CoroutineScope(Dispatchers.IO).plus(SupervisorJob())
     abstract val logger: ILogger
     abstract val platform: IPlatform
-    private var initialized: Boolean = false
+    private var initialized = CompletableDeferred<Unit>()
     private var started: Boolean = false
     lateinit var bot: TelegramBot private set
     private var spark: SparkHelper? = null
 
-    // TODO: automate this better somehow
-    internal var lastMessage: LastMessage? = null
-    private val lastMessageLock = Mutex()
+    internal val merger: MessageMerger = MessageMerger()
 
     private val availableIntegrations: MutableList<ITgbridgeCompat> = mutableListOf()
     lateinit var loadedIntegrations: List<ITgbridgeCompat> private set
+    val chatIntegration: IChatCompat?
+        get() = loadedIntegrations.find { it is IChatCompat } as? IChatCompat
 
     companion object {
         private var _INSTANCE: TelegramBridge? = null
@@ -52,11 +49,11 @@ abstract class TelegramBridge {
         logger.info("tgbridge starting on ${platform.name}")
         ConfigManager.init(platform.configDir, platform::getLanguageKey)
         MuteService.init(logger, platform.configDir)
-        if (config.hasDefaultValues()) {
-            logger.warn("Can't start with default config values: please fill in botToken and chatId, then run /tgbridge reload")
+        config.getError()?.let {
+            logger.error(it)
             return
         }
-        bot = TelegramBot(config.advanced.botApiUrl, config.general.botToken, logger, coroutineScope)
+        bot = TelegramBot(config.advanced.botApiUrl, config.botToken, logger, coroutineScope)
         addIntegration(ReplacementsCompat(this))
         addIntegration(VoiceMessagesCompat(this))
         coroutineScope.launch {
@@ -64,9 +61,19 @@ abstract class TelegramBridge {
             logger.info("Logged in as @${bot.me.username}")
             registerTelegramHandlers()
             bot.startPolling()
-            initialized = true
+            initialized.complete(Unit)
         }
     }
+
+    suspend fun waitForInit(): Boolean =
+        try {
+            withTimeout(5.seconds) {
+                initialized.await()
+            }
+            true
+        } catch (_: TimeoutCancellationException) {
+            false
+        }
 
     fun addIntegration(integration: ITgbridgeCompat) {
         if (started) {
@@ -76,15 +83,30 @@ abstract class TelegramBridge {
         availableIntegrations.add(integration)
     }
 
-    fun onServerStarted() {
-        if (!initialized) {
-            if (!config.hasDefaultValues()) {
+    fun onServerStarted() = coroutineScope.launch {
+        // TODO: this will fail if there is no internet on server start
+        if (!waitForInit()) {
+            if (config.getError() != null) {
                 logger.error("Error initializing the mod, check the server console for errors")
             }
-            return
+            return@launch
         }
         loadedIntegrations = availableIntegrations.filter { it.shouldEnable() }
+        var hasChatIntegration = false
+        var hasVanishIntegration = false
         for (integration in loadedIntegrations) {
+            if (integration is IChatCompat) {
+                if (hasChatIntegration) {
+                    logger.error("Multiple chat integrations found, this is not supported and won't work")
+                }
+                hasChatIntegration = true
+            }
+            if (integration is IVanishCompat) {
+                if (hasVanishIntegration) {
+                    logger.error("Multiple vanish integrations found, this is not supported and won't work")
+                }
+                hasVanishIntegration = true
+            }
             integration.enable()
         }
         logger.info("Loaded integrations: ${loadedIntegrations.joinToString { it::class.simpleName ?: "unknown" }}")
@@ -92,20 +114,17 @@ abstract class TelegramBridge {
         spark = SparkHelper.createOrNull()
         if (config.events.enableStartMessages) {
             coroutineScope.launch {
-                sendMessage(lang.telegram.serverStarted)
+                sendMessage(config.getDefaultChat(), lang.telegram.serverStarted)
             }
         }
         started = true
     }
 
     fun shutdown() {
-        if (!initialized) {
-            return
-        }
         runBlocking {
             MuteService.shutdown()
-            if (config.events.enableStopMessages) {
-                sendMessage(lang.telegram.serverStopped)
+            if (config.events.enableStopMessages && initialized.isCompleted) {
+                sendMessage(config.getDefaultChat(), lang.telegram.serverStopped)
             }
             bot.shutdown()
         }
@@ -118,89 +137,80 @@ abstract class TelegramBridge {
         bot.registerMessageHandler(this::onTelegramMessage)
     }
 
-    private fun checkMessageChat(msg: TgMessage): Boolean {
-        val isTopicMessage = msg.isTopicMessage ?: false
-        val messageThreadId = if (isTopicMessage) {
+    private fun getMessageChat(msg: TgMessage): ChatConfig? {
+        val topicId = if (msg.isTopicMessage ?: false) {
             msg.messageThreadId!!
         } else {
             // Replies in "General" topic have threadId set to the reply message id
             1
         }
-        val chatValid = msg.chat.id == config.general.chatId
-        val topicValid = config.general.topicId == null || messageThreadId == config.general.topicId
-        return chatValid && topicValid
+        return config.getChat(msg.chat.id, topicId)
     }
 
     private suspend fun onTelegramTpsCommand(msg: TgMessage) {
-        val spark = spark
-        if (!checkMessageChat(msg) || spark == null) {
-            return
-        }
+        val spark = spark ?: return
+        val chat = getMessageChat(msg) ?: return
         val durations = spark.getPlaceholders()
         if (durations == null) {
             logger.error("Unable to get spark data")
             return
         }
-        sendMessage(lang.telegram.tps.formatLang(durations))
+        sendMessage(chat, lang.telegram.tps.formatLang(durations))
     }
 
     private suspend fun onTelegramListCommand(msg: TgMessage) {
-        if (!checkMessageChat(msg)) {
-            return
-        }
+        val chat = getMessageChat(msg) ?: return
         val onlinePlayers = platform.getOnlinePlayers().filterNot { it.isVanished() }
-        if (onlinePlayers.isNotEmpty()) {
-            sendMessage(
-                lang.telegram.playerList.formatLang(
-                    Placeholders(
-                        mapOf(
-                            "count" to onlinePlayers.size.toString(),
-                            "usernames" to onlinePlayers.joinToString { it.getName() },
-                        ),
-                    )
+        val text = if (onlinePlayers.isNotEmpty()) {
+            lang.telegram.playerList.formatLang(
+                Placeholders(
+                    mapOf(
+                        "count" to onlinePlayers.size.toString(),
+                        "usernames" to onlinePlayers.joinToString { it.getName() },
+                    ),
                 )
             )
         } else {
-            sendMessage(lang.telegram.playerListZeroOnline)
+            lang.telegram.playerListZeroOnline
         }
+        sendMessage(chat, text)
     }
 
     private suspend fun onTelegramMessage(msg: TgMessage) {
-        if (!checkMessageChat(msg)) {
-            return
+        val chat = getMessageChat(msg) ?: return
+        merger.lock.withLock {
+            merger.lastMessages.remove(chat.name)
         }
-        lastMessageLock.withLock {
-            lastMessage = null
-        }
-        val e = TgbridgeTgChatMessageEvent(msg)
+        val e = TgbridgeTgChatMessageEvent(msg, chat)
         val textComponent = TelegramToMinecraftConverter.convert(msg, bot.me.id)
         e.placeholders = e.placeholders.withDefaults(
             Placeholders(
-                mapOf("sender" to msg.senderName),
+                mapOf("sender" to msg.senderName, "chat_name" to chat.name),
                 mapOf("text" to textComponent),
             )
         )
         if (!TgbridgeEvents.TG_CHAT_MESSAGE.invoke(e)) return
-        platform.broadcastMessage(lang.minecraft.format.formatMiniMessage(e.placeholders))
+        val fmtString = if (chat.isDefault) lang.minecraft.format else lang.minecraft.formatChat
+        platform.broadcastMessage(chat, fmtString.formatMiniMessage(e.placeholders))
     }
 
-    private fun tryReinit(ctx: TBCommandContext): Boolean {
+    private fun tryReinit(ctx: TBCommandContext): Boolean = runBlocking {
+        initialized = CompletableDeferred()
         init()
-        if (initialized) {
+        val success = waitForInit()
+        if (success) {
             onServerStarted()
             ctx.reply("tgbridge initialized")
-        } else if (config.hasDefaultValues()) {
-            ctx.reply("Config still has default values: please fill in botToken and chatId")
         } else {
-            ctx.reply("Error initializing the mod, check the server console for errors")
+            ctx.reply(config.getError() ?: "Error initializing the mod, check the server console for errors")
         }
-        return initialized
+        return@runBlocking success
     }
 
     fun onReloadCommand(ctx: TBCommandContext): Boolean {
-        if (!initialized) {
+        if (!initialized.isCompleted) {
             try {
-                if (config.hasDefaultValues()) {
+                if (config.getError() != null) {
                     return tryReinit(ctx)
                 }
             } catch (_: UninitializedPropertyAccessException) {
@@ -216,9 +226,7 @@ abstract class TelegramBridge {
         }
         runBlocking {
             bot.recoverPolling()
-            if (lastMessageLock.isLocked) {
-                lastMessageLock.unlock()
-            }
+            merger.unlock()
         }
         ctx.reply("Config reloaded. Note that the bot token can't be changed without a restart")
         coroutineScope.launch {
@@ -246,6 +254,9 @@ abstract class TelegramBridge {
             Placeholders(mapOf("username" to e.sender.getName()))
         )
         if (!TgbridgeEvents.MC_CHAT_MESSAGE.invoke(e)) return@wrapMinecraftHandler
+
+        val chat = config.getChat(e.chatName) ?: return@wrapMinecraftHandler
+
         var telegramText = MinecraftToTelegramConverter.convert(e.message)
         val bluemapLink = telegramText.text.asBluemapLinkOrNone()
         val prefix = config.integrations.incompatiblePluginChatPrefix
@@ -272,7 +283,7 @@ abstract class TelegramBridge {
         val currText = tgPrefix + telegramText
         val currDate = Clock.systemUTC().instant()
 
-        val lm = lastMessage
+        val lm = merger.lastMessages[chat.name]
         if (
             lm != null
             && lm.type == LastMessageType.TEXT
@@ -281,10 +292,10 @@ abstract class TelegramBridge {
         ) {
             lm.text = lm.text!! + "\n" + currText
             lm.date = currDate
-            editMessageText(lm.id, lm.text!!.text, lm.text!!.entities)
+            editMessageText(chat, lm.id, lm.text!!.text, lm.text!!.entities)
         } else {
-            val newMsg = sendMessage(currText.text, currText.entities)
-            lastMessage = LastMessage(
+            val newMsg = sendMessage(chat, currText.text, currText.entities)
+            merger.lastMessages[chat.name] = LastMessage(
                 LastMessageType.TEXT,
                 newMsg.messageId,
                 currDate,
@@ -299,8 +310,8 @@ abstract class TelegramBridge {
         val convertedMessage = when (val msg = e.message) {
             is TranslatableComponent -> {
                 val args = mutableListOf<Component>(Component.text(e.player.getName()))
-                args.addAll(msg.arguments().map { it.asComponent() }.drop(1))
-                msg.arguments(args)
+                args.addAll(msg.args().map { it.asComponent() }.drop(1))
+                msg.args(args)
             }
 
             null -> Component.translatable("death.attack.generic", Component.text(e.player.getName()))
@@ -316,8 +327,9 @@ abstract class TelegramBridge {
         val telegramText = MinecraftToTelegramConverter.convert(
             lang.telegram.playerDied.formatMiniMessage(e.placeholders),
         )
-        sendMessage(telegramText.text, telegramText.entities)
-        lastMessage = null
+        val chat = config.getDefaultChat()
+        sendMessage(chat, telegramText.text, telegramText.entities)
+        merger.lastMessages.remove(chat.name)
     }
 
     fun onPlayerJoin(e: TgbridgeJoinEvent) = wrapMinecraftHandler {
@@ -327,7 +339,8 @@ abstract class TelegramBridge {
         )
         if (!TgbridgeEvents.JOIN.invoke(e)) return@wrapMinecraftHandler
         if (!e.ignoreVanish && e.player.isVanished()) return@wrapMinecraftHandler
-        val lm = lastMessage
+        val chat = config.getDefaultChat()
+        val lm = merger.lastMessages[chat.name]
         val currDate = Clock.systemUTC().instant()
         if (
             lm != null
@@ -335,16 +348,16 @@ abstract class TelegramBridge {
             && lm.leftPlayer!! == e.player.uuid
             && currDate.minus((config.events.leaveJoinMergeWindow).toLong(), ChronoUnit.SECONDS) < lm.date
         ) {
-            deleteMessage(lm.id)
+            deleteMessage(chat, lm.id)
         } else {
             val message = if (e.hasPlayedBefore) {
                 lang.telegram.playerJoined
             } else {
                 lang.telegram.playerJoinedFirstTime
             }
-            sendMessage(message.formatLang(e.placeholders))
+            sendMessage(chat, message.formatLang(e.placeholders))
         }
-        lastMessage = null
+        merger.lastMessages.remove(chat.name)
     }
 
     fun onPlayerLeave(e: TgbridgeLeaveEvent) = wrapMinecraftHandler {
@@ -354,10 +367,12 @@ abstract class TelegramBridge {
         )
         if (!TgbridgeEvents.LEAVE.invoke(e)) return@wrapMinecraftHandler
         if (!e.ignoreVanish && e.player.isVanished()) return@wrapMinecraftHandler
+        val chat = config.getDefaultChat()
         val newMsg = sendMessage(
+            chat,
             lang.telegram.playerLeft.formatLang(e.placeholders),
         )
-        lastMessage = LastMessage(
+        merger.lastMessages[chat.name] = LastMessage(
             LastMessageType.LEAVE,
             newMsg.messageId,
             Clock.systemUTC().instant(),
@@ -406,34 +421,40 @@ abstract class TelegramBridge {
 
             else -> throw TBAssertionFailed("Unknown advancement type ${e.type}.")
         }
-        sendMessage(langKey.formatLang(e.placeholders))
-        lastMessage = null
+        val chat = config.getDefaultChat()
+        sendMessage(chat, langKey.formatLang(e.placeholders))
+        merger.lastMessages.remove(chat.name)
     }
 
     private fun wrapMinecraftHandler(fn: suspend () -> Unit) {
-        if (!initialized) {
+        if (!initialized.isCompleted) {
             return
         }
         coroutineScope.launch {
-            lastMessageLock.withLock {
+            merger.lock.withLock {
                 fn()
             }
         }
     }
 
-    private suspend fun sendMessage(text: String, entities: List<TgEntity>? = null): TgMessage {
+    private suspend fun sendMessage(chat: ChatConfig, text: String, entities: List<TgEntity>? = null): TgMessage {
         return bot.sendMessage(
-            config.general.chatId,
+            chat.chatId,
             text,
             entities,
             parseMode = if (entities == null) "HTML" else null,
-            replyToMessageId = config.general.topicId,
+            replyToMessageId = chat.topicId,
         )
     }
 
-    private suspend fun editMessageText(messageId: Int, text: String, entities: List<TgEntity>? = null): TgMessage {
+    private suspend fun editMessageText(
+        chat: ChatConfig,
+        messageId: Int,
+        text: String,
+        entities: List<TgEntity>? = null
+    ): TgMessage {
         return bot.editMessageText(
-            config.general.chatId,
+            chat.chatId,
             messageId,
             text,
             entities,
@@ -441,7 +462,7 @@ abstract class TelegramBridge {
         )
     }
 
-    private suspend fun deleteMessage(messageId: Int) {
-        bot.deleteMessage(config.general.chatId, messageId)
+    private suspend fun deleteMessage(chat: ChatConfig, messageId: Int) {
+        bot.deleteMessage(chat.chatId, messageId)
     }
 }

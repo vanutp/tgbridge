@@ -4,15 +4,26 @@ default: По умолчанию
 required: Обязательно
 example: Пример
 options:
-  general.botToken:
+  botToken:
     type: string
     default: '"your bot token"'
     required: true
-  general.chatId:
-    type: number
-    default: 0
+  chats[]:
+    default:
+      - name: '"global"'
+        isDefault: true
+        chatId: 0
+  chats[].name:
+    type: string
     required: true
-  general.topicId:
+  chats[].isDefault:
+    type: boolean
+    default: false
+  chats[].chatId:
+    type: number
+    kotlin_type: Long
+    required: true
+  chats[].topicId:
     type: number | null
     default: null
 
@@ -51,13 +62,6 @@ options:
     description: |
       Если эта опция задана, вейпойнты, которыми игроки поделились с помощью
       Xaero's Minimap/World Map, будут отображаться как ссылки на указанный инстанс BlueMap
-  integrations.globalChatName:
-    type: string
-    default: '"global"'
-    description: |
-      Название чата из которого пересылать сообщения в Telegram.
-      Используется только если установлен совместимый плагин чата с поддержкой мультичатов
-      (см. [Совместимость](https://tgbridge.vanutp.dev/ru/compatibility#chat))
   integrations.incompatiblePluginChatPrefix:
     type: string | null
     default: null (отключено)

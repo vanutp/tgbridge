@@ -107,6 +107,8 @@ data class ServiceMessages(
 @Serializable
 data class LangMinecraft(
     val format: String = "<aqua>\\<<sender>></aqua> <text>",
+    @YamlComment("This is used when the message is sent to non-default chat/channel")
+    val formatChat: String = "<gray>[<chat_name>]</gray> <aqua>\\<<sender>></aqua> <text>",
     val messageMeta: MessageMeta = MessageMeta(),
     val messageFormatting: MessageFormatting = MessageFormatting(),
     val serviceMessages: ServiceMessages = ServiceMessages(),

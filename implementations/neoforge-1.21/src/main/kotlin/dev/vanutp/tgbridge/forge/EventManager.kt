@@ -1,6 +1,7 @@
 package dev.vanutp.tgbridge.forge
 
 import com.mojang.brigadier.context.CommandContext
+import dev.vanutp.tgbridge.common.TelegramBridge
 import dev.vanutp.tgbridge.common.models.*
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands
@@ -25,9 +26,15 @@ object EventManager {
 
     private fun registerChatMessageListener() {
         FORGE_BUS.addListener { e: ServerChatEvent ->
+            if (TelegramBridge.INSTANCE.chatIntegration != null) {
+                return@addListener
+            }
             NeoForgeTelegramBridge.onChatMessage(
                 TgbridgeMcChatMessageEvent(
-                    e.player.toTgbridge(), e.message.toAdventure(), e,
+                    e.player.toTgbridge(),
+                    e.message.toAdventure(),
+                    null,
+                    e,
                 )
             )
         }

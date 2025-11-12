@@ -65,6 +65,7 @@ export class Client {
     return this.chatMessages.find(predicate);
   }
 
+  // TODO
   // async getMessage() {
   //   try {
   //     return await Promise.race([

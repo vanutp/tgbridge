@@ -64,9 +64,14 @@ export abstract class Server {
       general: settings.general ? { ...settings.general } : {},
       advanced: settings.advanced ? { ...settings.advanced } : {},
     };
-    data.general.botToken = this.tg.token;
-    data.general.chatId = this.tg.chatId;
+    data.botToken = this.tg.token;
+    data.chats = [{
+      name: 'general',
+      isDefault: true,
+      chatId: this.tg.chatId,
+    }];
     data.advanced.botApiUrl = this.tg.apiUrl;
+    data.version = 4;
     await Deno.writeTextFile(
       new URL('config.yml', this.modConfigDir),
       JSON.stringify(data),
@@ -81,7 +86,10 @@ export abstract class Server {
   }
 
   protected async configureServer() {
-    await Deno.writeTextFile(new URL('eula.txt', this.serverDir), 'eula=true\n');
+    await Deno.writeTextFile(
+      new URL('eula.txt', this.serverDir),
+      'eula=true\n',
+    );
     await Deno.writeTextFile(
       new URL('server.properties', this.serverDir),
       `
@@ -97,10 +105,10 @@ view-distance=2
 simulation-distance=2
 `,
     );
-    const logsDir = new URL('logs/', this.serverDir)
-    await ensureDir(logsDir)
+    const logsDir = new URL('logs/', this.serverDir);
+    await ensureDir(logsDir);
     for await (const logFile of Deno.readDir(logsDir)) {
-      await Deno.remove(new URL(logFile.name, logsDir))
+      await Deno.remove(new URL(logFile.name, logsDir));
     }
     await this.configureMod({});
   }
@@ -187,7 +195,7 @@ simulation-distance=2
 
     if (this.type == ServerType.forge || this.type == ServerType.neoforge) {
       // пиздец
-      await delay(500)
+      await delay(500);
     }
 
     try {
@@ -209,8 +217,10 @@ simulation-distance=2
     this.tg.reset();
     this.client.reset();
     // await this.rcon.send(`kill ${this.client.username}`)
-    await this.rcon.send(`advancement revoke ${this.client.username} everything`)
-    await this.rcon.send(`clear ${this.client.username}`)
+    await this.rcon.send(
+      `advancement revoke ${this.client.username} everything`,
+    );
+    await this.rcon.send(`clear ${this.client.username}`);
   }
 
   async stop() {

@@ -6,12 +6,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Config(
-    @YamlComment(
-        "It's enough to set botToken and chatId for the plugin to work.",
-        "When your group has topics enabled, you should also set topicId.",
-        "See https://tgbridge.vanutp.dev for more information.",
-    )
-    val general: GeneralConfig = GeneralConfig(),
+    val botToken: String = "your bot token",
+    val chats: List<ChatConfig> = listOf(ChatConfig(name = "global", isDefault = true, chatId = 0)),
     val messages: MessagesConfig = MessagesConfig(),
     val integrations: IntegrationsConfig = IntegrationsConfig(),
     val events: EventsConfig = EventsConfig(),
@@ -23,9 +19,10 @@ data class Config(
 )
 
 @Serializable
-data class GeneralConfig(
-    val botToken: String = "your bot token",
-    val chatId: Long = 0,
+data class ChatConfig(
+    val name: String,
+    val isDefault: Boolean = false,
+    val chatId: Long,
     val topicId: Int? = null,
 )
 
@@ -66,12 +63,6 @@ data class IntegrationsConfig(
         "Default value: null (disabled)",
     )
     val bluemapUrl: String? = null,
-    @YamlComment(
-        "The chat name to forward messages from.",
-        "Only has an effect when a compatible chat plugin with support for named chats, such as Chatty, is installed.",
-        "(see [Compatibility](https://tgbridge.vanutp.dev/en/compatibility#chat))",
-    )
-    val globalChatName: String = "global",
     @YamlComment(
         "See also: [Compatibility](https://tgbridge.vanutp.dev/en/compatibility#chat)",
         "Use this if you have an incompatible plugin, such as CMI or AdvancedChat installed.",

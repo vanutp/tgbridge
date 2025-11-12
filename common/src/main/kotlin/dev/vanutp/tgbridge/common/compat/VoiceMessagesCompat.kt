@@ -12,6 +12,7 @@ import dev.vanutp.tgbridge.common.TelegramBridge
 import dev.vanutp.tgbridge.common.TgbridgeEvents
 import dev.vanutp.tgbridge.common.converters.MinecraftToTelegramConverter
 import dev.vanutp.tgbridge.common.formatMiniMessage
+import dev.vanutp.tgbridge.common.getDefaultChat
 import kotlinx.coroutines.launch
 import net.kyori.adventure.text.Component
 import ru.dimaskama.voicemessages.api.VoiceMessageReceivedCallback
@@ -28,6 +29,11 @@ class VoiceChatPlugin : VoicechatPlugin {
         internal lateinit var api: VoicechatApi private set
         internal lateinit var decoder: OpusDecoder
         internal lateinit var encoder: OpusEncoder
+
+        fun transcodeOpus(packets: List<ByteArray>) =
+            packets.map {
+                encoder.encode(decoder.decode(it))
+            }
     }
 
     override fun initialize(api: VoicechatApi) {
@@ -37,23 +43,20 @@ class VoiceChatPlugin : VoicechatPlugin {
     }
 }
 
-private fun voiceMessagesExists() = try {
-    Class.forName("ru.dimaskama.voicemessages.api.VoiceMessagesApiInitCallback")
-    true
-} catch (_: ClassNotFoundException) {
-    false
-}
-
 class VoiceMessagesCompat(bridge: TelegramBridge) : AbstractCompat(bridge) {
     override val fabricId = "voicemessages"
     override val forgeId = "voicemessages"
     override val paperId = "voicemessages"
     private lateinit var voiceMessages: VoiceMessagesApi
 
-    private fun transcodeOpus(packets: List<ByteArray>) =
-        packets.map {
-            VoiceChatPlugin.encoder.encode(VoiceChatPlugin.decoder.decode(it))
+    companion object {
+        fun voiceMessagesExists() = try {
+            Class.forName("ru.dimaskama.voicemessages.api.VoiceMessagesApiInitCallback")
+            true
+        } catch (_: ClassNotFoundException) {
+            false
         }
+    }
 
     init {
         if (voiceMessagesExists()) {
@@ -71,17 +74,18 @@ class VoiceMessagesCompat(bridge: TelegramBridge) : AbstractCompat(bridge) {
             val fileResponse = bridge.bot.downloadFile(msg.voice.fileId)
             val bytes = fileResponse.body()!!.bytes()
             val frames = extractOpusPackets(bytes)
-            val transcoded = transcodeOpus(frames)
+            val transcoded = VoiceChatPlugin.transcodeOpus(frames)
 
             val emptyUuid = UUID.fromString("00000000-0000-0000-0000-000000000000")
-            val targetUuids = bridge.platform.getOnlinePlayers().map { it.uuid }
-            val senderNameMsg = lang.minecraft.format.formatMiniMessage(
+            val targetUuids = bridge.platform.getChatRecipients(e.chat)?.map { it.uuid } ?: emptyList()
+            val fmtString = if (e.chat.isDefault) lang.minecraft.format else lang.minecraft.formatChat
+            val senderNameMsg = fmtString.formatMiniMessage(
                 Placeholders(
-                    mapOf("sender" to msg.senderName),
+                    mapOf("sender" to msg.senderName, "chat_name" to e.chat.name),
                     mapOf("text" to Component.text("")),
                 )
             )
-            bridge.platform.broadcastMessage(senderNameMsg)
+            bridge.platform.broadcastMessage(e.chat, senderNameMsg)
             voiceMessages.sendVoiceMessage(emptyUuid, targetUuids, transcoded, "all")
             e.isCancelled = true
         }
@@ -95,17 +99,18 @@ class VoiceMessagesCompat(bridge: TelegramBridge) : AbstractCompat(bridge) {
                     )
                 )
             )
+            val chat = config.getDefaultChat()
             bridge.coroutineScope.launch {
                 bridge.bot.sendVoice(
-                    config.general.chatId,
+                    chat.chatId,
                     oggData,
                     tgText.text,
                     tgText.entities,
-                    config.general.topicId,
+                    chat.topicId,
                     null,
                 )
             }
-            bridge.lastMessage = null
+            bridge.merger.lastMessages.remove(chat.name)
             return@register false
         }
     }

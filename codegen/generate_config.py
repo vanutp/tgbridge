@@ -1,5 +1,5 @@
 import re
-from dataclasses import dataclass
+from enum import Enum, auto
 from pathlib import Path
 from textwrap import dedent
 from typing import Literal
@@ -10,11 +10,17 @@ from pydantic import BaseModel
 DEFAULT_OPTION_RGX = re.compile(r'(.*?)( \(.*\))?')
 
 
+class OptType(Enum):
+    single = auto()
+    list = auto()
+    dict = auto()
+
+
 class ConfigOption(BaseModel):
-    type: str
+    type: str | None = None
     kotlin_type: str | None = None
     required: Literal['true'] | None = None
-    default: str
+    default: str | list | dict | None = None
     example: str | None = None
     description: str = ''
 
@@ -52,24 +58,31 @@ if list(en_config.options.keys()) != list(ru_config.options.keys()):
     raise ValueError('en and ru config keys don\'t match')
 
 
-@dataclass
-class KotlinField:
+class KotlinField(BaseModel):
     name: str
-    type: str
-    default: str
-    comments: list[str]
+    type: str | None = None
+    opt_type: OptType | None = None
+    comments: list[str] = []
+    default: str | list | dict | None = None
 
 
-@dataclass
-class KotlinDataclass:
+class KotlinDataclass(BaseModel):
     name: str
     fields: list[KotlinField]
 
 
-@dataclass
-class DocsSection:
+class DocsSection(BaseModel):
     name: str
     children: dict[str, 'DocsSection | ConfigOption']
+
+
+def parse_name(name: str) -> tuple[str, OptType]:
+    if name.endswith('[]'):
+        return name.removesuffix('[]'), OptType.list
+    elif name.endswith('{}'):
+        return name.removesuffix('{}'), OptType.dict
+    else:
+        return name, OptType.single
 
 
 def parse_default(default: str) -> tuple[str, str]:
@@ -95,8 +108,16 @@ class KotlinRenderer:
         cls_key = '.'.join(path)
         if cls := self.classes.get(cls_key):
             return cls
+
+        # TODO: validate if every class instance's opt_type is the same
+        clean_path = []
+        for p in path:
+            p, typ = parse_name(p)
+            if typ != OptType.single:
+                p = p.removesuffix('s')
+            clean_path.append(p)
         cls = KotlinDataclass(
-            name=''.join(capitalize_first(x) for x in path) + 'Config',
+            name=''.join(capitalize_first(x) for x in clean_path) + 'Config',
             fields=[],
         )
 
@@ -110,19 +131,50 @@ class KotlinRenderer:
                     'When your group has topics enabled, you should also set topicId.',
                     'See https://tgbridge.vanutp.dev for more information.',
                 ]
-            parent_field = KotlinField(
-                name=path[-1],
-                type=cls.name,
-                default=f'{cls.name}()',
-                comments=comments,
-            )
-            parent.fields.append(parent_field)
+            opt_name, opt_type = parse_name(path[-1])
+            parent_field = next((f for f in parent.fields if f.name == opt_name), None)
+            if not parent_field:
+                parent_field = KotlinField(name=opt_name)
+                parent.fields.append(parent_field)
+            if opt_type == OptType.single:
+                parent_field.type = cls.name
+            elif opt_type == OptType.list:
+                parent_field.type = f'List<{cls.name}>'
+            elif opt_type == OptType.dict:
+                parent_field.type = f'Map<String, {cls.name}>'
+            else:
+                raise ValueError
+            parent_field.comments.extend(comments)
+            parent_field.opt_type = opt_type
+            if parent_field.default:
+                if opt_type == OptType.single:
+                    raise ValueError(
+                        'Default value for option groups can only be set for list/dict option groups'
+                    )
+                elif opt_type == OptType.list:
+                    instances = []
+                    for instance in parent_field.default:
+                        vals = [f'{k} = {v}' for k, v in instance.items()]
+                        instances.append(f'{cls.name}({', '.join(vals)})')
+                    parent_field.default = f'listOf({', '.join(instances)})'
+                elif opt_type == OptType.dict:
+                    instances = []
+                    for key, instance in parent_field.default.items():
+                        vals = [f'{k} = {v}' for k, v in instance.items()]
+                        instances.append(f'"{key}" to {cls.name}({', '.join(vals)})')
+                    parent_field.default = f'mapOf({', '.join(instances)})'
+            elif opt_type == OptType.list:
+                parent_field.default = 'listOf()'
+            elif opt_type == OptType.dict:
+                parent_field.default = 'mapOf()'
+            else:
+                parent_field.default = f'{cls.name}()'
 
         self.classes[cls_key] = cls
         return cls
 
     @staticmethod
-    def type_to_kotlin(opt_name: str, schema_type: str) -> str:
+    def type_to_kotlin(schema_type: str) -> str:
         nullable_suffix = ' | null'
         nullable_mark = '?' if schema_type.endswith(nullable_suffix) else ''
         schema_type = schema_type.removesuffix(nullable_suffix)
@@ -131,12 +183,21 @@ class KotlinRenderer:
             'number': 'Int',
             'boolean': 'Boolean',
         }[schema_type]
-        if opt_name == 'chatId':
-            kotlin_base_type = 'Long'
         return kotlin_base_type + nullable_mark
 
-    def render_field(self, field: KotlinField) -> list[str]:
-        rend_field = [f'val {field.name}: {field.type} = {field.default},\n']
+    @staticmethod
+    def render_field(field: KotlinField) -> list[str]:
+        if isinstance(field.default, str):
+            default = f' = {field.default}'
+        elif field.default is None:
+            default = ''
+        else:
+            raise ValueError(
+                f'Invalid default value for field {field.name}: {field.default}'
+            )
+        if not field.type:
+            raise ValueError(f'Field {field.name} has no type')
+        rend_field = [f'val {field.name}: {field.type}{default},\n']
         if field.comments:
             rend_lines = []
             for line in field.comments:
@@ -165,31 +226,47 @@ class KotlinRenderer:
         res = (
             dedent(
                 '''
-                // Generated by codegen/generate_config.py. Do not modify
-                package dev.vanutp.tgbridge.common.models
-        
-                import com.charleskorn.kaml.YamlComment
-                import kotlinx.serialization.Serializable
-            '''
+                        // Generated by codegen/generate_config.py. Do not modify
+                        package dev.vanutp.tgbridge.common.models
+                
+                        import com.charleskorn.kaml.YamlComment
+                        import kotlinx.serialization.Serializable
+                    '''
             ).strip()
             + '\n'
         )
         for k, opt in self.spec.options.items():
             *path, opt_name = k.split('.')
-            cls = self.get_or_create_kotlin_cls(path)
+            opt_name, opt_type = parse_name(opt_name)
+
+            type_ = opt.kotlin_type
+            if not type_ and opt.type:
+                type_ = self.type_to_kotlin(opt.type)
+
             comments = [x for x in opt.description.splitlines() if x]
+
             if opt.example:
                 example_val, example_help = parse_default(opt.example)
                 comments.append(f'Example: {example_val}{example_help}')
-            default_val, default_help = parse_default(opt.default)
-            if default_help:
-                comments.append(f'Default value: {default_val}{default_help}')
+
+            if isinstance(opt.default, str):
+                default_val, default_help = parse_default(opt.default)
+                if default_help:
+                    comments.append(f'Default value: {default_val}{default_help}')
+            elif opt.default is None:
+                default_val = None
+            else:
+                default_val = opt.default
+
             field = KotlinField(
                 name=opt_name,
-                type=opt.kotlin_type or self.type_to_kotlin(opt_name, opt.type),
-                default=default_val,
+                type=type_,
                 comments=comments,
+                default=default_val,
+                opt_type=opt_type,
             )
+
+            cls = self.get_or_create_kotlin_cls(path)
             cls.fields.append(field)
 
         for cls in self.classes.values():
@@ -212,7 +289,9 @@ class DocsRenderer:
         parent = self.get_or_create_parent(path[:-1])
         sect_name = path[-1]
 
-        if sect_name in parent.children:
+        if sect_name in parent.children and isinstance(
+            parent.children[sect_name], DocsSection
+        ):
             return parent.children[sect_name]
 
         sect = DocsSection(
@@ -228,7 +307,11 @@ class DocsRenderer:
         res += f'- **{self.spec.type}:** `{opt.type}`\n'
         if opt.required:
             res += f'- **{self.spec.required}**\n'
-        default_val, default_help = parse_default(opt.default)
+        if isinstance(opt.default, str):
+            default_val, default_help = parse_default(opt.default)
+        else:
+            default_val = None
+            default_help = ''
         hide_default_section = path[0] in ('general', 'events', 'version')
         if not opt.required and not hide_default_section or default_help:
             res += f'- **{self.spec.default}:** `{default_val}`{default_help}\n'

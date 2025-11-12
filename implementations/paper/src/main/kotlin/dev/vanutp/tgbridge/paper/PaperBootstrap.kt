@@ -7,6 +7,7 @@ class PaperBootstrap : JavaPlugin() {
 
     override fun onEnable() {
         EventManager(this).register()
+        tgbridge.onEnable()
     }
 
     override fun onDisable() {

@@ -3,6 +3,7 @@ package dev.vanutp.tgbridge.common
 import dev.vanutp.tgbridge.common.ConfigManager.config
 import dev.vanutp.tgbridge.common.converters.MinecraftToTelegramConverter
 import dev.vanutp.tgbridge.common.converters.TelegramFormattedText
+import dev.vanutp.tgbridge.common.models.ChatConfig
 import dev.vanutp.tgbridge.common.models.Config
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
@@ -110,5 +111,30 @@ fun String.asBluemapLinkOrNone(): TelegramFormattedText? {
     return null
 }
 
-fun Config.hasDefaultValues() =
-    general.botToken == Config().general.botToken || general.chatId == Config().general.chatId
+fun Config.getError(): String? {
+    return if (botToken == Config().botToken || chats.any { it.chatId == Config().chats[0].chatId }) {
+        "Can't run with default config values: please fill in botToken and chatId, then run /tgbridge reload"
+    } else if (chats.filter { it.isDefault }.size != 1) {
+        "There must be exactly one default chat in the config"
+    } else if (chats.map { it.name }.toSet().size != chats.size) {
+        "Chat names must be unique"
+    } else {
+        null
+    }
+}
+
+fun Config.getDefaultChat(): ChatConfig {
+    return chats.find { it.isDefault }!!
+}
+
+fun Config.getChat(name: String?): ChatConfig? {
+    return if (name == null) {
+        getDefaultChat()
+    } else {
+        chats.find { it.name.equals(name, true) }
+    }
+}
+
+fun Config.getChat(chatId: Long, topicId: Int?): ChatConfig? {
+    return chats.find { it.chatId == chatId && (it.topicId == topicId || it.topicId == null && topicId == 1) }
+}

@@ -1,5 +1,6 @@
 package dev.vanutp.tgbridge.paper
 
+import dev.vanutp.tgbridge.common.TelegramBridge
 import dev.vanutp.tgbridge.common.models.*
 import io.papermc.paper.event.player.AsyncChatEvent
 import org.bukkit.event.EventHandler
@@ -28,10 +29,17 @@ class EventManager(private val plugin: PaperBootstrap) : Listener {
         plugin.server.pluginManager.registerEvents(object : Listener {
             @EventHandler(priority = EventPriority.MONITOR)
             fun onMessage(e: AsyncChatEvent) {
-                if (e.isCancelled) {
+                if (e.isCancelled || TelegramBridge.INSTANCE.chatIntegration != null) {
                     return
                 }
-                plugin.tgbridge.onChatMessage(TgbridgeMcChatMessageEvent(e.player.toTgbridge(), e.message(), e))
+                plugin.tgbridge.onChatMessage(
+                    TgbridgeMcChatMessageEvent(
+                        e.player.toTgbridge(),
+                        e.message(),
+                        null,
+                        e,
+                    )
+                )
             }
         }, plugin)
     }

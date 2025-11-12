@@ -1,3 +1,6 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
+
 plugins {
     id("io.papermc.paperweight.userdev")
     id("xyz.jpenilla.run-paper")
@@ -58,9 +61,10 @@ dependencies {
     compileOnly("ru.mrbrikster:chatty-api:2.19.13")
     compileOnly("de.maxhenkel.voicechat:voicechat-api:2.5.31")
     compileOnly("com.dthielke.herochat:Herochat:5.6.5")
-    compileOnly("de.hexaoxi:carbonchat-api:3.0.0-beta.26")
+    compileOnly("de.hexaoxi:carbonchat-api:3.0.0-beta.36")
 }
 
+paperweight.reobfArtifactConfiguration = io.papermc.paperweight.userdev.ReobfArtifactConfiguration.MOJANG_PRODUCTION
 
 tasks {
     processResources {
@@ -71,16 +75,27 @@ tasks {
         }
     }
 
-    reobfJar {
-        outputJar.set(rootProject.layout.buildDirectory.file("release/${rootProject.name}-${rootProject.version}-${project.name}.jar"))
+    shadowJar {
+        archiveFileName = "${rootProject.name}-${rootProject.version}-${project.name}.jar"
+        destinationDirectory.set(rootProject.layout.buildDirectory.dir("release"))
     }
 
     assemble {
-        dependsOn(reobfJar)
+        dependsOn(shadowJar)
     }
 
     runServer {
         minecraftVersion("1.21.9")
+    }
+
+    withType<JavaCompile> {
+        options.release = 21
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_21)
     }
 }
 

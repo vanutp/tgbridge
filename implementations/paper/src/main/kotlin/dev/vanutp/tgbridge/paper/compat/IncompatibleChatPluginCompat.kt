@@ -1,17 +1,18 @@
 package dev.vanutp.tgbridge.paper.compat
 
 import dev.vanutp.tgbridge.common.ConfigManager.config
-import dev.vanutp.tgbridge.common.TgbridgeEvents
+import dev.vanutp.tgbridge.common.compat.IChatCompat
+import dev.vanutp.tgbridge.common.models.ChatConfig
 import dev.vanutp.tgbridge.common.models.TgbridgeMcChatMessageEvent
 import dev.vanutp.tgbridge.paper.PaperTelegramBridge
 import dev.vanutp.tgbridge.paper.toTgbridge
-import io.papermc.paper.event.player.AsyncChatEvent
 import net.kyori.adventure.text.Component
+import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.player.AsyncPlayerChatEvent
 
-class IncompatibleChatPluginCompat(bridge: PaperTelegramBridge) : AbstractPaperCompat(bridge) {
+class IncompatibleChatPluginCompat(bridge: PaperTelegramBridge) : AbstractPaperCompat(bridge), IChatCompat {
     override fun shouldEnable(): Boolean {
         return config.integrations.incompatiblePluginChatPrefix != null
     }
@@ -25,17 +26,12 @@ class IncompatibleChatPluginCompat(bridge: PaperTelegramBridge) : AbstractPaperC
             TgbridgeMcChatMessageEvent(
                 e.player.toTgbridge(),
                 Component.text(e.message),
+                null,
                 e,
             )
         )
     }
 
-    override fun enable() {
-        super.enable()
-        TgbridgeEvents.MC_CHAT_MESSAGE.addListener { e ->
-            if (e.originalEvent is AsyncChatEvent) {
-                e.isCancelled = true
-            }
-        }
-    }
+    override fun getChatRecipients(chat: ChatConfig): List<Player>? =
+        bridge.plugin.server.onlinePlayers.takeIf { chat.isDefault }?.toList()
 }

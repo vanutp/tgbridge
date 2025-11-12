@@ -119,11 +119,15 @@ export class BotApiMock {
     this.messageListenersOnce = [];
   }
 
-  private static error(code: number, message: string) {
+  private static error(code: number, message: string, method?: string, body?: any) {
     return Response.json({
       description: message,
       error_code: code,
       ok: false,
+      request: {
+        method,
+        ...body,
+      },
     }, { status: code });
   }
 
@@ -153,7 +157,7 @@ export class BotApiMock {
 
     const [, token, _method] = url.pathname.match(/^\/bot(.*?)\/(.*)/)!;
     if (token != this.token) {
-      return BotApiMock.error(401, 'Unauthorized');
+      return BotApiMock.error(401, 'Unauthorized', _method, args);
     }
     const method = 'api_' + _method;
     const allowedMethods = [
@@ -173,13 +177,13 @@ export class BotApiMock {
         return BotApiMock.ok(result);
       } catch (e) {
         if (e instanceof BadRequestError) {
-          return BotApiMock.error(400, 'Bad Request: ' + e.message);
+          return BotApiMock.error(400, 'Bad Request: ' + e.message, _method, args);
         }
         throw e;
       }
     } else {
       console.warn(`Method ${_method} is not implemented in mock Bot API`);
-      return BotApiMock.error(404, 'Not found');
+      return BotApiMock.error(404, 'Not found', _method, args);
     }
   }
 

@@ -13,7 +13,7 @@ async function minecraftToTelegram(server: Server) {
 async function telegramToMinecraft(server: Server) {
   const text = 'test telegramToMinecraft'
   server.tg.sendMessage({text})
-  await delay(200)
+  await delay(300)
   assert(server.client.findMessage(msg => JSON.stringify(msg.json).includes(text)))
 }
 
@@ -52,7 +52,7 @@ async function muteUnmuteCommand(server: Server) {
 
   const textMuted = 'test muted message'
   server.tg.sendMessage({text: textMuted})
-  await delay(200)
+  await delay(300)
   assert(!server.client.findMessage(msg => JSON.stringify(msg.json).includes(textMuted)))
 
   server.client.sendCommand('tgbridge toggle')

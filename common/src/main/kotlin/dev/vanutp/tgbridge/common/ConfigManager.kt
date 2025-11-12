@@ -3,7 +3,10 @@ package dev.vanutp.tgbridge.common
 import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.YamlConfiguration
 import com.charleskorn.kaml.YamlMap
+import com.charleskorn.kaml.YamlNode
+import com.charleskorn.kaml.YamlScalar
 import com.charleskorn.kaml.yamlMap
+import dev.vanutp.tgbridge.common.models.ChatConfig
 import dev.vanutp.tgbridge.common.models.Config
 import dev.vanutp.tgbridge.common.models.Lang
 import kotlinx.serialization.decodeFromString
@@ -14,8 +17,8 @@ import java.nio.file.Path
 import kotlin.io.path.*
 
 object ConfigManager {
-    private const val LATEST_CONFIG_VERSION = 3
-    private const val LATEST_LANG_VERSION = 3
+    private const val LATEST_CONFIG_VERSION = 4
+    private const val LATEST_LANG_VERSION = 4
 
     private val yaml = Yaml(configuration = YamlConfiguration(strictMode = false))
     private lateinit var configDir: Path
@@ -84,6 +87,13 @@ object ConfigManager {
                         .replace("{deathMessage}", "<death_message>")
                 ),
             )
+        }  else if (lang.version == 3) {
+            lang = lang.copy(
+                version = 4,
+                minecraft = lang.minecraft.copy(
+                    formatChat = "<gray>[<chat_name>]</gray> " + lang.minecraft.format,
+                ),
+            )
         } else if (lang.version != LATEST_LANG_VERSION) {
             throw Exception("Unsupported lang version ${lang.version}")
         }
@@ -107,14 +117,41 @@ object ConfigManager {
                         ?.getScalar("bluemapUrl")?.content ?: ""
                 )
             )
+        } else if (config.version == 3) {
+            val data = yaml.parseToYamlNode(configPath.readText())
+            val oldGeneral = data.yamlMap.get<YamlMap>("general")
+            val oldToken = oldGeneral?.getScalar("botToken")?.content ?: Config().botToken
+            val oldChatId = oldGeneral?.getScalar("chatId")?.content?.toLongOrNull() ?: Config().chats[0].chatId
+            val oldTopicId = when (val node = oldGeneral?.get<YamlNode>("topicId")) {
+                is YamlScalar -> node.content.toIntOrNull()
+                else -> null
+            }
+            config = config.copy(
+                version = 4,
+                botToken = oldToken,
+                chats = listOf(
+                    ChatConfig(
+                        name = "global",
+                        isDefault = true,
+                        chatId = oldChatId,
+                        topicId = oldTopicId,
+                    )
+                )
+            )
         } else if (config.version != LATEST_CONFIG_VERSION) {
             throw Exception("Unsupported config version ${config.version}")
         }
-        if (config.general.chatId > 0) {
+        if (config.chats.any { it.chatId > 0 }) {
             config = config.copy(
-                general = config.general.copy(
-                    chatId = -1000000000000 - config.general.chatId
-                )
+                chats = config.chats.map {
+                    it.copy(
+                        chatId = if (it.chatId > 0) {
+                            -1000000000000 - it.chatId
+                        } else {
+                            it.chatId
+                        }
+                    )
+                },
             )
         }
     }

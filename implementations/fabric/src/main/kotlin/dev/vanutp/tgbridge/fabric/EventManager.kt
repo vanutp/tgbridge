@@ -1,6 +1,7 @@
 package dev.vanutp.tgbridge.fabric
 
 import com.mojang.brigadier.context.CommandContext
+import dev.vanutp.tgbridge.common.TelegramBridge
 import dev.vanutp.tgbridge.common.models.*
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
 import net.fabricmc.fabric.api.message.v1.ServerMessageEvents
@@ -22,6 +23,9 @@ object EventManager {
 
     private fun registerChatMessageListener() {
         ServerMessageEvents.CHAT_MESSAGE.register { message: PlayerChatMessage, sender, params ->
+            if (TelegramBridge.INSTANCE.chatIntegration != null) {
+                return@register
+            }
             val messageContent = if (FabricTelegramBridge.versionInfo.IS_192) {
                 val cls = message.javaClass
                 val getContent = cls.getMethod("method_44125")
@@ -33,6 +37,7 @@ object EventManager {
                 TgbridgeMcChatMessageEvent(
                     sender.toTgbridge(),
                     messageContent.toAdventure(),
+                    null,
                     FabricEventWrapper(
                         ServerMessageEvents.ChatMessage::class,
                         listOf(message, sender, params),
