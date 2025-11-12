@@ -6,7 +6,6 @@ import net.kyori.adventure.text.Component
 
 interface MinecraftEvent {
     val originalEvent: Any?
-    val metadata: Map<String, Any>
 }
 
 interface MessageProducingEvent {
@@ -29,7 +28,6 @@ data class TgbridgeMcChatMessageEvent(
     var message: Component,
     var chatName: String?,
     override val originalEvent: Any?,
-    override val metadata: Map<String, Any> = emptyMap(),
     override var isCancelled: Boolean = false,
     override var placeholders: Placeholders = Placeholders(),
 ) : MinecraftEvent, Cancellable, MessageProducingEvent
@@ -38,7 +36,6 @@ data class TgbridgeDeathEvent(
     var player: TgbridgePlayer,
     var message: Component?,
     override val originalEvent: Any?,
-    override val metadata: Map<String, Any> = emptyMap(),
     override var isCancelled: Boolean = false,
     override var placeholders: Placeholders = Placeholders(),
 ) : MinecraftEvent, Cancellable, MessageProducingEvent
@@ -47,7 +44,6 @@ data class TgbridgeJoinEvent(
     var player: TgbridgePlayer,
     var hasPlayedBefore: Boolean,
     override val originalEvent: Any?,
-    override val metadata: Map<String, Any> = emptyMap(),
     var ignoreVanish: Boolean = false,
     override var isCancelled: Boolean = false,
     override var placeholders: Placeholders = Placeholders(),
@@ -56,7 +52,6 @@ data class TgbridgeJoinEvent(
 data class TgbridgeLeaveEvent(
     var player: TgbridgePlayer,
     override val originalEvent: Any?,
-    override val metadata: Map<String, Any> = emptyMap(),
     var ignoreVanish: Boolean = false,
     override var isCancelled: Boolean = false,
     override var placeholders: Placeholders = Placeholders(),
@@ -68,7 +63,6 @@ data class TgbridgeAdvancementEvent(
     var title: Component,
     var description: Component,
     override val originalEvent: Any?,
-    override val metadata: Map<String, Any> = emptyMap(),
     override var isCancelled: Boolean = false,
     override var placeholders: Placeholders = Placeholders(),
 ) : MinecraftEvent, Cancellable, MessageProducingEvent

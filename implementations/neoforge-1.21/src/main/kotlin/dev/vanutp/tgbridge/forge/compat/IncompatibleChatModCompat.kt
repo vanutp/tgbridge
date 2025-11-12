@@ -29,7 +29,6 @@ class IncompatibleChatModCompat(override val bridge: NeoForgeTelegramBridge) : A
                 e.message.toAdventure(),
                 null,
                 e,
-                mapOf("IncompatibleChatModCompat" to true)
             )
         )
     }

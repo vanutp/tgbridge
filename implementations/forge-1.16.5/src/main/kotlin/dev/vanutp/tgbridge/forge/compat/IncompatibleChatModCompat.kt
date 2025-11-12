@@ -29,7 +29,6 @@ class IncompatibleChatModCompat(override val bridge: ForgeTelegramBridge) : Abst
                 Component.text(e.message),
                 null,
                 e,
-                mapOf("IncompatibleChatModCompat" to true)
             )
         )
     }
