@@ -14,8 +14,9 @@ export class PaperServer extends Server {
     );
     const versionsData = await versionsResp.json();
     const version = versionsData.builds[versionsData.builds.length - 1];
+    const suffix = Object.hasOwn(version.downloads, 'mojang-mappings') ? '-mojang' : '';
     const versionUrl =
-      `https://api.papermc.io/v2/projects/paper/versions/${this.version}/builds/${version.build}/downloads/paper-${this.version}-${version.build}.jar`;
+      `https://api.papermc.io/v2/projects/paper/versions/${this.version}/builds/${version.build}/downloads/paper-${this.version}-${version.build}${suffix}.jar`;
 
     const serverFileName = basename(versionUrl);
     const serverFilePath = new URL(serverFileName, this.serverDir)

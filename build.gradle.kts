@@ -1,9 +1,10 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
-    id("org.jetbrains.kotlin.jvm") version "2.0.21"
-    id("org.jetbrains.kotlin.plugin.serialization") version "2.0.21" apply false
+    id("org.jetbrains.kotlin.jvm") version "2.2.21"
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.2.21" apply false
     id("com.gradleup.shadow") version "8.3.9"  // TODO: will new version work with forge 1.16.5?
     id("io.papermc.paperweight.userdev") version "2.0.0-beta.19" apply false
     id("xyz.jpenilla.run-paper") version "2.3.1" apply false
@@ -99,6 +100,8 @@ subprojects {
 
     kotlin {
         compilerOptions {
+            languageVersion.set(KotlinVersion.KOTLIN_2_0)
+            apiVersion.set(KotlinVersion.KOTLIN_2_0)
             jvmTarget.set(JvmTarget.JVM_17)
         }
     }
