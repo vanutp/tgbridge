@@ -39,6 +39,7 @@ repositories {
             includeGroup("ru.brikster")
             includeGroup("ru.mrbrikster")
             includeGroup("com.dthielke.herochat")
+            includeGroup("com.discordsrv")
         }
     }
     maven {
@@ -62,6 +63,7 @@ dependencies {
     compileOnly("de.maxhenkel.voicechat:voicechat-api:2.5.31")
     compileOnly("com.dthielke.herochat:Herochat:5.6.5")
     compileOnly("de.hexaoxi:carbonchat-api:3.0.0-beta.36")
+    compileOnly("com.discordsrv:discordsrv:1.28.0")
 }
 
 paperweight.reobfArtifactConfiguration = io.papermc.paperweight.userdev.ReobfArtifactConfiguration.MOJANG_PRODUCTION

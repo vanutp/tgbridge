@@ -25,7 +25,7 @@ abstract class TelegramBridge {
     lateinit var bot: TelegramBot private set
     private var spark: SparkHelper? = null
 
-    internal val merger: MessageMerger = MessageMerger()
+    val merger: MessageMerger = MessageMerger()
 
     private val availableIntegrations: MutableList<ITgbridgeCompat> = mutableListOf()
     lateinit var loadedIntegrations: List<ITgbridgeCompat> private set
@@ -426,7 +426,7 @@ abstract class TelegramBridge {
         merger.lastMessages.remove(chat.name)
     }
 
-    private fun wrapMinecraftHandler(fn: suspend () -> Unit) {
+    fun wrapMinecraftHandler(fn: suspend () -> Unit) {
         if (!initialized.isCompleted) {
             return
         }

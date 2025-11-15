@@ -115,15 +115,25 @@ data class LangMinecraft(
 )
 
 @Serializable
+data class LangDiscord(
+    @YamlComment("Format of messages sent from Discord to Telegram. Uses MiniMessage formatting (see above for details).")
+    val toTelegram: String = "<b>[<sender>]</b> <text>",
+    @YamlComment("Format of messages sent from Telegram to Discord. Uses Discord markdown formatting.")
+    val toDiscord: String = "**[{sender}]** {text}",
+)
+
+@Serializable
 data class Lang(
     @YamlComment("Translations to other languages can be downloaded from https://github.com/vanutp/tgbridge")
     val telegram: LangTelegram = LangTelegram(),
     @YamlComment(
         "This section uses MiniMessage formatting (in non-strict mode).",
         "See https://docs.advntr.dev/minimessage/format.html for more information.",
-        "Additionally, {variable} syntax can be used instead of <variable> for some plain-text placeholders."
+        "Additionally, {variable} syntax can be used instead of <variable> for plain-text placeholders."
     )
     val minecraft: LangMinecraft = LangMinecraft(),
+    @YamlComment("DiscordSRV integration messages")
+    val discord: LangDiscord = LangDiscord(),
     @YamlComment("Don't change the version manually")
     val version: Int = 1,
 )

@@ -19,9 +19,9 @@ data class LastMessage(
 )
 
 
-internal class MessageMerger {
+class MessageMerger {
     // TODO: automate this better
-    internal val lastMessages = mutableMapOf<String, LastMessage>()
+    val lastMessages = mutableMapOf<String, LastMessage>()
     // TODO: do we even need this? maybe a queue would be better?
     internal val lock = Mutex()
 
