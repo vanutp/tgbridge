@@ -29,7 +29,7 @@ class ReplacementsCompat(bridge: TelegramBridge) : AbstractCompat(bridge) {
 
     override fun enable() {
         loadConfig()
-        TgbridgeEvents.CONFIG_RELOAD.addListener { loadConfig() }
+        TgbridgeEvents.POST_RELOAD.addListener { loadConfig() }
         TgbridgeEvents.MC_CHAT_MESSAGE.addListener { e ->
             val effectivePattern = pattern ?: return@addListener
             e.message = e.message.replaceText {

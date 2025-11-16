@@ -230,7 +230,7 @@ abstract class TelegramBridge {
         }
         ctx.reply("Config reloaded. Note that the bot token can't be changed without a restart")
         coroutineScope.launch {
-            TgbridgeEvents.CONFIG_RELOAD.invoke(Unit)
+            TgbridgeEvents.POST_RELOAD.invoke(Unit)
         }
         return true
     }

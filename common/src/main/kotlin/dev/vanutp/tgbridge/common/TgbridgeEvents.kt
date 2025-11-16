@@ -32,5 +32,5 @@ object TgbridgeEvents {
     val JOIN = TgbridgeEventHandler<TgbridgeJoinEvent>()
     val LEAVE = TgbridgeEventHandler<TgbridgeLeaveEvent>()
     val ADVANCEMENT = TgbridgeEventHandler<TgbridgeAdvancementEvent>()
-    val CONFIG_RELOAD = TgbridgeEventHandler<Unit>()
+    val POST_RELOAD = TgbridgeEventHandler<Unit>()
 }
