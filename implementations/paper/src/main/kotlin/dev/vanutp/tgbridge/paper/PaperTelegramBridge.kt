@@ -22,9 +22,14 @@ class PaperTelegramBridge(val plugin: PaperBootstrap) : TelegramBridge() {
         addIntegration(GenericVanishCompat(this))
         addIntegration(SuperVanishCompat(this))
         addIntegration(IncompatibleChatPluginCompat(this))
+        addIntegration(VoiceMessagesPaperCompat(this))
     }
 
     internal fun onEnable() {
-        addIntegration(VoiceMessagesPaperCompat(this))
+        availableIntegrations
+            .asSequence()
+            .filter { it.shouldEnable() }
+            .filterIsInstance<AbstractPaperCompat>()
+            .forEach { it.onPluginEnable() }
     }
 }

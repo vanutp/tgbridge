@@ -10,4 +10,6 @@ abstract class AbstractPaperCompat(override val bridge: PaperTelegramBridge) : A
     override fun enable() {
         bridge.plugin.server.pluginManager.registerEvents(this, bridge.plugin)
     }
+
+    open fun onPluginEnable() {}
 }

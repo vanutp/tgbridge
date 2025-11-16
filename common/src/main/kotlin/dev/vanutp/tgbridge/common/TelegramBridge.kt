@@ -27,7 +27,7 @@ abstract class TelegramBridge {
 
     val merger: MessageMerger = MessageMerger()
 
-    private val availableIntegrations: MutableList<ITgbridgeCompat> = mutableListOf()
+    protected val availableIntegrations: MutableList<ITgbridgeCompat> = mutableListOf()
     lateinit var loadedIntegrations: List<ITgbridgeCompat> private set
     val chatIntegration: IChatCompat?
         get() = loadedIntegrations.find { it is IChatCompat } as? IChatCompat
