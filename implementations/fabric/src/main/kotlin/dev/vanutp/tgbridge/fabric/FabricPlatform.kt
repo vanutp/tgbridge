@@ -4,13 +4,12 @@ import dev.vanutp.tgbridge.common.IPlatform
 import dev.vanutp.tgbridge.common.MuteService
 import dev.vanutp.tgbridge.common.TelegramBridge
 import dev.vanutp.tgbridge.common.models.ChatConfig
-import dev.vanutp.tgbridge.common.models.TgbridgePlayer
+import dev.vanutp.tgbridge.common.models.ITgbridgePlayer
 import dev.vanutp.tgbridge.fabric.FabricTelegramBridge.server
 import net.fabricmc.loader.api.FabricLoader
 import net.kyori.adventure.text.Component
 import net.minecraft.locale.Language
 import net.minecraft.server.level.ServerPlayer
-import net.minecraft.world.entity.player.Player
 
 
 class FabricPlatform : IPlatform {
@@ -22,7 +21,7 @@ class FabricPlatform : IPlatform {
         val players = if (integration == null) {
             server.playerList.players.takeIf { chat.isDefault }
         } else {
-            integration.getChatRecipients(chat, ServerPlayer::class.java)
+            integration.getChatRecipients(chat)?.map { it.toNative() }
         }
         return players?.filterNot { MuteService.isMuted(it.uuid) }
     }
@@ -38,7 +37,7 @@ class FabricPlatform : IPlatform {
         }
     }
 
-    override fun getOnlinePlayers(): List<TgbridgePlayer> {
+    override fun getOnlinePlayers(): List<ITgbridgePlayer> {
         return server.playerList.players
             .map { it.toTgbridge() }
     }
@@ -62,5 +61,5 @@ class FabricPlatform : IPlatform {
     override fun isModLoaded(modId: String) =
         FabricLoader.getInstance().isModLoaded(modId)
 
-    override fun playerToTgbridge(player: Any) = (player as Player).toTgbridge()
+    override fun playerToTgbridge(player: Any) = (player as ServerPlayer).toTgbridge()
 }

@@ -7,7 +7,6 @@ import dev.vanutp.tgbridge.common.models.TgbridgeMcChatMessageEvent
 import dev.vanutp.tgbridge.paper.PaperTelegramBridge
 import dev.vanutp.tgbridge.paper.toTgbridge
 import net.kyori.adventure.text.Component
-import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.player.AsyncPlayerChatEvent
@@ -32,6 +31,8 @@ class IncompatibleChatPluginCompat(bridge: PaperTelegramBridge) : AbstractPaperC
         )
     }
 
-    override fun getChatRecipients(chat: ChatConfig): List<Player>? =
-        bridge.plugin.server.onlinePlayers.takeIf { chat.isDefault }?.toList()
+    override fun getChatRecipients(chat: ChatConfig) =
+        bridge.plugin.server.onlinePlayers
+            .takeIf { chat.isDefault }
+            ?.map { it.toTgbridge() }
 }

@@ -3,14 +3,12 @@ package dev.vanutp.tgbridge.paper.compat
 import com.dthielke.herochat.ChannelChatEvent
 import com.dthielke.herochat.Chatter
 import com.dthielke.herochat.Herochat
-import dev.vanutp.tgbridge.common.TgbridgeEvents
 import dev.vanutp.tgbridge.common.compat.IChatCompat
 import dev.vanutp.tgbridge.common.models.ChatConfig
 import dev.vanutp.tgbridge.common.models.TgbridgeMcChatMessageEvent
 import dev.vanutp.tgbridge.paper.PaperTelegramBridge
 import dev.vanutp.tgbridge.paper.toTgbridge
 import net.kyori.adventure.text.Component
-import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 
@@ -32,10 +30,10 @@ class HeroChatCompat(bridge: PaperTelegramBridge) : AbstractPaperCompat(bridge),
         )
     }
 
-    override fun getChatRecipients(chat: ChatConfig): List<Player>? =
+    override fun getChatRecipients(chat: ChatConfig) =
         Herochat.getChannelManager()
             .channels
             .find { it.name.equals(chat.name, true) }
             ?.members
-            ?.map { it.player }
+            ?.map { it.player.toTgbridge() }
 }

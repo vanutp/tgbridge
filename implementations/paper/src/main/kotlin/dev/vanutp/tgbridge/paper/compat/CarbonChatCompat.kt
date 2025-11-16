@@ -1,20 +1,25 @@
 package dev.vanutp.tgbridge.paper.compat
 
-import dev.vanutp.tgbridge.common.MuteService
-import dev.vanutp.tgbridge.common.TgbridgeEvents
 import dev.vanutp.tgbridge.common.asString
 import dev.vanutp.tgbridge.common.compat.IChatCompat
 import dev.vanutp.tgbridge.common.models.ChatConfig
+import dev.vanutp.tgbridge.common.models.ITgbridgePlayer
 import dev.vanutp.tgbridge.common.models.TgbridgeMcChatMessageEvent
-import dev.vanutp.tgbridge.common.models.TgbridgePlayer
 import dev.vanutp.tgbridge.paper.PaperTelegramBridge
+import dev.vanutp.tgbridge.paper.toTgbridge
 import net.draycia.carbon.api.CarbonChatProvider
 import net.draycia.carbon.api.event.events.CarbonChatEvent
-import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.key.Key
-import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
-import org.bukkit.entity.Player
+import java.util.*
+
+private class CarbonPlayer(
+    override val uuid: UUID,
+    override val username: String,
+    override val displayName: String?,
+) : ITgbridgePlayer {
+    override val nativePlayer = null
+}
 
 class CarbonChatCompat(bridge: PaperTelegramBridge) : AbstractPaperCompat(bridge), IChatCompat {
     override val paperId = "CarbonChat"
@@ -27,7 +32,7 @@ class CarbonChatCompat(bridge: PaperTelegramBridge) : AbstractPaperCompat(bridge
         val sender = e.sender()
         bridge.onChatMessage(
             TgbridgeMcChatMessageEvent(
-                TgbridgePlayer(sender.uuid(), sender.username(), sender.displayName().asString()),
+                CarbonPlayer(sender.uuid(), sender.username(), sender.displayName().asString()),
                 e.message(),
                 channel,
                 e,
@@ -35,7 +40,7 @@ class CarbonChatCompat(bridge: PaperTelegramBridge) : AbstractPaperCompat(bridge
         )
     }
 
-    override fun getChatRecipients(chat: ChatConfig): List<Player>? {
+    override fun getChatRecipients(chat: ChatConfig): List<ITgbridgePlayer>? {
         val cc = CarbonChatProvider.carbonChat()
         val channelKey = if (chat.name.contains(":")) {
             Key.key(chat.name)
@@ -49,7 +54,7 @@ class CarbonChatCompat(bridge: PaperTelegramBridge) : AbstractPaperCompat(bridge
             .asSequence()
             .filter { channel.permissions().hearingPermitted(it).permitted() }
             .filterNot { it.leftChannels().contains(channel.key()) }
-            .map { Bukkit.getPlayer(it.uuid())!! }
+            .map { Bukkit.getPlayer(it.uuid())!!.toTgbridge() }
             .toList()
     }
 

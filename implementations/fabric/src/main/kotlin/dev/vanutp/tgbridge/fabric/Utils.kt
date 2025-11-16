@@ -5,14 +5,12 @@ import com.google.gson.JsonParseException
 import com.mojang.brigadier.context.CommandContext
 import com.mojang.serialization.JsonOps
 import dev.vanutp.tgbridge.common.models.TBCommandContext
-import dev.vanutp.tgbridge.common.models.TgbridgePlayer
 import dev.vanutp.tgbridge.fabric.FabricTelegramBridge.server
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.core.HolderLookup
 import net.minecraft.network.chat.ComponentSerialization
-import net.minecraft.world.entity.player.Player
 import net.minecraft.network.chat.Component as Text
 
 
@@ -74,12 +72,6 @@ fun Text.toAdventure(): Component {
         GsonComponentSerializer.gson().deserializeFromTree(jsonTree)
     }
 }
-
-fun Player.toTgbridge() = TgbridgePlayer(
-    uuid,
-    name.string,
-    displayName?.string,
-)
 
 fun CommandContext<CommandSourceStack>.toTgbridge() = TBCommandContext(
     source = source.player?.toTgbridge(),

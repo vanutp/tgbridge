@@ -6,7 +6,6 @@ import dev.vanutp.tgbridge.common.models.TgbridgeMcChatMessageEvent
 import dev.vanutp.tgbridge.paper.PaperTelegramBridge
 import dev.vanutp.tgbridge.paper.toTgbridge
 import net.kyori.adventure.text.Component
-import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import ru.mrbrikster.chatty.api.ChattyApi
 import ru.mrbrikster.chatty.api.events.ChattyMessageEvent
@@ -33,10 +32,10 @@ class ChattyV2Compat(bridge: PaperTelegramBridge) : AbstractPaperCompat(bridge),
         )
     }
 
-    override fun getChatRecipients(chat: ChatConfig): List<Player>? =
+    override fun getChatRecipients(chat: ChatConfig) =
         ChattyApi.get()
             .getChat(chat.name)
             .getOrNull()
             ?.getRecipients(null)
-            ?.toList()
+            ?.map { it.toTgbridge() }
 }

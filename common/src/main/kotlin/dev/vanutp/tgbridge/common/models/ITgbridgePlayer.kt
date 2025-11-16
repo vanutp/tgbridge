@@ -3,13 +3,15 @@ package dev.vanutp.tgbridge.common.models
 import dev.vanutp.tgbridge.common.ConfigManager.config
 import dev.vanutp.tgbridge.common.TelegramBridge
 import dev.vanutp.tgbridge.common.compat.IVanishCompat
+import net.kyori.adventure.text.Component
 import java.util.UUID
 
-data class TgbridgePlayer(
-    val uuid: UUID,
-    val username: String,
-    val displayName: String?,
-) {
+interface ITgbridgePlayer {
+    val uuid: UUID
+    val username: String
+    val displayName: String?
+    val nativePlayer: Any?
+
     fun getName() = if (config.messages.useRealUsername) {
         username
     } else {
@@ -23,5 +25,4 @@ data class TgbridgePlayer(
                 (it as IVanishCompat).isVanished(this)
             }
             ?: false
-
 }

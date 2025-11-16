@@ -30,6 +30,6 @@ class VanishCompat(override val bridge: FabricTelegramBridge) : AbstractCompat(b
         }
     }
 
-    override fun isVanished(player: TgbridgePlayer) =
+    override fun isVanished(player: ITgbridgePlayer) =
         VanishAPI.isVanished(bridge.server, player.uuid)
 }

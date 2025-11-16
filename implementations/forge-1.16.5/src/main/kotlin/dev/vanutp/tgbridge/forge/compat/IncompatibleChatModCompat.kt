@@ -1,15 +1,14 @@
 package dev.vanutp.tgbridge.forge.compat
 
 import dev.vanutp.tgbridge.common.ConfigManager.config
-import dev.vanutp.tgbridge.common.TgbridgeEvents
 import dev.vanutp.tgbridge.common.compat.AbstractCompat
 import dev.vanutp.tgbridge.common.compat.IChatCompat
 import dev.vanutp.tgbridge.common.models.ChatConfig
+import dev.vanutp.tgbridge.common.models.ITgbridgePlayer
 import dev.vanutp.tgbridge.common.models.TgbridgeMcChatMessageEvent
 import dev.vanutp.tgbridge.forge.ForgeTelegramBridge
 import dev.vanutp.tgbridge.forge.toTgbridge
 import net.kyori.adventure.text.Component
-import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraftforge.common.MinecraftForge.EVENT_BUS
 import net.minecraftforge.event.ServerChatEvent
 import net.minecraftforge.eventbus.api.EventPriority
@@ -37,6 +36,8 @@ class IncompatibleChatModCompat(override val bridge: ForgeTelegramBridge) : Abst
         EVENT_BUS.register(this)
     }
 
-    override fun getChatRecipients(chat: ChatConfig): List<ServerPlayerEntity>?
-        = ServerLifecycleHooks.getCurrentServer().playerManager.playerList.takeIf { chat.isDefault }
+    override fun getChatRecipients(chat: ChatConfig): List<ITgbridgePlayer>? =
+        ServerLifecycleHooks.getCurrentServer().playerManager.playerList
+            .takeIf { chat.isDefault }
+            ?.map { it.toTgbridge() }
 }

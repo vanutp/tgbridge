@@ -4,9 +4,8 @@ import dev.vanutp.tgbridge.common.IPlatform
 import dev.vanutp.tgbridge.common.MuteService
 import dev.vanutp.tgbridge.common.TelegramBridge
 import dev.vanutp.tgbridge.common.models.ChatConfig
-import dev.vanutp.tgbridge.common.models.TgbridgePlayer
+import dev.vanutp.tgbridge.common.models.ITgbridgePlayer
 import net.kyori.adventure.text.Component
-import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.network.MessageType
 import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket
 import net.minecraft.server.network.ServerPlayerEntity
@@ -26,7 +25,7 @@ class ForgePlatform : IPlatform {
         val players = if (integration == null) {
             server.playerManager.playerList.takeIf { chat.isDefault }
         } else {
-            integration.getChatRecipients(chat, ServerPlayerEntity::class.java)
+            integration.getChatRecipients(chat)?.map { it.toNative() }
         }
         return players?.filterNot { MuteService.isMuted(it.uuid) }
     }
@@ -48,7 +47,7 @@ class ForgePlatform : IPlatform {
         }
     }
 
-    override fun getOnlinePlayers(): List<TgbridgePlayer> {
+    override fun getOnlinePlayers(): List<ITgbridgePlayer> {
         return ServerLifecycleHooks.getCurrentServer().playerManager.playerList
             .map { it.toTgbridge() }
     }
@@ -63,5 +62,5 @@ class ForgePlatform : IPlatform {
 
     override fun isModLoaded(modId: String) = ModList.get().isLoaded(modId)
 
-    override fun playerToTgbridge(player: Any) = (player as PlayerEntity).toTgbridge()
+    override fun playerToTgbridge(player: Any) = (player as ServerPlayerEntity).toTgbridge()
 }

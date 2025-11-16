@@ -37,6 +37,8 @@ class IncompatibleChatModCompat(override val bridge: NeoForgeTelegramBridge) : A
         NeoForge.EVENT_BUS.register(this)
     }
 
-    override fun getChatRecipients(chat: ChatConfig): List<ServerPlayer>?
-        = ServerLifecycleHooks.getCurrentServer()?.playerList?.players?.takeIf { chat.isDefault }
+    override fun getChatRecipients(chat: ChatConfig) =
+        ServerLifecycleHooks.getCurrentServer()?.playerList?.players
+            ?.takeIf { chat.isDefault }
+            ?.map { it.toTgbridge() }
 }

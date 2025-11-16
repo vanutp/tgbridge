@@ -4,11 +4,10 @@ import dev.vanutp.tgbridge.common.IPlatform
 import dev.vanutp.tgbridge.common.MuteService
 import dev.vanutp.tgbridge.common.TelegramBridge
 import dev.vanutp.tgbridge.common.models.ChatConfig
-import dev.vanutp.tgbridge.common.models.TgbridgePlayer
+import dev.vanutp.tgbridge.common.models.ITgbridgePlayer
 import net.kyori.adventure.text.Component
 import net.minecraft.locale.Language
 import net.minecraft.server.level.ServerPlayer
-import net.minecraft.world.entity.player.Player
 import net.neoforged.fml.ModList
 import net.neoforged.fml.loading.FMLPaths
 import net.neoforged.neoforge.server.ServerLifecycleHooks
@@ -23,7 +22,7 @@ class NeoForgePlatform : IPlatform {
         val players = if (integration == null) {
             server.playerList.players.takeIf { chat.isDefault }
         } else {
-            integration.getChatRecipients(chat, ServerPlayer::class.java)
+            integration.getChatRecipients(chat)?.map { it.toNative() }
         }
         return players?.filterNot { MuteService.isMuted(it.uuid) }
     }
@@ -40,7 +39,7 @@ class NeoForgePlatform : IPlatform {
         }
     }
 
-    override fun getOnlinePlayers(): List<TgbridgePlayer> {
+    override fun getOnlinePlayers(): List<ITgbridgePlayer> {
         return ServerLifecycleHooks.getCurrentServer()?.playerList?.players
             ?.map { it.toTgbridge() }
             ?: emptyList()
@@ -56,5 +55,5 @@ class NeoForgePlatform : IPlatform {
 
     override fun isModLoaded(modId: String) = ModList.get().isLoaded(modId)
 
-    override fun playerToTgbridge(player: Any) = (player as Player).toTgbridge()
+    override fun playerToTgbridge(player: Any) = (player as ServerPlayer).toTgbridge()
 }

@@ -24,7 +24,7 @@ data class TgbridgeTgChatMessageEvent(
 ) : Cancellable, MessageProducingEvent
 
 data class TgbridgeMcChatMessageEvent(
-    var sender: TgbridgePlayer,
+    var sender: ITgbridgePlayer,
     var message: Component,
     var chatName: String?,
     override val originalEvent: Any?,
@@ -33,7 +33,7 @@ data class TgbridgeMcChatMessageEvent(
 ) : MinecraftEvent, Cancellable, MessageProducingEvent
 
 data class TgbridgeDeathEvent(
-    var player: TgbridgePlayer,
+    var player: ITgbridgePlayer,
     var message: Component?,
     override val originalEvent: Any?,
     override var isCancelled: Boolean = false,
@@ -41,7 +41,7 @@ data class TgbridgeDeathEvent(
 ) : MinecraftEvent, Cancellable, MessageProducingEvent
 
 data class TgbridgeJoinEvent(
-    var player: TgbridgePlayer,
+    var player: ITgbridgePlayer,
     var hasPlayedBefore: Boolean,
     override val originalEvent: Any?,
     var ignoreVanish: Boolean = false,
@@ -50,7 +50,7 @@ data class TgbridgeJoinEvent(
 ) : MinecraftEvent, Cancellable, MessageProducingEvent
 
 data class TgbridgeLeaveEvent(
-    var player: TgbridgePlayer,
+    var player: ITgbridgePlayer,
     override val originalEvent: Any?,
     var ignoreVanish: Boolean = false,
     override var isCancelled: Boolean = false,
@@ -58,7 +58,7 @@ data class TgbridgeLeaveEvent(
 ) : MinecraftEvent, Cancellable, MessageProducingEvent
 
 data class TgbridgeAdvancementEvent(
-    var player: TgbridgePlayer,
+    var player: ITgbridgePlayer,
     var type: String,
     var title: Component,
     var description: Component,

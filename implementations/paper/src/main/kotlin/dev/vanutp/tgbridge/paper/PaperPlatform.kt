@@ -4,7 +4,7 @@ import dev.vanutp.tgbridge.common.IPlatform
 import dev.vanutp.tgbridge.common.MuteService
 import dev.vanutp.tgbridge.common.TelegramBridge
 import dev.vanutp.tgbridge.common.models.ChatConfig
-import dev.vanutp.tgbridge.common.models.TgbridgePlayer
+import dev.vanutp.tgbridge.common.models.ITgbridgePlayer
 import net.kyori.adventure.text.Component
 import net.minecraft.locale.Language
 import org.bukkit.entity.Player
@@ -20,7 +20,7 @@ class PaperPlatform(private val plugin: JavaPlugin) : IPlatform {
         val players = if (integration == null) {
             plugin.server.onlinePlayers.takeIf { chat.isDefault }?.toList()
         } else {
-            integration.getChatRecipients(chat, Player::class.java)
+            integration.getChatRecipients(chat)?.map { it.toNative() }
         }
         return players?.filterNot { MuteService.isMuted(it.uniqueId) }
     }
@@ -35,7 +35,7 @@ class PaperPlatform(private val plugin: JavaPlugin) : IPlatform {
         }
     }
 
-    override fun getOnlinePlayers(): List<TgbridgePlayer> {
+    override fun getOnlinePlayers(): List<ITgbridgePlayer> {
         return plugin.server.onlinePlayers.map { it.toTgbridge() }
     }
 

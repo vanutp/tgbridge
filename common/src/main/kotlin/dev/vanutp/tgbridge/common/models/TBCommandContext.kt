@@ -1,6 +1,6 @@
 package dev.vanutp.tgbridge.common.models
 
 data class TBCommandContext(
-    val source: TgbridgePlayer?,
+    val source: ITgbridgePlayer?,
     val reply: (text: String) -> Unit
 )
