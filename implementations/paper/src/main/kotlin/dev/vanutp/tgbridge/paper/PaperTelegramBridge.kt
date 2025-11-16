@@ -17,7 +17,6 @@ class PaperTelegramBridge(val plugin: PaperBootstrap) : TelegramBridge() {
         addIntegration(ChattyV2Compat(this))
         addIntegration(ChattyV3Compat(this))
         addIntegration(HeroChatCompat(this))
-        addIntegration(CarbonChatCompat(this))
         addIntegration(DiscordSRVCompat(this))
         addIntegration(EssentialsVanishCompat(this))
         addIntegration(GenericVanishCompat(this))
