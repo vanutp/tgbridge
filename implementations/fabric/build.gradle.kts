@@ -26,6 +26,8 @@ dependencies {
 
 	implementation(project(":common"))
 	shadow(project(":common"))
+	implementation(project(":common-jvm21"))
+	shadow(project(":common-jvm21"))
 
 	modCompileOnly("maven.modrinth:vanish:$vanishVersion")
 }

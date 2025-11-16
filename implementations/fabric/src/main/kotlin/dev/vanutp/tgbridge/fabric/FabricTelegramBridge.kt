@@ -1,6 +1,7 @@
 package dev.vanutp.tgbridge.fabric
 
 import dev.vanutp.tgbridge.common.TelegramBridge
+import dev.vanutp.tgbridge.common.TgbridgeJvm21
 import dev.vanutp.tgbridge.fabric.compat.VanishCompat
 import net.fabricmc.api.DedicatedServerModInitializer
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
@@ -19,6 +20,7 @@ object FabricTelegramBridge : DedicatedServerModInitializer, TelegramBridge() {
 
     override fun onInitializeServer() {
         addIntegration(VanishCompat(this))
+        TgbridgeJvm21.register(this)
         EventManager.register()
         ServerLifecycleEvents.SERVER_STARTING.register { server ->
             versionInfo = ServerVersionInfo(server)

@@ -1,6 +1,7 @@
 package dev.vanutp.tgbridge.paper
 
 import dev.vanutp.tgbridge.common.TelegramBridge
+import dev.vanutp.tgbridge.common.TgbridgeJvm21
 import dev.vanutp.tgbridge.paper.compat.*
 import kotlin.io.path.deleteIfExists
 
@@ -23,6 +24,7 @@ class PaperTelegramBridge(val plugin: PaperBootstrap) : TelegramBridge() {
         addIntegration(SuperVanishCompat(this))
         addIntegration(IncompatibleChatPluginCompat(this))
         addIntegration(VoiceMessagesPaperCompat(this))
+        TgbridgeJvm21.register(this)
     }
 
     internal fun onEnable() {

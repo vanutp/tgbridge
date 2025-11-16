@@ -10,3 +10,4 @@ commands:
 softdepend:
   - voicechat
   - voicemessages
+  - FlectonePulse

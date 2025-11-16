@@ -53,6 +53,7 @@ repositories {
 dependencies {
     paperweight.paperDevBundle("1.20.1-R0.1-SNAPSHOT")
     implementation(project(":common"))
+    implementation(project(":common-jvm21"))
 
     compileOnly("com.charleskorn.kaml:kaml:${rootProject.properties["kamlVersion"]}")
 
