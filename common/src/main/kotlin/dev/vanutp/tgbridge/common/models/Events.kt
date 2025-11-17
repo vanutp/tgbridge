@@ -4,7 +4,7 @@ import dev.vanutp.tgbridge.common.Placeholders
 import dev.vanutp.tgbridge.common.TgMessage
 import net.kyori.adventure.text.Component
 
-interface MinecraftEvent {
+interface SyntheticEvent {
     val originalEvent: Any?
 }
 
@@ -26,14 +26,14 @@ data class TgbridgeMcChatMessageEvent(
     var chatName: String?,
     override val originalEvent: Any?,
     override var isCancelled: Boolean = false,
-) : MinecraftEvent, Cancellable
+) : SyntheticEvent, Cancellable
 
 data class TgbridgeDeathEvent(
     var player: ITgbridgePlayer,
     var message: Component?,
     override val originalEvent: Any?,
     override var isCancelled: Boolean = false,
-) : MinecraftEvent, Cancellable
+) : SyntheticEvent, Cancellable
 
 data class TgbridgeJoinEvent(
     var player: ITgbridgePlayer,
@@ -41,14 +41,14 @@ data class TgbridgeJoinEvent(
     override val originalEvent: Any?,
     var ignoreVanish: Boolean = false,
     override var isCancelled: Boolean = false,
-) : MinecraftEvent, Cancellable
+) : SyntheticEvent, Cancellable
 
 data class TgbridgeLeaveEvent(
     var player: ITgbridgePlayer,
     override val originalEvent: Any?,
     var ignoreVanish: Boolean = false,
     override var isCancelled: Boolean = false,
-) : MinecraftEvent, Cancellable
+) : SyntheticEvent, Cancellable
 
 data class TgbridgeAdvancementEvent(
     var player: ITgbridgePlayer,
@@ -57,7 +57,7 @@ data class TgbridgeAdvancementEvent(
     var description: Component,
     override val originalEvent: Any?,
     override var isCancelled: Boolean = false,
-) : MinecraftEvent, Cancellable
+) : SyntheticEvent, Cancellable
 
 data class TgbridgePlayerPlaceholdersEvent(
     var player: ITgbridgePlayer,
