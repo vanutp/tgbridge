@@ -6,11 +6,7 @@ import dev.vanutp.tgbridge.common.converters.MinecraftToTelegramConverter
 import dev.vanutp.tgbridge.common.converters.TelegramFormattedText
 import dev.vanutp.tgbridge.common.converters.TelegramToMinecraftConverter
 import dev.vanutp.tgbridge.common.models.*
-import dev.vanutp.tgbridge.common.modules.IChatModule
-import dev.vanutp.tgbridge.common.modules.ITgbridgeModule
-import dev.vanutp.tgbridge.common.modules.IVanishModule
-import dev.vanutp.tgbridge.common.modules.ReplacementsModule
-import dev.vanutp.tgbridge.common.modules.VoiceMessagesModule
+import dev.vanutp.tgbridge.common.modules.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.withLock
 import net.kyori.adventure.text.Component
@@ -192,15 +188,22 @@ abstract class TelegramBridge {
         merger.lock.withLock {
             merger.lastMessages.remove(chat.name)
         }
-        val e = TgbridgeTgChatMessageEvent(msg, chat)
         val textComponent = TelegramToMinecraftConverter.convert(msg, bot.me.id)
-        e.placeholders = e.placeholders.withDefaults(
+        val e = TgbridgeTgChatMessageEvent(
+            msg, chat, null,
             Placeholders(
                 mapOf("sender" to msg.senderName, "chat_name" to chat.name),
                 mapOf("text" to textComponent),
             )
         )
         if (!TgbridgeEvents.TG_CHAT_MESSAGE.invoke(e)) return
+
+        e.player?.let { player ->
+            val placeholdersEvt = TgbridgePlayerPlaceholdersEvent(player, Placeholders(), e)
+            TgbridgeEvents.PLAYER_PLACEHOLDERS.invoke(placeholdersEvt)
+            e.placeholders = placeholdersEvt.placeholders
+        }
+
         val fmtString = if (chat.isDefault) lang.minecraft.format else lang.minecraft.formatChat
         platform.broadcastMessage(chat, fmtString.formatMiniMessage(e.placeholders))
     }
@@ -278,10 +281,14 @@ abstract class TelegramBridge {
     }
 
     fun onChatMessage(e: TgbridgeMcChatMessageEvent) = wrapMinecraftHandler {
-        e.placeholders = e.placeholders.withDefaults(
-            Placeholders(mapOf("username" to e.sender.getName()))
-        )
         if (!TgbridgeEvents.MC_CHAT_MESSAGE.invoke(e)) return@wrapMinecraftHandler
+
+        val placeholdersEvt = TgbridgePlayerPlaceholdersEvent(
+            e.sender,
+            Placeholders(mapOf("username" to e.sender.getName())),
+            e,
+        )
+        TgbridgeEvents.PLAYER_PLACEHOLDERS.invoke(placeholdersEvt)
 
         val chat = config.getChat(e.chatName) ?: return@wrapMinecraftHandler
 
@@ -304,7 +311,7 @@ abstract class TelegramBridge {
         }
 
         val tgPrefix = MinecraftToTelegramConverter.convert(
-            lang.telegram.chatMessage.formatMiniMessage(e.placeholders)
+            lang.telegram.chatMessage.formatMiniMessage(placeholdersEvt.placeholders)
                 .append(Component.text(" "))
         )
 
@@ -345,15 +352,19 @@ abstract class TelegramBridge {
             null -> Component.translatable("death.attack.generic", Component.text(e.player.getName()))
             else -> msg
         }
-        e.placeholders = e.placeholders.withDefaults(
-            Placeholders(component = mapOf("death_message" to convertedMessage))
-        )
 
         if (!TgbridgeEvents.DEATH.invoke(e)) return@wrapMinecraftHandler
         if (e.player.isVanished()) return@wrapMinecraftHandler
 
+        val placeholdersEvt = TgbridgePlayerPlaceholdersEvent(
+            e.player,
+            Placeholders(component = mapOf("death_message" to convertedMessage)),
+            e,
+        )
+        TgbridgeEvents.PLAYER_PLACEHOLDERS.invoke(placeholdersEvt)
+
         val telegramText = MinecraftToTelegramConverter.convert(
-            lang.telegram.playerDied.formatMiniMessage(e.placeholders),
+            lang.telegram.playerDied.formatMiniMessage(placeholdersEvt.placeholders),
         )
         val chat = config.getDefaultChat()
         sendMessage(chat, telegramText.text, telegramText.entities)
@@ -362,11 +373,16 @@ abstract class TelegramBridge {
 
     fun onPlayerJoin(e: TgbridgeJoinEvent) = wrapMinecraftHandler {
         if (!config.events.enableJoinMessages) return@wrapMinecraftHandler
-        e.placeholders = e.placeholders.withDefaults(
-            Placeholders(mapOf("username" to e.player.getName()))
-        )
         if (!TgbridgeEvents.JOIN.invoke(e)) return@wrapMinecraftHandler
         if (!e.ignoreVanish && e.player.isVanished()) return@wrapMinecraftHandler
+
+        val placeholdersEvt = TgbridgePlayerPlaceholdersEvent(
+            e.player,
+            Placeholders(mapOf("username" to e.player.getName())),
+            e,
+        )
+        TgbridgeEvents.PLAYER_PLACEHOLDERS.invoke(placeholdersEvt)
+
         val chat = config.getDefaultChat()
         val lm = merger.lastMessages[chat.name]
         val currDate = Clock.systemUTC().instant()
@@ -383,22 +399,27 @@ abstract class TelegramBridge {
             } else {
                 lang.telegram.playerJoinedFirstTime
             }
-            sendMessage(chat, message.formatLang(e.placeholders))
+            sendMessage(chat, message.formatLang(placeholdersEvt.placeholders))
         }
         merger.lastMessages.remove(chat.name)
     }
 
     fun onPlayerLeave(e: TgbridgeLeaveEvent) = wrapMinecraftHandler {
         if (!config.events.enableLeaveMessages) return@wrapMinecraftHandler
-        e.placeholders = e.placeholders.withDefaults(
-            Placeholders(mapOf("username" to e.player.getName()))
-        )
         if (!TgbridgeEvents.LEAVE.invoke(e)) return@wrapMinecraftHandler
         if (!e.ignoreVanish && e.player.isVanished()) return@wrapMinecraftHandler
+
+        val placeholdersEvt = TgbridgePlayerPlaceholdersEvent(
+            e.player,
+            Placeholders(mapOf("username" to e.player.getName())),
+            e,
+        )
+        TgbridgeEvents.PLAYER_PLACEHOLDERS.invoke(placeholdersEvt)
+
         val chat = config.getDefaultChat()
         val newMsg = sendMessage(
             chat,
-            lang.telegram.playerLeft.formatLang(e.placeholders),
+            lang.telegram.playerLeft.formatLang(placeholdersEvt.placeholders),
         )
         merger.lastMessages[chat.name] = LastMessage(
             LastMessageType.LEAVE,
@@ -418,7 +439,12 @@ abstract class TelegramBridge {
         } else {
             ""
         }
-        e.placeholders = e.placeholders.withDefaults(
+
+        if (!TgbridgeEvents.ADVANCEMENT.invoke(e)) return@wrapMinecraftHandler
+        if (e.player.isVanished()) return@wrapMinecraftHandler
+
+        val placeholdersEvt = TgbridgePlayerPlaceholdersEvent(
+            e.player,
             Placeholders(
                 mapOf(
                     "username" to e.player.getName(),
@@ -426,10 +452,9 @@ abstract class TelegramBridge {
                     "description" to advancementDescription.escapeHTML(),
                 ),
             ),
+            e,
         )
-
-        if (!TgbridgeEvents.ADVANCEMENT.invoke(e)) return@wrapMinecraftHandler
-        if (e.player.isVanished()) return@wrapMinecraftHandler
+        TgbridgeEvents.PLAYER_PLACEHOLDERS.invoke(placeholdersEvt)
 
         val langKey = when (e.type) {
             "task" -> {
@@ -450,7 +475,7 @@ abstract class TelegramBridge {
             else -> throw TBAssertionFailed("Unknown advancement type ${e.type}.")
         }
         val chat = config.getDefaultChat()
-        sendMessage(chat, langKey.formatLang(e.placeholders))
+        sendMessage(chat, langKey.formatLang(placeholdersEvt.placeholders))
         merger.lastMessages.remove(chat.name)
     }
 

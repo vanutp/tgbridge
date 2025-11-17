@@ -41,4 +41,5 @@ object TgbridgeEvents {
     val LEAVE = TgbridgeEventHandler<TgbridgeLeaveEvent>()
     val ADVANCEMENT = TgbridgeEventHandler<TgbridgeAdvancementEvent>()
     val POST_RELOAD = TgbridgeEventHandler<Unit>()
+    val PLAYER_PLACEHOLDERS = TgbridgeEventHandler<TgbridgePlayerPlaceholdersEvent>()
 }

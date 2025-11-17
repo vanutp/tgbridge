@@ -41,12 +41,7 @@ data class Placeholders(
         component + mapOf(other)
     )
 
-    fun withDefaults(other: Placeholders): Placeholders {
-        return Placeholders(
-            plain = other.plain + plain,
-            component = other.component + component,
-        )
-    }
+    fun withDefaults(other: Placeholders) = other + this
 }
 
 

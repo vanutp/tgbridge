@@ -8,10 +8,6 @@ interface MinecraftEvent {
     val originalEvent: Any?
 }
 
-interface MessageProducingEvent {
-    var placeholders: Placeholders
-}
-
 interface Cancellable {
     var isCancelled: Boolean
 }
@@ -19,9 +15,10 @@ interface Cancellable {
 data class TgbridgeTgChatMessageEvent(
     var message: TgMessage,
     var chat: ChatConfig,
+    var player: ITgbridgePlayer?,
+    var placeholders: Placeholders = Placeholders(),
     override var isCancelled: Boolean = false,
-    override var placeholders: Placeholders = Placeholders(),
-) : Cancellable, MessageProducingEvent
+) : Cancellable
 
 data class TgbridgeMcChatMessageEvent(
     var sender: ITgbridgePlayer,
@@ -29,16 +26,14 @@ data class TgbridgeMcChatMessageEvent(
     var chatName: String?,
     override val originalEvent: Any?,
     override var isCancelled: Boolean = false,
-    override var placeholders: Placeholders = Placeholders(),
-) : MinecraftEvent, Cancellable, MessageProducingEvent
+) : MinecraftEvent, Cancellable
 
 data class TgbridgeDeathEvent(
     var player: ITgbridgePlayer,
     var message: Component?,
     override val originalEvent: Any?,
     override var isCancelled: Boolean = false,
-    override var placeholders: Placeholders = Placeholders(),
-) : MinecraftEvent, Cancellable, MessageProducingEvent
+) : MinecraftEvent, Cancellable
 
 data class TgbridgeJoinEvent(
     var player: ITgbridgePlayer,
@@ -46,16 +41,14 @@ data class TgbridgeJoinEvent(
     override val originalEvent: Any?,
     var ignoreVanish: Boolean = false,
     override var isCancelled: Boolean = false,
-    override var placeholders: Placeholders = Placeholders(),
-) : MinecraftEvent, Cancellable, MessageProducingEvent
+) : MinecraftEvent, Cancellable
 
 data class TgbridgeLeaveEvent(
     var player: ITgbridgePlayer,
     override val originalEvent: Any?,
     var ignoreVanish: Boolean = false,
     override var isCancelled: Boolean = false,
-    override var placeholders: Placeholders = Placeholders(),
-) : MinecraftEvent, Cancellable, MessageProducingEvent
+) : MinecraftEvent, Cancellable
 
 data class TgbridgeAdvancementEvent(
     var player: ITgbridgePlayer,
@@ -64,5 +57,10 @@ data class TgbridgeAdvancementEvent(
     var description: Component,
     override val originalEvent: Any?,
     override var isCancelled: Boolean = false,
-    override var placeholders: Placeholders = Placeholders(),
-) : MinecraftEvent, Cancellable, MessageProducingEvent
+) : MinecraftEvent, Cancellable
+
+data class TgbridgePlayerPlaceholdersEvent(
+    var player: ITgbridgePlayer,
+    var placeholders: Placeholders = Placeholders(),
+    val originalEvent: Any?,
+)
