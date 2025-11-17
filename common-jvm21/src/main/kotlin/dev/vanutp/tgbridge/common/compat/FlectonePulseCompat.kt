@@ -5,11 +5,11 @@ import dev.vanutp.tgbridge.common.asString
 import dev.vanutp.tgbridge.common.models.ChatConfig
 import dev.vanutp.tgbridge.common.models.ITgbridgePlayer
 import dev.vanutp.tgbridge.common.models.TgbridgeMcChatMessageEvent
-import net.flectone.pulse.FlectonePulse
 import net.flectone.pulse.FlectonePulseAPI
 import net.flectone.pulse.annotation.Pulse
 import net.flectone.pulse.listener.PulseListener
 import net.flectone.pulse.model.entity.FEntity
+import net.flectone.pulse.model.event.ReloadEvent
 import net.flectone.pulse.model.event.message.MessagePrepareEvent
 import net.flectone.pulse.module.message.chat.model.ChatMetadata
 import net.flectone.pulse.platform.registry.ListenerRegistry
@@ -72,6 +72,13 @@ private class FlectonePulsePlayer(
 }
 
 class FlectonePulseListener(private val bridge: TelegramBridge) : PulseListener {
+    private val flectonePulse = FlectonePulseAPI.getInstance()
+    private val fListenerRegistry = flectonePulse.get(ListenerRegistry::class.java)
+
+    init {
+        fListenerRegistry.register(this)
+    }
+
     @Pulse
     fun onMessagePrepare(e: MessagePrepareEvent) {
         val meta = e.eventMetadata
@@ -88,21 +95,22 @@ class FlectonePulseListener(private val bridge: TelegramBridge) : PulseListener 
             )
         )
     }
+
+    @Pulse
+    fun onReload(e: ReloadEvent) {
+        fListenerRegistry.register(this)
+    }
 }
 
 class FlectonePulseCompat(bridge: TelegramBridge) : AbstractCompat(bridge), IChatCompat {
     override val fabricId = "flectonepulse"
     override val paperId = "FlectonePulse"
 
-    private lateinit var flectonePulse: FlectonePulse
-    private lateinit var fListenerRegistry: ListenerRegistry
     private lateinit var fPlayerService: FPlayerService
 
     override fun enable() {
-        flectonePulse = FlectonePulseAPI.getInstance()
-        fListenerRegistry = flectonePulse.get(ListenerRegistry::class.java)
-        fPlayerService = flectonePulse.get(FPlayerService::class.java)
-        fListenerRegistry.register(FlectonePulseListener(bridge))
+        fPlayerService = FlectonePulseAPI.getInstance().get(FPlayerService::class.java)
+        FlectonePulseListener(bridge)
     }
 
     override fun getChatRecipients(chat: ChatConfig): List<ITgbridgePlayer> =
