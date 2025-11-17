@@ -11,3 +11,7 @@ softdepend:
   - voicechat
   - voicemessages
   - FlectonePulse
+  - Kotlin
+  - ktlibs-kotlin-stdlib
+  - ktlibs-kotlinx-coroutines-core
+  - ktlibs-kotlinx-serialization

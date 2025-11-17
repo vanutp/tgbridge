@@ -21,10 +21,8 @@ val kotlinxCoroutinesVersion: String by project
 val kotlinxSerializationVersion: String by project
 val adventureVersion: String by project
 
-// I didn't find a good kotlin for paper library
 // kotlinforforge for 1.16.5 hasn't been updated for a long time
-fun checkBundleKotlin(projectName: String) =
-    listOf("paper", "forge-1.16.5").contains(projectName)
+fun shouldBundleKotlin(projectName: String) = projectName == "forge-1.16.5"
 
 subprojects {
     apply {
@@ -60,7 +58,7 @@ subprojects {
         (KOTLIN_LIBS + ADVENTURE_LIBS).forEach {
             testImplementation(it)
         }
-        if (checkBundleKotlin(project.name)) {
+        if (shouldBundleKotlin(project.name)) {
             KOTLIN_LIBS.forEach { lib ->
                 shadow(implementation(lib)!!)
             }
@@ -70,7 +68,7 @@ subprojects {
             }
         }
 
-        if (project.name == "paper" || project.name == "common") {
+        if (project.name.startsWith("common") || project.name == "paper") {
             ADVENTURE_LIBS.forEach {
                 compileOnly(it) {
                     // technically needs to be excluded only for text-serializer-gson,
@@ -135,7 +133,7 @@ subprojects {
             // fixes "Modules net.kyori.... and tgbridge export package net.kyori..." in forge
             mergeServiceFiles()
 
-            if (checkBundleKotlin(project.name)) {
+            if (shouldBundleKotlin(project.name)) {
                 relocate("kotlin", "tgbridge.shaded.kotlin")
                 relocate("kotlinx", "tgbridge.shaded.kotlinx")
                 relocate("org.jetbrains", "tgbridge.shaded.org.jetbrains")
