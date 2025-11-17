@@ -1,23 +1,23 @@
 package dev.vanutp.tgbridge.forge.compat
 
 import dev.vanutp.tgbridge.common.ConfigManager.config
-import dev.vanutp.tgbridge.common.TgbridgeEvents
-import dev.vanutp.tgbridge.common.compat.AbstractCompat
-import dev.vanutp.tgbridge.common.compat.IChatCompat
+import dev.vanutp.tgbridge.common.modules.AbstractModule
+import dev.vanutp.tgbridge.common.modules.IChatModule
 import dev.vanutp.tgbridge.common.models.ChatConfig
 import dev.vanutp.tgbridge.common.models.ITgbridgePlayer
 import dev.vanutp.tgbridge.common.models.TgbridgeMcChatMessageEvent
 import dev.vanutp.tgbridge.forge.ForgeTelegramBridge
-import dev.vanutp.tgbridge.forge.toAdventure
 import dev.vanutp.tgbridge.forge.toTgbridge
-import net.minecraft.server.level.ServerPlayer
+import net.kyori.adventure.text.Component
+import net.minecraftforge.common.MinecraftForge.EVENT_BUS
 import net.minecraftforge.event.ServerChatEvent
 import net.minecraftforge.eventbus.api.EventPriority
 import net.minecraftforge.eventbus.api.SubscribeEvent
-import net.minecraftforge.server.ServerLifecycleHooks
-import thedarkcolour.kotlinforforge.forge.FORGE_BUS
+import net.minecraftforge.fml.server.ServerLifecycleHooks
 
-class IncompatibleChatModCompat(override val bridge: ForgeTelegramBridge) : AbstractCompat(bridge), IChatCompat {
+class IncompatibleChatModModule(override val bridge: ForgeTelegramBridge) : AbstractModule(bridge), IChatModule {
+    override val canBeDisabled = true
+
     override fun shouldEnable(): Boolean {
         return config.integrations.incompatiblePluginChatPrefix != null
     }
@@ -27,7 +27,7 @@ class IncompatibleChatModCompat(override val bridge: ForgeTelegramBridge) : Abst
         bridge.onChatMessage(
             TgbridgeMcChatMessageEvent(
                 e.player.toTgbridge(),
-                e.message.toAdventure(),
+                Component.text(e.message),
                 null,
                 e,
             )
@@ -35,11 +35,15 @@ class IncompatibleChatModCompat(override val bridge: ForgeTelegramBridge) : Abst
     }
 
     override fun enable() {
-        FORGE_BUS.register(this)
+        EVENT_BUS.register(this)
+    }
+
+    override fun disable() {
+        EVENT_BUS.unregister(this)
     }
 
     override fun getChatRecipients(chat: ChatConfig): List<ITgbridgePlayer>? =
-        ServerLifecycleHooks.getCurrentServer().playerList.players
+        ServerLifecycleHooks.getCurrentServer().playerManager.playerList
             .takeIf { chat.isDefault }
             ?.map { it.toTgbridge() }
 }

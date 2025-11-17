@@ -30,7 +30,7 @@
 			}
 		],
 		"voicechat": [
-			"dev.vanutp.tgbridge.common.compat.VoiceChatPlugin"
+          "dev.vanutp.tgbridge.common.modules.VoiceChatPlugin"
 		]
 	},
 	"mixins": [

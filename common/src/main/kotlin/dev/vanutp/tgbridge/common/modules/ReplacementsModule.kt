@@ -1,4 +1,4 @@
-package dev.vanutp.tgbridge.common.compat
+package dev.vanutp.tgbridge.common.modules
 
 import dev.vanutp.tgbridge.common.TelegramBridge
 import dev.vanutp.tgbridge.common.TgbridgeEvents
@@ -10,7 +10,7 @@ import kotlin.io.path.notExists
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
 
-class ReplacementsCompat(bridge: TelegramBridge) : AbstractCompat(bridge) {
+class ReplacementsModule(bridge: TelegramBridge) : AbstractModule(bridge) {
     private lateinit var filePath: Path
     private var replacements: Map<String, String> = mapOf()
     private var pattern: Pattern? = null
@@ -18,7 +18,7 @@ class ReplacementsCompat(bridge: TelegramBridge) : AbstractCompat(bridge) {
     private fun loadConfig() {
         filePath = bridge.platform.configDir.resolve("replacements.json")
         if (filePath.notExists()) {
-            val defaultData = ReplacementsCompat::class.java.getResource("/replacements.json")!!.readText()
+            val defaultData = ReplacementsModule::class.java.getResource("/replacements.json")!!.readText()
             filePath.writeText(defaultData)
         }
         replacements = Json.decodeFromString<Map<String, String>>(filePath.readText())

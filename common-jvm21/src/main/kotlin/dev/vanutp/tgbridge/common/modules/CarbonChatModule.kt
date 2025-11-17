@@ -1,4 +1,4 @@
-package dev.vanutp.tgbridge.common.compat
+package dev.vanutp.tgbridge.common.modules
 
 import dev.vanutp.tgbridge.common.TelegramBridge
 import dev.vanutp.tgbridge.common.asString
@@ -68,7 +68,7 @@ private class CarbonTgbridgePlayer(
     }
 }
 
-class CarbonChatCompat(bridge: TelegramBridge) : AbstractCompat(bridge), IChatCompat {
+class CarbonChatModule(bridge: TelegramBridge) : AbstractModule(bridge), IChatModule {
     override val fabricId = "carbonchat"
     override val paperId = "CarbonChat"
 

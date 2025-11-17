@@ -21,11 +21,11 @@ class ForgePlatform : IPlatform {
 
     private fun getRecipients(chat: ChatConfig): List<ServerPlayerEntity>? {
         val server = ServerLifecycleHooks.getCurrentServer()
-        val integration = TelegramBridge.INSTANCE.chatIntegration
-        val players = if (integration == null) {
+        val module = TelegramBridge.INSTANCE.chatModule
+        val players = if (module == null) {
             server.playerManager.playerList.takeIf { chat.isDefault }
         } else {
-            integration.getChatRecipients(chat)?.map { it.toNative() }
+            module.getChatRecipients(chat)?.map { it.toNative() }
         }
         return players?.filterNot { MuteService.isMuted(it.uuid) }
     }

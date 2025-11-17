@@ -4,7 +4,7 @@ import com.google.gson.Gson
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import dev.vanutp.tgbridge.common.TelegramBridge
-import dev.vanutp.tgbridge.forge.compat.IncompatibleChatModCompat
+import dev.vanutp.tgbridge.forge.compat.IncompatibleChatModModule
 import net.minecraft.client.resource.language.TranslationStorage
 import net.minecraft.server.command.ServerCommandSource
 import net.minecraft.text.LiteralText
@@ -15,7 +15,6 @@ import net.minecraftforge.event.RegisterCommandsEvent
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent
 import net.minecraftforge.fml.event.server.FMLServerStartedEvent
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent
 import net.minecraftforge.fml.event.server.FMLServerStoppingEvent
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext
 import net.minecraftforge.fml.loading.FMLEnvironment
@@ -41,7 +40,7 @@ class ForgeTelegramBridge : TelegramBridge() {
             }
 
             Dist.DEDICATED_SERVER -> {
-                addIntegration(IncompatibleChatModCompat(this))
+                addModule(IncompatibleChatModModule(this))
                 EventManager(this).register()
                 init()
                 EVENT_BUS.addListener { _: FMLServerStartedEvent ->

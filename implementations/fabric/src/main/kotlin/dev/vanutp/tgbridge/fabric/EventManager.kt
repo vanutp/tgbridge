@@ -23,7 +23,7 @@ object EventManager {
 
     private fun registerChatMessageListener() {
         ServerMessageEvents.CHAT_MESSAGE.register { message: PlayerChatMessage, sender, params ->
-            if (TelegramBridge.INSTANCE.chatIntegration != null) {
+            if (TelegramBridge.INSTANCE.chatModule != null) {
                 return@register
             }
             val messageContent = if (FabricTelegramBridge.versionInfo.IS_192) {

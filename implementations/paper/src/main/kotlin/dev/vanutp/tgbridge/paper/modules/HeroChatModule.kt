@@ -1,9 +1,9 @@
-package dev.vanutp.tgbridge.paper.compat
+package dev.vanutp.tgbridge.paper.modules
 
 import com.dthielke.herochat.ChannelChatEvent
 import com.dthielke.herochat.Chatter
 import com.dthielke.herochat.Herochat
-import dev.vanutp.tgbridge.common.compat.IChatCompat
+import dev.vanutp.tgbridge.common.modules.IChatModule
 import dev.vanutp.tgbridge.common.models.ChatConfig
 import dev.vanutp.tgbridge.common.models.TgbridgeMcChatMessageEvent
 import dev.vanutp.tgbridge.paper.PaperTelegramBridge
@@ -12,7 +12,7 @@ import net.kyori.adventure.text.Component
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 
-class HeroChatCompat(bridge: PaperTelegramBridge) : AbstractPaperCompat(bridge), IChatCompat {
+class HeroChatModule(bridge: PaperTelegramBridge) : AbstractPaperModule(bridge), IChatModule {
     override val paperId = "Herochat"
 
     @EventHandler(priority = EventPriority.MONITOR)

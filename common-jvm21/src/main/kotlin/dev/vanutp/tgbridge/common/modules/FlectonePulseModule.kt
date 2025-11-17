@@ -1,4 +1,4 @@
-package dev.vanutp.tgbridge.common.compat
+package dev.vanutp.tgbridge.common.modules
 
 import dev.vanutp.tgbridge.common.TelegramBridge
 import dev.vanutp.tgbridge.common.asString
@@ -102,7 +102,7 @@ class FlectonePulseListener(private val bridge: TelegramBridge) : PulseListener 
     }
 }
 
-class FlectonePulseCompat(bridge: TelegramBridge) : AbstractCompat(bridge), IChatCompat {
+class FlectonePulseModule(bridge: TelegramBridge) : AbstractModule(bridge), IChatModule {
     override val fabricId = "flectonepulse"
     override val paperId = "FlectonePulse"
 

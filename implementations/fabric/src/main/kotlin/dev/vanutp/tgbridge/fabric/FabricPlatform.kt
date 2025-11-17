@@ -17,11 +17,11 @@ class FabricPlatform : IPlatform {
     override val configDir = FabricLoader.getInstance().configDir.resolve(FabricTelegramBridge.MOD_ID)
 
     private fun getRecipients(chat: ChatConfig): List<ServerPlayer>? {
-        val integration = TelegramBridge.INSTANCE.chatIntegration
-        val players = if (integration == null) {
+        val module = TelegramBridge.INSTANCE.chatModule
+        val players = if (module == null) {
             server.playerList.players.takeIf { chat.isDefault }
         } else {
-            integration.getChatRecipients(chat)?.map { it.toNative() }
+            module.getChatRecipients(chat)?.map { it.toNative() }
         }
         return players?.filterNot { MuteService.isMuted(it.uuid) }
     }

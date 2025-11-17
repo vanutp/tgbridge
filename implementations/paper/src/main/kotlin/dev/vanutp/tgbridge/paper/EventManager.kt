@@ -29,7 +29,7 @@ class EventManager(private val plugin: PaperBootstrap) : Listener {
         plugin.server.pluginManager.registerEvents(object : Listener {
             @EventHandler(priority = EventPriority.MONITOR)
             fun onMessage(e: AsyncChatEvent) {
-                if (e.isCancelled || TelegramBridge.INSTANCE.chatIntegration != null) {
+                if (e.isCancelled || TelegramBridge.INSTANCE.chatModule != null) {
                     return
                 }
                 plugin.tgbridge.onChatMessage(

@@ -1,7 +1,7 @@
 package dev.vanutp.tgbridge.fabric.compat
 
-import dev.vanutp.tgbridge.common.compat.IVanishCompat
-import dev.vanutp.tgbridge.common.compat.AbstractCompat
+import dev.vanutp.tgbridge.common.modules.IVanishModule
+import dev.vanutp.tgbridge.common.modules.AbstractModule
 import dev.vanutp.tgbridge.common.models.*
 import dev.vanutp.tgbridge.fabric.FabricEventWrapper
 import dev.vanutp.tgbridge.fabric.FabricTelegramBridge
@@ -9,7 +9,7 @@ import dev.vanutp.tgbridge.fabric.toTgbridge
 import me.drex.vanish.api.VanishAPI
 import me.drex.vanish.api.VanishEvents
 
-class VanishCompat(override val bridge: FabricTelegramBridge) : AbstractCompat(bridge), IVanishCompat {
+class VanishModule(override val bridge: FabricTelegramBridge) : AbstractModule(bridge), IVanishModule {
     override val fabricId = "melius-vanish"
 
     override fun enable() {

@@ -1,7 +1,7 @@
-package dev.vanutp.tgbridge.paper.compat
+package dev.vanutp.tgbridge.paper.modules
 
 import dev.vanutp.tgbridge.common.ConfigManager.config
-import dev.vanutp.tgbridge.common.compat.IChatCompat
+import dev.vanutp.tgbridge.common.modules.IChatModule
 import dev.vanutp.tgbridge.common.models.ChatConfig
 import dev.vanutp.tgbridge.common.models.TgbridgeMcChatMessageEvent
 import dev.vanutp.tgbridge.paper.PaperTelegramBridge
@@ -11,7 +11,9 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.player.AsyncPlayerChatEvent
 
-class IncompatibleChatPluginCompat(bridge: PaperTelegramBridge) : AbstractPaperCompat(bridge), IChatCompat {
+class IncompatibleChatPluginModule(bridge: PaperTelegramBridge) : AbstractPaperModule(bridge), IChatModule {
+    override val canBeDisabled = true
+
     override fun shouldEnable(): Boolean {
         return config.integrations.incompatiblePluginChatPrefix != null
     }

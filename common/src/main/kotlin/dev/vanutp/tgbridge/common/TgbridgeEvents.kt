@@ -13,6 +13,14 @@ class TgbridgeEventHandler<E> internal constructor() {
         listeners.add(listener)
     }
 
+    fun removeListener(listener: Function1<E>) {
+        listeners.remove(listener::apply)
+    }
+
+    fun removeListener(listener: suspend (E) -> Unit) {
+        listeners.remove(listener)
+    }
+
     suspend fun invoke(event: E): Boolean {
         for (listener in listeners) {
             listener(event)

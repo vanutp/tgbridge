@@ -1,4 +1,4 @@
-package dev.vanutp.tgbridge.paper.compat
+package dev.vanutp.tgbridge.paper.modules
 
 import de.myzelyam.api.vanish.PlayerHideEvent
 import de.myzelyam.api.vanish.PlayerShowEvent
@@ -8,7 +8,7 @@ import dev.vanutp.tgbridge.paper.PaperTelegramBridge
 import dev.vanutp.tgbridge.paper.toTgbridge
 import org.bukkit.event.EventHandler
 
-class SuperVanishCompat(bridge: PaperTelegramBridge) : AbstractPaperCompat(bridge) {
+class SuperVanishModule(bridge: PaperTelegramBridge) : AbstractPaperModule(bridge) {
     override val paperId = "SuperVanish"
 
     @EventHandler

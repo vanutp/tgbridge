@@ -1,4 +1,4 @@
-package dev.vanutp.tgbridge.common.compat
+package dev.vanutp.tgbridge.common.modules
 
 import de.maxhenkel.voicechat.api.ForgeVoicechatPlugin
 import de.maxhenkel.voicechat.api.VoicechatApi
@@ -43,7 +43,7 @@ class VoiceChatPlugin : VoicechatPlugin {
     }
 }
 
-class VoiceMessagesCompat(bridge: TelegramBridge) : AbstractCompat(bridge) {
+class VoiceMessagesModule(bridge: TelegramBridge) : AbstractModule(bridge) {
     override val fabricId = "voicemessages"
     override val forgeId = "voicemessages"
     override val paperId = "voicemessages"

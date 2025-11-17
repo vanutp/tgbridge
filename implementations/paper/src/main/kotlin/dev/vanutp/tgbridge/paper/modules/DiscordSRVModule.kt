@@ -1,4 +1,4 @@
-package dev.vanutp.tgbridge.paper.compat
+package dev.vanutp.tgbridge.paper.modules
 
 import dev.vanutp.tgbridge.common.*
 import dev.vanutp.tgbridge.common.ConfigManager.config
@@ -13,7 +13,7 @@ import github.scarsz.discordsrv.util.MessageUtil
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 
-class DiscordSRVCompat(bridge: PaperTelegramBridge) : AbstractPaperCompat(bridge) {
+class DiscordSRVModule(bridge: PaperTelegramBridge) : AbstractPaperModule(bridge) {
     override val paperId = "DiscordSRV"
 
     companion object {

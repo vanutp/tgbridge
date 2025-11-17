@@ -2,11 +2,15 @@ package dev.vanutp.tgbridge.common
 
 import dev.vanutp.tgbridge.common.ConfigManager.config
 import dev.vanutp.tgbridge.common.ConfigManager.lang
-import dev.vanutp.tgbridge.common.compat.*
 import dev.vanutp.tgbridge.common.converters.MinecraftToTelegramConverter
 import dev.vanutp.tgbridge.common.converters.TelegramFormattedText
 import dev.vanutp.tgbridge.common.converters.TelegramToMinecraftConverter
 import dev.vanutp.tgbridge.common.models.*
+import dev.vanutp.tgbridge.common.modules.IChatModule
+import dev.vanutp.tgbridge.common.modules.ITgbridgeModule
+import dev.vanutp.tgbridge.common.modules.IVanishModule
+import dev.vanutp.tgbridge.common.modules.ReplacementsModule
+import dev.vanutp.tgbridge.common.modules.VoiceMessagesModule
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.withLock
 import net.kyori.adventure.text.Component
@@ -27,10 +31,12 @@ abstract class TelegramBridge {
 
     val merger: MessageMerger = MessageMerger()
 
-    protected val availableIntegrations: MutableList<ITgbridgeCompat> = mutableListOf()
-    lateinit var loadedIntegrations: List<ITgbridgeCompat> private set
-    val chatIntegration: IChatCompat?
-        get() = loadedIntegrations.find { it is IChatCompat } as? IChatCompat
+    protected val availableModules = mutableListOf<ITgbridgeModule>()
+    private val _loadedModules = mutableListOf<ITgbridgeModule>()
+    val loadedModules: List<ITgbridgeModule>
+        get() = _loadedModules
+    val chatModule: IChatModule?
+        get() = _loadedModules.find { it is IChatModule } as? IChatModule
 
     companion object {
         private var _INSTANCE: TelegramBridge? = null
@@ -54,8 +60,8 @@ abstract class TelegramBridge {
             return
         }
         bot = TelegramBot(config.advanced.botApiUrl, config.botToken, logger, coroutineScope)
-        addIntegration(ReplacementsCompat(this))
-        addIntegration(VoiceMessagesCompat(this))
+        addModule(ReplacementsModule(this))
+        addModule(VoiceMessagesModule(this))
         coroutineScope.launch {
             bot.init()
             logger.info("Logged in as @${bot.me.username}")
@@ -75,12 +81,34 @@ abstract class TelegramBridge {
             false
         }
 
-    fun addIntegration(integration: ITgbridgeCompat) {
+    fun addModule(module: ITgbridgeModule) {
         if (started) {
-            logger.error("Can't add integration ${integration::class.simpleName} after the server has started")
-            return
+            throw IllegalStateException("Can't add module ${module::class.simpleName} after the server has started")
         }
-        availableIntegrations.add(integration)
+        if (availableModules.contains(module)) {
+            throw IllegalStateException("Module ${module::class.simpleName} is already added")
+        }
+        availableModules.add(module)
+    }
+
+    private fun checkConflictingModules() {
+        var hasChatModule = false
+        var hasVanishModule = false
+        for (module in loadedModules) {
+            if (module is IChatModule) {
+                if (hasChatModule) {
+                    logger.error("Multiple chat modules found (see above), this is not supported and won't work")
+                }
+                hasChatModule = true
+            }
+            if (module is IVanishModule) {
+                if (hasVanishModule) {
+                    logger.error("Multiple vanish modules found (see above), this is not supported and won't work")
+                }
+                hasVanishModule = true
+            }
+            module.enable()
+        }
     }
 
     fun onServerStarted() = coroutineScope.launch {
@@ -91,25 +119,8 @@ abstract class TelegramBridge {
             }
             return@launch
         }
-        loadedIntegrations = availableIntegrations.filter { it.shouldEnable() }
-        var hasChatIntegration = false
-        var hasVanishIntegration = false
-        for (integration in loadedIntegrations) {
-            if (integration is IChatCompat) {
-                if (hasChatIntegration) {
-                    logger.error("Multiple chat integrations found, this is not supported and won't work")
-                }
-                hasChatIntegration = true
-            }
-            if (integration is IVanishCompat) {
-                if (hasVanishIntegration) {
-                    logger.error("Multiple vanish integrations found, this is not supported and won't work")
-                }
-                hasVanishIntegration = true
-            }
-            integration.enable()
-        }
-        logger.info("Loaded integrations: ${loadedIntegrations.joinToString { it::class.simpleName ?: "unknown" }}")
+        _loadedModules.addAll(availableModules.filter { it.shouldEnable() })
+        logger.info("Loaded modules: " + loadedModules.joinToString { it::class.simpleName ?: "unknown" })
         // Doing this here to ensure spark is loaded
         spark = SparkHelper.createOrNull()
         if (config.events.enableStartMessages) {
@@ -224,6 +235,23 @@ abstract class TelegramBridge {
             ctx.reply("Error reloading config: " + (e.message ?: e.javaClass.name))
             return false
         }
+
+        loadedModules
+            .filter { !it.shouldEnable() && it.canBeDisabled }
+            .also { toDisable ->
+                logger.info("Disabling modules: " + toDisable.joinToString { it::class.simpleName ?: "unknown" })
+                toDisable.forEach { it.disable() }
+                _loadedModules.removeAll(toDisable)
+            }
+        availableModules
+            .filter { it.shouldEnable() && !_loadedModules.contains(it) }
+            .also { toEnable ->
+                logger.info("Enabling modules: " + toEnable.joinToString { it::class.simpleName ?: "unknown" })
+                toEnable.forEach { it.enable() }
+                _loadedModules.addAll(toEnable)
+            }
+        checkConflictingModules()
+
         runBlocking {
             bot.recoverPolling()
             merger.unlock()

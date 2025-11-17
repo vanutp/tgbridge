@@ -1,4 +1,4 @@
-package dev.vanutp.tgbridge.common.compat
+package dev.vanutp.tgbridge.common.modules
 
 import kotlin.test.Test
 

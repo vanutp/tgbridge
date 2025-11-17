@@ -1,4 +1,4 @@
-package dev.vanutp.tgbridge.paper.compat
+package dev.vanutp.tgbridge.paper.modules
 
 import com.earth2me.essentials.Essentials
 import dev.vanutp.tgbridge.common.TgbridgeEvents
@@ -10,8 +10,8 @@ import net.ess3.api.events.VanishStatusChangeEvent
 import net.essentialsx.api.v2.events.AsyncUserDataLoadEvent
 import org.bukkit.event.EventHandler
 
-class EssentialsVanishCompat(bridge: PaperTelegramBridge) :
-    AbstractPaperCompat(bridge) {
+class EssentialsVanishModule(bridge: PaperTelegramBridge) :
+    AbstractPaperModule(bridge) {
     override val paperId = "Essentials"
 
     @EventHandler

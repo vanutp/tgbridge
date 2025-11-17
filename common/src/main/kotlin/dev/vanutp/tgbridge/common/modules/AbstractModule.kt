@@ -1,8 +1,8 @@
-package dev.vanutp.tgbridge.common.compat
+package dev.vanutp.tgbridge.common.modules
 
 import dev.vanutp.tgbridge.common.TelegramBridge
 
-abstract class AbstractCompat(protected open val bridge: TelegramBridge) : ITgbridgeCompat {
+abstract class AbstractModule(protected open val bridge: TelegramBridge) : ITgbridgeModule {
     open val fabricId: String? = null
     open val forgeId: String? = null
     open val paperId: String? = null

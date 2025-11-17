@@ -26,7 +26,7 @@ class EventManager(private val tgbridge: ForgeTelegramBridge) {
 
     private fun registerChatMessageListener() {
         EVENT_BUS.addListener { e: ServerChatEvent ->
-            if (TelegramBridge.INSTANCE.chatIntegration != null) {
+            if (TelegramBridge.INSTANCE.chatModule != null) {
                 return@addListener
             }
             tgbridge.onChatMessage(

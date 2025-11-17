@@ -1,7 +1,7 @@
-package dev.vanutp.tgbridge.common.compat
+package dev.vanutp.tgbridge.common.modules
 
 import dev.vanutp.tgbridge.common.models.ITgbridgePlayer
 
-interface IVanishCompat {
+interface IVanishModule {
     fun isVanished(player: ITgbridgePlayer): Boolean
 }

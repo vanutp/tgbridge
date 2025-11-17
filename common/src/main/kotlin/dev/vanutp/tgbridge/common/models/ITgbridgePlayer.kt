@@ -2,8 +2,7 @@ package dev.vanutp.tgbridge.common.models
 
 import dev.vanutp.tgbridge.common.ConfigManager.config
 import dev.vanutp.tgbridge.common.TelegramBridge
-import dev.vanutp.tgbridge.common.compat.IVanishCompat
-import net.kyori.adventure.text.Component
+import dev.vanutp.tgbridge.common.modules.IVanishModule
 import java.util.UUID
 
 interface ITgbridgePlayer {
@@ -19,10 +18,10 @@ interface ITgbridgePlayer {
     }
 
     fun isVanished() =
-        TelegramBridge.INSTANCE.loadedIntegrations
-            .find { it is IVanishCompat }
+        TelegramBridge.INSTANCE.loadedModules
+            .find { it is IVanishModule }
             ?.let {
-                (it as IVanishCompat).isVanished(this)
+                (it as IVanishModule).isVanished(this)
             }
             ?: false
 }

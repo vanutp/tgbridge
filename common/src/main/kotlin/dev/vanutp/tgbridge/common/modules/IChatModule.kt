@@ -1,9 +1,9 @@
-package dev.vanutp.tgbridge.common.compat
+package dev.vanutp.tgbridge.common.modules
 
 import dev.vanutp.tgbridge.common.models.ChatConfig
 import dev.vanutp.tgbridge.common.models.ITgbridgePlayer
 
-interface IChatCompat {
+interface IChatModule {
     /**
      * Get a list of players that should receive messages
      * in the specified chat.

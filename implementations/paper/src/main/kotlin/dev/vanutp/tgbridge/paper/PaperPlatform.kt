@@ -16,11 +16,11 @@ class PaperPlatform(private val plugin: JavaPlugin) : IPlatform {
     override val configDir = plugin.dataFolder.toPath().absolute()
 
     private fun getRecipients(chat: ChatConfig): List<Player>? {
-        val integration = TelegramBridge.INSTANCE.chatIntegration
-        val players = if (integration == null) {
+        val module = TelegramBridge.INSTANCE.chatModule
+        val players = if (module == null) {
             plugin.server.onlinePlayers.takeIf { chat.isDefault }?.toList()
         } else {
-            integration.getChatRecipients(chat)?.map { it.toNative() }
+            module.getChatRecipients(chat)?.map { it.toNative() }
         }
         return players?.filterNot { MuteService.isMuted(it.uniqueId) }
     }
