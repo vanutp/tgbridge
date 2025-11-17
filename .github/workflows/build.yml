@@ -25,7 +25,7 @@ jobs:
         run: ./gradlew build
       - name: Run tests
         run: ./gradlew test
-      
+
       # TODO: only run after e2e tests
       - name: Upload to Maven repository
         if: ${{ github.event_name == 'push' && github.ref_type == 'tag' || github.ref == 'refs/heads/master' }}
@@ -34,7 +34,7 @@ jobs:
           REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
         run: |
           if [[ "${{ github.ref_type }}" != "tag" ]]; then
-            export VERSION="0.1-SNAPSHOT"
+            export VERSION="1.0-SNAPSHOT"
           fi
           ./gradlew publish
 
