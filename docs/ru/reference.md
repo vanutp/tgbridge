@@ -109,6 +109,22 @@ Xaero's Minimap/World Map, будут отображаться как ссылк
 Поддерживается только на Paper и Forge/NeoForge.
 
 
+### discord
+
+#### toDiscordFmt
+
+- **Тип:** `string`
+- **По умолчанию:** `"**[{sender}]** {text}"`
+
+Формат сообщений Telegram -> Discord. Использует форматирование Discord (Markdown).
+
+#### toTelegramFmt
+
+- **Тип:** `string`
+- **По умолчанию:** `"<b>[<sender>]</b> <text>"`
+
+Формат сообщений Discord -> Telegram. Использует форматирование MiniMessage.
+
 ## events
 
 ### advancementMessages

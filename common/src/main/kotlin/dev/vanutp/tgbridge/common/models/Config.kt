@@ -81,6 +81,22 @@ data class IntegrationsConfig(
         "Default value: null (disabled)",
     )
     val incompatiblePluginChatPrefix: String? = null,
+    @YamlComment(
+        "DiscordSRV integration settings",
+    )
+    val discord: IntegrationsDiscordConfig = IntegrationsDiscordConfig(),
+)
+
+@Serializable
+data class IntegrationsDiscordConfig(
+    @YamlComment(
+        "Format of Telegram -> Discord messages. Uses Discord Markdown formatting.",
+    )
+    val toDiscordFmt: String = "**[{sender}]** {text}",
+    @YamlComment(
+        "Format of Discord -> Telegram messages. Uses MiniMessage formatting.",
+    )
+    val toTelegramFmt: String = "<b>[<sender>]</b> <text>",
 )
 
 @Serializable

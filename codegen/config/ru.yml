@@ -83,6 +83,16 @@ options:
       Зарегистрирует legacy-обработчик ивентов чата с приоритетом LOWEST (HIGHEST на Forge/NeoForge)
       и будет отправлять только сообщения, начинающиеся с указанного префикса.
       Поддерживается только на Paper и Forge/NeoForge.
+  integrations.discord:
+    description: Настройки интеграции DiscordSRV
+  integrations.discord.toDiscordFmt:
+    type: string
+    default: '"**[{sender}]** {text}"'
+    description: Формат сообщений Telegram -> Discord. Использует форматирование Discord (Markdown).
+  integrations.discord.toTelegramFmt:
+    type: string
+    default: '"<b>[<sender>]</b> <text>"'
+    description: Формат сообщений Discord -> Telegram. Использует форматирование MiniMessage.
 
   events.advancementMessages.enable:
     type: boolean

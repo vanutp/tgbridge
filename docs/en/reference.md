@@ -108,6 +108,22 @@ and only forward messages that start with the specified string.
 Currently this only has an effect on Paper and Forge/NeoForge.
 
 
+### discord
+
+#### toDiscordFmt
+
+- **Type:** `string`
+- **Default:** `"**[{sender}]** {text}"`
+
+Format of Telegram -> Discord messages. Uses Discord Markdown formatting.
+
+#### toTelegramFmt
+
+- **Type:** `string`
+- **Default:** `"<b>[<sender>]</b> <text>"`
+
+Format of Discord -> Telegram messages. Uses MiniMessage formatting.
+
 ## events
 
 ### advancementMessages

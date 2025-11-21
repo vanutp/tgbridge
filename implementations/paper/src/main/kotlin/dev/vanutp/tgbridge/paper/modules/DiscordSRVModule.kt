@@ -39,7 +39,7 @@ class DiscordSRVModule(bridge: PaperTelegramBridge) : AbstractPaperModule(bridge
         if (chatName == null || chatName.equals("link", ignoreCase = true)) return@wrapMinecraftHandler
         val chat = config.getChat(chatName) ?: return@wrapMinecraftHandler
         val text = dsrvToAdventure(MessageUtil.reserializeToMinecraft(e.message.contentRaw))
-        val message = lang.discord.toTelegram.formatMiniMessage(
+        val message = config.integrations.discord.toTelegramFmt.formatMiniMessage(
             Placeholders(
                 mapOf("sender" to (e.member?.effectiveName ?: e.author.name)),
                 mapOf("text" to text),
@@ -69,7 +69,7 @@ class DiscordSRVModule(bridge: PaperTelegramBridge) : AbstractPaperModule(bridge
             val text = MessageUtil
                 .reserializeToDiscord(adventureToDsrv(component))
                 .replace("@", "@\u200B")
-            val message = lang.discord.toDiscord.formatLang(
+            val message = config.integrations.discord.toDiscordFmt.formatLang(
                 Placeholders(
                     mapOf(
                         "sender" to e.message.senderName,

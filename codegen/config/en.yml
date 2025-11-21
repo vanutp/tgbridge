@@ -82,6 +82,16 @@ options:
       Will register a legacy chat listener with LOWEST priority (HIGHEST on Forge/NeoForge)
       and only forward messages that start with the specified string.
       Currently this only has an effect on Paper and Forge/NeoForge.
+  integrations.discord:
+    description: DiscordSRV integration settings
+  integrations.discord.toDiscordFmt:
+    type: string
+    default: '"**[{sender}]** {text}"'
+    description: Format of Telegram -> Discord messages. Uses Discord Markdown formatting.
+  integrations.discord.toTelegramFmt:
+    type: string
+    default: '"<b>[<sender>]</b> <text>"'
+    description: Format of Discord -> Telegram messages. Uses MiniMessage formatting.
 
   events.advancementMessages.enable:
     type: boolean
