@@ -28,11 +28,11 @@ abstract class TelegramBridge {
     val merger: MessageMerger = MessageMerger()
 
     protected val availableModules = mutableListOf<ITgbridgeModule>()
-    private val _loadedModules = mutableListOf<ITgbridgeModule>()
-    val loadedModules: List<ITgbridgeModule>
-        get() = _loadedModules
+    private val _enabledModules = mutableListOf<ITgbridgeModule>()
+    val enabledModules: List<ITgbridgeModule>
+        get() = _enabledModules
     val chatModule: IChatModule?
-        get() = _loadedModules.find { it is IChatModule } as? IChatModule
+        get() = _enabledModules.find { it is IChatModule } as? IChatModule
 
     companion object {
         private var _INSTANCE: TelegramBridge? = null
@@ -90,7 +90,7 @@ abstract class TelegramBridge {
     private fun checkConflictingModules() {
         var hasChatModule = false
         var hasVanishModule = false
-        for (module in loadedModules) {
+        for (module in enabledModules) {
             if (module is IChatModule) {
                 if (hasChatModule) {
                     logger.error("Multiple chat modules found (see above), this is not supported and won't work")
@@ -103,7 +103,6 @@ abstract class TelegramBridge {
                 }
                 hasVanishModule = true
             }
-            module.enable()
         }
     }
 
@@ -115,8 +114,13 @@ abstract class TelegramBridge {
             }
             return@launch
         }
-        _loadedModules.addAll(availableModules.filter { it.shouldEnable() })
-        logger.info("Loaded modules: " + loadedModules.joinToString { it::class.simpleName ?: "unknown" })
+        availableModules
+            .filter { it.shouldEnable() }
+            .also { toEnable ->
+                toEnable.forEach { it.enable() }
+                _enabledModules.addAll(toEnable)
+            }
+        logger.info("Loaded modules: " + enabledModules.joinToString { it::class.simpleName ?: "unknown" })
         // Doing this here to ensure spark is loaded
         spark = SparkHelper.createOrNull()
         if (config.events.enableStartMessages) {
@@ -239,19 +243,19 @@ abstract class TelegramBridge {
             return false
         }
 
-        loadedModules
+        enabledModules
             .filter { !it.shouldEnable() && it.canBeDisabled }
             .also { toDisable ->
                 logger.info("Disabling modules: " + toDisable.joinToString { it::class.simpleName ?: "unknown" })
                 toDisable.forEach { it.disable() }
-                _loadedModules.removeAll(toDisable)
+                _enabledModules.removeAll(toDisable)
             }
         availableModules
-            .filter { it.shouldEnable() && !_loadedModules.contains(it) }
+            .filter { it.shouldEnable() && !_enabledModules.contains(it) }
             .also { toEnable ->
                 logger.info("Enabling modules: " + toEnable.joinToString { it::class.simpleName ?: "unknown" })
                 toEnable.forEach { it.enable() }
-                _loadedModules.addAll(toEnable)
+                _enabledModules.addAll(toEnable)
             }
         checkConflictingModules()
 
