@@ -9,7 +9,7 @@ import net.flectone.pulse.FlectonePulseAPI
 import net.flectone.pulse.annotation.Pulse
 import net.flectone.pulse.listener.PulseListener
 import net.flectone.pulse.model.entity.FEntity
-import net.flectone.pulse.model.event.ReloadEvent
+import net.flectone.pulse.model.event.lifecycle.ReloadEvent
 import net.flectone.pulse.model.event.message.MessagePrepareEvent
 import net.flectone.pulse.module.message.chat.model.ChatMetadata
 import net.flectone.pulse.platform.registry.ListenerRegistry
