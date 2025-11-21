@@ -21,9 +21,6 @@ data class LangTelegram(
     @YamlComment("This option uses MiniMessage formatting (see below for details)")
     val playerDied: String = "☠️ <b><death_message></b>",
 
-    @YamlComment("This option uses MiniMessage formatting (see below for details)")
-    val chatMessage: String = "<b>[<username>]</b>",
-
     val advancements: LangAdvancements = LangAdvancements(),
 
     val playerList: String = "📝 <b>{count} players online:</b> {usernames}",
@@ -106,9 +103,6 @@ data class ServiceMessages(
 
 @Serializable
 data class LangMinecraft(
-    val format: String = "<aqua>\\<<sender>></aqua> <text>",
-    @YamlComment("This is used when the message is sent to non-default chat/channel")
-    val formatChat: String = "<gray>[<chat_name>]</gray> <aqua>\\<<sender>></aqua> <text>",
     val messageMeta: MessageMeta = MessageMeta(),
     val messageFormatting: MessageFormatting = MessageFormatting(),
     val serviceMessages: ServiceMessages = ServiceMessages(),

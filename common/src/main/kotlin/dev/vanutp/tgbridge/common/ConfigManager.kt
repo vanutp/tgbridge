@@ -50,12 +50,6 @@ object ConfigManager {
             val mm = MiniMessage.miniMessage()
             lang = lang.copy(
                 version = 2,
-                telegram = lang.telegram.copy(
-                    chatMessage = lang.telegram.chatMessage
-                        .replace("{sender}", "<sender>")
-                        .replace("{text}", "")
-                        .trim()
-                ),
                 minecraft = lang.minecraft.copy(
                     messageMeta = lang.minecraft.messageMeta.copy(
                         reply = "<blue>" + mm.escapeTags(lang.minecraft.messageMeta.reply)
@@ -88,18 +82,13 @@ object ConfigManager {
                 ),
             )
         }  else if (lang.version == 3) {
-            lang = lang.copy(
-                version = 4,
-                minecraft = lang.minecraft.copy(
-                    formatChat = "<gray>[<chat_name>]</gray> " + lang.minecraft.format,
-                ),
-            )
+            lang = lang.copy(version = 4)
         } else if (lang.version != LATEST_LANG_VERSION) {
             throw Exception("Unsupported lang version ${lang.version}")
         }
     }
 
-    private fun migrateConfig(configPath: Path) {
+    private fun migrateConfig(configPath: Path, langPath: Path) {
         if (config.version == 1) {
             config = config.copy(
                 version = 2,
@@ -126,6 +115,16 @@ object ConfigManager {
                 is YamlScalar -> node.content.toIntOrNull()
                 else -> null
             }
+            val langData = yaml.parseToYamlNode(langPath.readText())
+            val langVersion = langData.yamlMap.getScalar("version")?.content?.toIntOrNull() ?: 1
+            val oldMinecraftFormat = langData.yamlMap.get<YamlMap>("minecraft")?.getScalar("format")?.content!!
+            val oldTelegramFormat = langData.yamlMap.get<YamlMap>("telegram")?.getScalar("chatMessage")?.content!!.let {
+                if (langVersion < 2) {
+                    it.replace("{sender}", "<username>").replace("{text}", "<text>")
+                } else {
+                    "$it <text>"
+                }
+            }
             config = config.copy(
                 version = 4,
                 botToken = oldToken,
@@ -135,6 +134,8 @@ object ConfigManager {
                         isDefault = true,
                         chatId = oldChatId,
                         topicId = oldTopicId,
+                        minecraftFormat = oldMinecraftFormat,
+                        telegramFormat = oldTelegramFormat,
                     )
                 )
             )
@@ -165,15 +166,16 @@ object ConfigManager {
         if (configPath.notExists()) {
             configPath.writeText(yaml.encodeToString(Config(version = LATEST_CONFIG_VERSION)))
         }
-        config = yaml.decodeFromString<Config>(configPath.readText())
-        migrateConfig(configPath)
-        // write new keys & update docs
-        configPath.writeText(yaml.encodeToString(config))
-
         val langPath = configDir.resolve("lang.yml")
         if (langPath.notExists()) {
             langPath.writeText(yaml.encodeToString(Lang(version = LATEST_LANG_VERSION)))
         }
+
+        config = yaml.decodeFromString<Config>(configPath.readText())
+        migrateConfig(configPath, langPath)
+        // write new keys & update docs
+        configPath.writeText(yaml.encodeToString(config))
+
         lang = yaml.decodeFromString<Lang>(langPath.readText())
         migrateLang()
         // write new keys & update docs

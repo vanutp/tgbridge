@@ -28,6 +28,20 @@
 - **Type:** `number | null`
 - **Default:** `null`
 
+### minecraftFormat
+
+- **Type:** `string`
+- **Default:** `"<aqua>\\<<sender>></aqua> <text>"`
+
+Format for Telegram -> Minecraft messages. Uses MiniMessage formatting.
+
+### telegramFormat
+
+- **Type:** `string`
+- **Default:** `"<b>[<username>]</b> <text>"`
+
+Format for Minecraft -> Telegram messages. Uses MiniMessage formatting.
+
 ## messages
 
 ### requirePrefixInMinecraft

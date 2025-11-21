@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Config(
     val botToken: String = "your bot token",
-    val chats: List<ChatConfig> = listOf(ChatConfig(name = "global", isDefault = true, chatId = 0)),
+    val chats: List<ChatConfig> = listOf(ChatConfig(name = "global", isDefault = true, chatId = 0, minecraftFormat = "<aqua>\\<<sender>></aqua> <text>", telegramFormat = "<b>[<username>]</b> <text>")),
     val messages: MessagesConfig = MessagesConfig(),
     val integrations: IntegrationsConfig = IntegrationsConfig(),
     val events: EventsConfig = EventsConfig(),
@@ -24,6 +24,14 @@ data class ChatConfig(
     val isDefault: Boolean = false,
     val chatId: Long,
     val topicId: Int? = null,
+    @YamlComment(
+        "Format for Telegram -> Minecraft messages. Uses MiniMessage formatting.",
+    )
+    val minecraftFormat: String = "<aqua>\\<<sender>></aqua> <text>",
+    @YamlComment(
+        "Format for Minecraft -> Telegram messages. Uses MiniMessage formatting.",
+    )
+    val telegramFormat: String = "<b>[<username>]</b> <text>",
 )
 
 @Serializable

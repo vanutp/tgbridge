@@ -3,7 +3,6 @@ package dev.vanutp.tgbridge.common
 import dev.vanutp.tgbridge.common.ConfigManager.config
 import dev.vanutp.tgbridge.common.ConfigManager.lang
 import dev.vanutp.tgbridge.common.converters.MinecraftToTelegramConverter
-import dev.vanutp.tgbridge.common.converters.TelegramFormattedText
 import dev.vanutp.tgbridge.common.converters.TelegramToMinecraftConverter
 import dev.vanutp.tgbridge.common.models.*
 import dev.vanutp.tgbridge.common.modules.*
@@ -13,7 +12,6 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TranslatableComponent
 import java.time.Clock
 import java.time.temporal.ChronoUnit
-import kotlin.math.max
 import kotlin.time.Duration.Companion.seconds
 
 abstract class TelegramBridge {
@@ -196,20 +194,21 @@ abstract class TelegramBridge {
         val e = TgbridgeTgChatMessageEvent(
             msg, chat, null,
             Placeholders(
-                mapOf("sender" to msg.senderName, "chat_name" to chat.name),
+                mapOf("sender" to msg.senderName),
                 mapOf("text" to textComponent),
             )
         )
         if (!TgbridgeEvents.TG_CHAT_MESSAGE.invoke(e)) return
 
-        e.player?.let { player ->
-            val placeholdersEvt = TgbridgePlayerPlaceholdersEvent(player, Placeholders(), e)
-            TgbridgeEvents.PLAYER_PLACEHOLDERS.invoke(placeholdersEvt)
-            e.placeholders = placeholdersEvt.placeholders
-        }
+        val placeholders = e.player
+            ?.let { player ->
+                val placeholdersEvt = TgbridgePlayerPlaceholdersEvent(player, e.placeholders, e)
+                TgbridgeEvents.PLAYER_PLACEHOLDERS.invoke(placeholdersEvt)
+                placeholdersEvt.placeholders
+            }
+            ?: e.placeholders
 
-        val fmtString = if (chat.isDefault) lang.minecraft.format else lang.minecraft.formatChat
-        platform.broadcastMessage(chat, fmtString.formatMiniMessage(e.placeholders))
+        platform.broadcastMessage(chat, chat.minecraftFormat.formatMiniMessage(placeholders))
     }
 
     private fun tryReinit(ctx: TBCommandContext): Boolean = runBlocking {
@@ -287,39 +286,33 @@ abstract class TelegramBridge {
     fun onChatMessage(e: TgbridgeMcChatMessageEvent) = wrapMinecraftHandler {
         if (!TgbridgeEvents.MC_CHAT_MESSAGE.invoke(e)) return@wrapMinecraftHandler
 
+        val chat = config.getChat(e.chatName) ?: return@wrapMinecraftHandler
+
+        val messageText = e.message.asString()
+        val bluemapLink = messageText.asBluemapLinkOrNone()
+        val prefix = config.integrations.incompatiblePluginChatPrefix
+            ?: config.messages.requirePrefixInMinecraft
+            ?: ""
+        if (bluemapLink == null && !messageText.startsWith(prefix)) {
+            return@wrapMinecraftHandler
+        }
+
+        val tgText = bluemapLink
+            ?: e.message.takeIf { config.messages.keepPrefix || prefix.isEmpty() }
+            ?: e.message.replaceText {
+                it.match("^" + Regex.escape(prefix)).replacement("")
+            }
+
         val placeholdersEvt = TgbridgePlayerPlaceholdersEvent(
             e.sender,
-            Placeholders(mapOf("username" to e.sender.getName())),
+            Placeholders(mapOf("username" to e.sender.getName()), mapOf("text" to tgText)),
             e,
         )
         TgbridgeEvents.PLAYER_PLACEHOLDERS.invoke(placeholdersEvt)
 
-        val chat = config.getChat(e.chatName) ?: return@wrapMinecraftHandler
-
-        var telegramText = MinecraftToTelegramConverter.convert(e.message)
-        val bluemapLink = telegramText.text.asBluemapLinkOrNone()
-        val prefix = config.integrations.incompatiblePluginChatPrefix
-            ?: config.messages.requirePrefixInMinecraft
-            ?: ""
-        if (bluemapLink == null && !telegramText.text.startsWith(prefix)) {
-            return@wrapMinecraftHandler
-        }
-
-        if (bluemapLink != null) {
-            telegramText = bluemapLink
-        } else if (!config.messages.keepPrefix) {
-            telegramText = TelegramFormattedText(
-                telegramText.text.removePrefix(prefix),
-                telegramText.entities.map { it.copy(offset = max(it.offset - prefix.length, 0)) },
-            )
-        }
-
-        val tgPrefix = MinecraftToTelegramConverter.convert(
-            lang.telegram.chatMessage.formatMiniMessage(placeholdersEvt.placeholders)
-                .append(Component.text(" "))
+        val currText = MinecraftToTelegramConverter.convert(
+            chat.telegramFormat.formatMiniMessage(placeholdersEvt.placeholders)
         )
-
-        val currText = tgPrefix + telegramText
         val currDate = Clock.systemUTC().instant()
 
         val lm = merger.lastMessages[chat.name]

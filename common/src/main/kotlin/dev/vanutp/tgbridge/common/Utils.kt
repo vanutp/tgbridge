@@ -2,10 +2,10 @@ package dev.vanutp.tgbridge.common
 
 import dev.vanutp.tgbridge.common.ConfigManager.config
 import dev.vanutp.tgbridge.common.converters.MinecraftToTelegramConverter
-import dev.vanutp.tgbridge.common.converters.TelegramFormattedText
 import dev.vanutp.tgbridge.common.models.ChatConfig
 import dev.vanutp.tgbridge.common.models.Config
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 
@@ -72,38 +72,30 @@ fun String.formatMiniMessage(placeholders: Placeholders = Placeholders()): Compo
 val XAERO_WAYPOINT_RGX =
     Regex("""xaero-waypoint:([^:]+):[^:]:([-\d]+):([-\d]+|~):([-\d]+):\d+:(?:false|true):\d+:Internal-(?:the-)?(overworld|nether|end)-waypoints""")
 
-fun String.asBluemapLinkOrNone(): TelegramFormattedText? {
+fun String.asBluemapLinkOrNone(): Component? {
     if (config.integrations.bluemapUrl == null) {
         return null
     }
-    XAERO_WAYPOINT_RGX.matchEntire(this)?.let {
-        try {
-            var waypointName = it.groupValues[1]
-            if (waypointName == "gui.xaero-deathpoint-old" || waypointName == "gui.xaero-deathpoint") {
-                waypointName = Component.translatable(waypointName).asString()
+    val match = XAERO_WAYPOINT_RGX.matchEntire(this) ?: return null
+    try {
+        val waypointNameRaw = match.groupValues[1]
+        val waypointName =
+            if (waypointNameRaw == "gui.xaero-deathpoint-old" || waypointNameRaw == "gui.xaero-deathpoint") {
+                Component.translatable(waypointNameRaw)
+            } else {
+                Component.text(waypointNameRaw)
             }
-            val x = Integer.parseInt(it.groupValues[2])
-            val yRaw = it.groupValues[3]
-            val y = Integer.parseInt(if (yRaw == "~") "100" else yRaw)
-            val z = Integer.parseInt(it.groupValues[4])
-            val worldName = it.groupValues[5]
+        val x = Integer.parseInt(match.groupValues[2])
+        val yRaw = match.groupValues[3]
+        val y = Integer.parseInt(if (yRaw == "~") "100" else yRaw)
+        val z = Integer.parseInt(match.groupValues[4])
+        val worldName = match.groupValues[5]
 
-            val url = "${config.integrations.bluemapUrl}#$worldName:$x:$y:$z:50:0:0:0:0:perspective"
-            return TelegramFormattedText(
-                text = waypointName,
-                entities = listOf(
-                    TgEntity(
-                        offset = 0,
-                        length = waypointName.length,
-                        type = TgEntityType.TEXT_LINK,
-                        url = url
-                    )
-                )
-            )
-        } catch (_: NumberFormatException) {
-        }
+        val url = "${config.integrations.bluemapUrl}#$worldName:$x:$y:$z:50:0:0:0:0:perspective"
+        return waypointName.style { it.clickEvent(ClickEvent.openUrl(url)) }
+    } catch (_: NumberFormatException) {
+        return null
     }
-    return null
 }
 
 fun Config.getError(): String? {

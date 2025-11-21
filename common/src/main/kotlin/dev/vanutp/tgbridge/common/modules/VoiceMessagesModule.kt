@@ -78,10 +78,9 @@ class VoiceMessagesModule(bridge: TelegramBridge) : AbstractModule(bridge) {
 
             val emptyUuid = UUID.fromString("00000000-0000-0000-0000-000000000000")
             val targetUuids = bridge.platform.getChatRecipients(e.chat)?.map { it.uuid } ?: emptyList()
-            val fmtString = if (e.chat.isDefault) lang.minecraft.format else lang.minecraft.formatChat
-            val senderNameMsg = fmtString.formatMiniMessage(
+            val senderNameMsg = e.chat.minecraftFormat.formatMiniMessage(
                 Placeholders(
-                    mapOf("sender" to msg.senderName, "chat_name" to e.chat.name),
+                    mapOf("sender" to msg.senderName),
                     mapOf("text" to Component.text("")),
                 )
             )
@@ -92,14 +91,15 @@ class VoiceMessagesModule(bridge: TelegramBridge) : AbstractModule(bridge) {
         VoiceMessageReceivedCallback.EVENT.register { player, message, target ->
             if (target != "all") return@register false
             val oggData = createOgg(message)
+            val chat = config.getDefaultChat()
             val tgText = MinecraftToTelegramConverter.convert(
-                lang.telegram.chatMessage.formatMiniMessage(
+                chat.telegramFormat.formatMiniMessage(
                     Placeholders(
                         mapOf("username" to (bridge.platform.playerToTgbridge(player)?.getName() ?: "???")),
+                        mapOf("text" to Component.text(""))
                     )
                 )
             )
-            val chat = config.getDefaultChat()
             bridge.coroutineScope.launch {
                 bridge.bot.sendVoice(
                     chat.chatId,

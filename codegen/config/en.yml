@@ -13,6 +13,8 @@ options:
       - name: '"global"'
         isDefault: true
         chatId: 0
+        minecraftFormat: '"<aqua>\\<<sender>></aqua> <text>"'
+        telegramFormat: '"<b>[<username>]</b> <text>"'
   chats[].name:
     type: string
     required: true
@@ -26,6 +28,14 @@ options:
   chats[].topicId:
     type: number | null
     default: null
+  chats[].minecraftFormat:
+    type: string
+    description: Format for Telegram -> Minecraft messages. Uses MiniMessage formatting.
+    default: '"<aqua>\\<<sender>></aqua> <text>"'
+  chats[].telegramFormat:
+    type: string
+    description: Format for Minecraft -> Telegram messages. Uses MiniMessage formatting.
+    default: '"<b>[<username>]</b> <text>"'
 
   messages.requirePrefixInMinecraft:
     type: string | null
