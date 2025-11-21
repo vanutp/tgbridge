@@ -116,6 +116,11 @@ object TelegramToMinecraftConverter {
         }
     }
 
+    private fun viaBotToText(msg: TgMessage): Component? =
+        msg.viaBot?.username?.let {
+            lang.minecraft.messageMeta.viaBot.formatMiniMessage(Placeholders(mapOf("bot_username" to it)))
+        }
+
     private fun ensureValidUrl(url: String): String {
         return if (urlRegex.matchesAt(url, 0)) {
             url
@@ -283,6 +288,7 @@ object TelegramToMinecraftConverter {
         msg.pinnedMessage?.let { pinnedMsg ->
             val pinnedMessageComponents = mutableListOf<Component>()
             forwardFromToText(pinnedMsg)?.let { pinnedMessageComponents.add(it) }
+            viaBotToText(pinnedMsg)?.let { pinnedMessageComponents.add(it) }
             mediaToText(pinnedMsg)?.let { pinnedMessageComponents.add(it) }
             pinnedMsg.effectiveText?.let {
                 pinnedMessageComponents.add(
@@ -306,6 +312,7 @@ object TelegramToMinecraftConverter {
 
         serviceMessageToText(msg)?.let { components.add(it) }
         forwardFromToText(msg)?.let { components.add(it) }
+        viaBotToText(msg)?.let { components.add(it) }
         replyToText(msg, botId)?.let { components.add(it) }
         mediaToText(msg)?.let { components.add(it) }
         msg.effectiveText?.let { components.add(formattedTextToComponent(it, msg.entities)) }

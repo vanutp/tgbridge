@@ -7,8 +7,6 @@ telegram:
   playerLeft: "😕 <b>{username} 离开了游戏</b>"
   # This option uses MiniMessage formatting (see below for details)
   playerDied: "☠️ <b><death_message></b>"
-  # This option uses MiniMessage formatting (see below for details)
-  chatMessage: "<b>[<username>]</b>"
   advancements:
     regular: "😼 <b>{username} 获得进度 {title}</b>\n\n<i>{description}</i>"
     goal: "🎯 <b>{username} 达成目标 {title}</b>\n\n<i>{description}</i>"
@@ -20,13 +18,13 @@ telegram:
   tps: "📊 <b>TPS：</b> <code>{tps10s}</code>\n⏱️ <b>MSPT：</b> <code>{mspt10sAvg}</code>"
 # This section uses MiniMessage formatting (in non-strict mode).
 # See https://docs.advntr.dev/minimessage/format.html for more information.
-# Additionally, {variable} syntax can be used instead of <variable> for some plain-text placeholders.
+# Additionally, {variable} syntax can be used instead of <variable> for plain-text placeholders.
 minecraft:
-  format: "<aqua>\\<<sender>></aqua> <text>"
   messageMeta:
     reply: "<blue>[回复 <sender>：<text>]"
     replyToMinecraft: "<blue>[回复 <text>]"
     forward: "<gray>[转发自 <from>]"
+    viaBot: "<gray>[通过 @<bot_username>]"
     pin: "<dark_aqua>[置顶了一条消息]"
     # Wrapper for all media types
     mediaFormatting: "<green><media>"
@@ -61,4 +59,4 @@ minecraft:
       muted: "您将不再收到来自 Telegram 的消息"
       unmuted: "您将收到来自 Telegram 的新消息"
 # Don't change the version manually
-version: 3
+version: 4

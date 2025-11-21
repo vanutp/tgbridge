@@ -213,6 +213,8 @@ data class TgMessage(
     @SerialName("external_reply")
     val externalReply: TgExternalReplyInfo? = null,
     val quote: TgTextQuote? = null,
+    @SerialName("via_bot")
+    val viaBot: TgUser? = null,
     @SerialName("message_thread_id")
     val messageThreadId: Int? = null,
     @SerialName("is_topic_message")

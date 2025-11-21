@@ -60,6 +60,7 @@ data class MessageMeta(
     val reply: String = "<blue>[R <sender>: <text>]",
     val replyToMinecraft: String = "<blue>[R <text>]",
     val forward: String = "<gray>[F <from>]",
+    val viaBot: String = "<gray>[via @<bot_username>]",
     val pin: String = "<dark_aqua>[pinned a message]",
     @YamlComment("Wrapper for all media types")
     val mediaFormatting: String = "<green><media>",
@@ -112,7 +113,7 @@ data class LangMinecraft(
 data class LangDiscord(
     @YamlComment("Format of messages sent from Discord to Telegram. Uses MiniMessage formatting (see above for details).")
     val toTelegram: String = "<b>[<sender>]</b> <text>",
-    @YamlComment("Format of messages sent from Telegram to Discord. Uses Discord markdown formatting.")
+    @YamlComment("Format of messages sent from Telegram to Discord. Uses Discord Markdown formatting.")
     val toDiscord: String = "**[{sender}]** {text}",
 )
 
