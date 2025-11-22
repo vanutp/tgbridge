@@ -66,6 +66,9 @@ dependencies {
     compileOnly("com.discordsrv:discordsrv:1.28.0")
 }
 
+// Using Mojmap here because we are building for jvm 21,
+// but paper 1.19.2 has old asm dependency that can't read jvm 21 classes,
+// so it can't remap our jar.
 paperweight.reobfArtifactConfiguration = io.papermc.paperweight.userdev.ReobfArtifactConfiguration.MOJANG_PRODUCTION
 
 tasks {
