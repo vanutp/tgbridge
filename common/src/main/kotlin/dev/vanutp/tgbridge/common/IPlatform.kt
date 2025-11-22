@@ -1,6 +1,5 @@
 package dev.vanutp.tgbridge.common
 
-import dev.vanutp.tgbridge.common.models.ChatConfig
 import dev.vanutp.tgbridge.common.models.ITgbridgePlayer
 import net.kyori.adventure.text.Component
 import java.nio.file.Path
@@ -9,8 +8,7 @@ interface IPlatform {
     val name: String
     val configDir: Path
 
-    fun broadcastMessage(chat: ChatConfig, text: Component)
-    fun getChatRecipients(chat: ChatConfig): List<ITgbridgePlayer>?
+    fun broadcastMessage(recipients: List<ITgbridgePlayer>, text: Component)
     fun getOnlinePlayers(): List<ITgbridgePlayer>
     fun getLanguageKey(key: String): String?
     fun isModLoaded(modId: String): Boolean

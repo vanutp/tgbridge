@@ -1,6 +1,7 @@
 package dev.vanutp.tgbridge.paper.modules
 
 import dev.vanutp.tgbridge.common.ConfigManager.config
+import dev.vanutp.tgbridge.common.TgbridgeEvents
 import dev.vanutp.tgbridge.common.modules.IChatModule
 import dev.vanutp.tgbridge.common.models.ChatConfig
 import dev.vanutp.tgbridge.common.models.TgbridgeMcChatMessageEvent
@@ -33,7 +34,14 @@ class IncompatibleChatPluginModule(bridge: PaperTelegramBridge) : AbstractPaperM
         )
     }
 
-    override fun getChatRecipients(chat: ChatConfig) =
+    override fun enable() {
+        super.enable()
+        TgbridgeEvents.RECIPIENTS.addListener { e ->
+            e.recipients += getChatRecipients(e.chat) ?: emptyList()
+        }
+    }
+
+    fun getChatRecipients(chat: ChatConfig) =
         bridge.plugin.server.onlinePlayers
             .takeIf { chat.isDefault }
             ?.map { it.toTgbridge() }

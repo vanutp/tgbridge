@@ -1,6 +1,7 @@
 package dev.vanutp.tgbridge.common.modules
 
 import dev.vanutp.tgbridge.common.TelegramBridge
+import dev.vanutp.tgbridge.common.TgbridgeEvents
 import dev.vanutp.tgbridge.common.asString
 import dev.vanutp.tgbridge.common.models.ChatConfig
 import dev.vanutp.tgbridge.common.models.ITgbridgePlayer
@@ -118,9 +119,12 @@ class FlectonePulseModule(bridge: TelegramBridge) : AbstractModule(bridge), ICha
         fPermissionChecker = fPulse.get(PermissionChecker::class.java)
         fChatModule = fPulse.get(ChatModule::class.java)
         FlectonePulseListener(bridge)
+        TgbridgeEvents.RECIPIENTS.addListener { e ->
+            e.recipients += getChatRecipients(e.chat)
+        }
     }
 
-    override fun getChatRecipients(chat: ChatConfig): List<ITgbridgePlayer> =
+    fun getChatRecipients(chat: ChatConfig): List<ITgbridgePlayer> =
         fPlayerService
             .onlineFPlayers
             .asSequence()

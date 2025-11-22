@@ -1,9 +1,6 @@
 package dev.vanutp.tgbridge.fabric
 
 import dev.vanutp.tgbridge.common.IPlatform
-import dev.vanutp.tgbridge.common.MuteService
-import dev.vanutp.tgbridge.common.TelegramBridge
-import dev.vanutp.tgbridge.common.models.ChatConfig
 import dev.vanutp.tgbridge.common.models.ITgbridgePlayer
 import dev.vanutp.tgbridge.fabric.FabricTelegramBridge.server
 import net.fabricmc.loader.api.FabricLoader
@@ -16,24 +13,11 @@ class FabricPlatform : IPlatform {
     override val name = "fabric"
     override val configDir = FabricLoader.getInstance().configDir.resolve(FabricTelegramBridge.MOD_ID)
 
-    private fun getRecipients(chat: ChatConfig): List<ServerPlayer>? {
-        val module = TelegramBridge.INSTANCE.chatModule
-        val players = if (module == null) {
-            server.playerList.players.takeIf { chat.isDefault }
-        } else {
-            module.getChatRecipients(chat)?.map { it.toNative() }
-        }
-        return players?.filterNot { MuteService.isMuted(it.uuid) }
-    }
-
-    override fun getChatRecipients(chat: ChatConfig) =
-        getRecipients(chat)?.map { it.toTgbridge() }
-
-    override fun broadcastMessage(chat: ChatConfig, text: Component) {
+    override fun broadcastMessage(recipients: List<ITgbridgePlayer>, text: Component) {
         val message = text.toMinecraft()
         server.sendSystemMessage(message)
-        getRecipients(chat)?.forEach { player ->
-            player.sendSystemMessage(message, false)
+        recipients.forEach { player ->
+            player.toNative()?.sendSystemMessage(message, false)
         }
     }
 

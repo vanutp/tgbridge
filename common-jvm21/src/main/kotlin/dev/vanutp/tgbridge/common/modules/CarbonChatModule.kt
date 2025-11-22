@@ -1,6 +1,7 @@
 package dev.vanutp.tgbridge.common.modules
 
 import dev.vanutp.tgbridge.common.TelegramBridge
+import dev.vanutp.tgbridge.common.TgbridgeEvents
 import dev.vanutp.tgbridge.common.asString
 import dev.vanutp.tgbridge.common.models.ChatConfig
 import dev.vanutp.tgbridge.common.models.ITgbridgePlayer
@@ -92,7 +93,7 @@ class CarbonChatModule(bridge: TelegramBridge) : AbstractModule(bridge), IChatMo
         )
     }
 
-    override fun getChatRecipients(chat: ChatConfig): List<ITgbridgePlayer>? {
+    private fun getChatRecipients(chat: ChatConfig): List<ITgbridgePlayer>? {
         val cc = CarbonChatProvider.carbonChat()
         val channelKey = CarbonHelpers.createKey.invoke(
             null,
@@ -118,5 +119,8 @@ class CarbonChatModule(bridge: TelegramBridge) : AbstractModule(bridge), IChatMo
         CarbonChatProvider.carbonChat()
             .eventHandler()
             .subscribe(CarbonChatEvent::class.java, this::onCarbonChatMessage)
+        TgbridgeEvents.RECIPIENTS.addListener { e ->
+            e.recipients += getChatRecipients(e.chat) ?: emptyList()
+        }
     }
 }

@@ -5,14 +5,10 @@ import de.maxhenkel.voicechat.api.VoicechatApi
 import de.maxhenkel.voicechat.api.VoicechatPlugin
 import de.maxhenkel.voicechat.api.opus.OpusDecoder
 import de.maxhenkel.voicechat.api.opus.OpusEncoder
+import dev.vanutp.tgbridge.common.*
 import dev.vanutp.tgbridge.common.ConfigManager.config
-import dev.vanutp.tgbridge.common.ConfigManager.lang
-import dev.vanutp.tgbridge.common.Placeholders
-import dev.vanutp.tgbridge.common.TelegramBridge
-import dev.vanutp.tgbridge.common.TgbridgeEvents
 import dev.vanutp.tgbridge.common.converters.MinecraftToTelegramConverter
-import dev.vanutp.tgbridge.common.formatMiniMessage
-import dev.vanutp.tgbridge.common.getDefaultChat
+import dev.vanutp.tgbridge.common.models.TgbridgeRecipientsEvent
 import kotlinx.coroutines.launch
 import net.kyori.adventure.text.Component
 import ru.dimaskama.voicemessages.api.VoiceMessageReceivedCallback
@@ -76,16 +72,18 @@ class VoiceMessagesModule(bridge: TelegramBridge) : AbstractModule(bridge) {
             val frames = extractOpusPackets(bytes)
             val transcoded = VoiceChatPlugin.transcodeOpus(frames)
 
-            val emptyUuid = UUID.fromString("00000000-0000-0000-0000-000000000000")
-            val targetUuids = bridge.platform.getChatRecipients(e.chat)?.map { it.uuid } ?: emptyList()
+            val recipientsEvt = TgbridgeRecipientsEvent(e.chat, originalEvent = e)
+            TgbridgeEvents.RECIPIENTS.invoke(recipientsEvt)
+
             val senderNameMsg = e.chat.minecraftFormat.formatMiniMessage(
                 Placeholders(
                     mapOf("sender" to msg.senderName),
                     mapOf("text" to Component.text("")),
                 )
             )
-            bridge.platform.broadcastMessage(e.chat, senderNameMsg)
-            voiceMessages.sendVoiceMessage(emptyUuid, targetUuids, transcoded, "all")
+            bridge.platform.broadcastMessage(recipientsEvt.recipients, senderNameMsg)
+            val emptyUuid = UUID.fromString("00000000-0000-0000-0000-000000000000")
+            voiceMessages.sendVoiceMessage(emptyUuid, recipientsEvt.recipients.map { it.uuid }, transcoded, "all")
             e.isCancelled = true
         }
         VoiceMessageReceivedCallback.EVENT.register { player, message, target ->

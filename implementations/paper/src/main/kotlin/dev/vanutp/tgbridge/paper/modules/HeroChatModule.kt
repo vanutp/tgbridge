@@ -3,6 +3,7 @@ package dev.vanutp.tgbridge.paper.modules
 import com.dthielke.herochat.ChannelChatEvent
 import com.dthielke.herochat.Chatter
 import com.dthielke.herochat.Herochat
+import dev.vanutp.tgbridge.common.TgbridgeEvents
 import dev.vanutp.tgbridge.common.modules.IChatModule
 import dev.vanutp.tgbridge.common.models.ChatConfig
 import dev.vanutp.tgbridge.common.models.TgbridgeMcChatMessageEvent
@@ -30,7 +31,14 @@ class HeroChatModule(bridge: PaperTelegramBridge) : AbstractPaperModule(bridge),
         )
     }
 
-    override fun getChatRecipients(chat: ChatConfig) =
+    override fun enable() {
+        super.enable()
+        TgbridgeEvents.RECIPIENTS.addListener { e ->
+            e.recipients += getChatRecipients(e.chat) ?: emptyList()
+        }
+    }
+
+    fun getChatRecipients(chat: ChatConfig) =
         Herochat.getChannelManager()
             .channels
             .find { it.name.equals(chat.name, true) }

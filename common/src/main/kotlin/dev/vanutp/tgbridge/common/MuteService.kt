@@ -65,6 +65,10 @@ object MuteService {
         } catch (e: Exception) {
             logger.error("Failed to load muted users: ${e.message}", e)
         }
+
+        TgbridgeEvents.RECIPIENTS.addListener(EventPriority.LOW) { e ->
+            e.recipients = e.recipients.filterNot { isMuted(it.uuid) }
+        }
     }
 
     /**

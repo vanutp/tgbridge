@@ -49,6 +49,11 @@ abstract class TelegramBridge {
         logger.info("tgbridge starting on ${platform.name}")
         ConfigManager.init(platform.configDir, platform::getLanguageKey)
         MuteService.init(logger, platform.configDir)
+        TgbridgeEvents.RECIPIENTS.addListener { e ->
+            if (e.recipients.isEmpty() && e.chat.isDefault && chatModule == null) {
+                e.recipients += platform.getOnlinePlayers()
+            }
+        }
         config.getError()?.let {
             logger.error(it)
             return
@@ -86,15 +91,8 @@ abstract class TelegramBridge {
     }
 
     private fun checkConflictingModules() {
-        var hasChatModule = false
         var hasVanishModule = false
         for (module in enabledModules) {
-            if (module is IChatModule) {
-                if (hasChatModule) {
-                    logger.error("Multiple chat modules found (see above), this is not supported and won't work")
-                }
-                hasChatModule = true
-            }
             if (module is IVanishModule) {
                 if (hasVanishModule) {
                     logger.error("Multiple vanish modules found (see above), this is not supported and won't work")
@@ -201,7 +199,10 @@ abstract class TelegramBridge {
         )
         if (!TgbridgeEvents.TG_CHAT_MESSAGE.invoke(e)) return
 
-        platform.broadcastMessage(chat, chat.minecraftFormat.formatMiniMessage(e.placeholders))
+        val recipientsEvt = TgbridgeRecipientsEvent(chat, originalEvent = e)
+        TgbridgeEvents.RECIPIENTS.invoke(recipientsEvt)
+
+        platform.broadcastMessage(recipientsEvt.recipients, chat.minecraftFormat.formatMiniMessage(e.placeholders))
     }
 
     private fun tryReinit(ctx: TBCommandContext): Boolean = runBlocking {

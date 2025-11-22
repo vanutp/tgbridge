@@ -1,9 +1,6 @@
 package dev.vanutp.tgbridge.forge
 
 import dev.vanutp.tgbridge.common.IPlatform
-import dev.vanutp.tgbridge.common.MuteService
-import dev.vanutp.tgbridge.common.TelegramBridge
-import dev.vanutp.tgbridge.common.models.ChatConfig
 import dev.vanutp.tgbridge.common.models.ITgbridgePlayer
 import net.kyori.adventure.text.Component
 import net.minecraft.network.MessageType
@@ -19,21 +16,7 @@ class ForgePlatform : IPlatform {
     override val name = "forge"
     override val configDir = FMLPaths.CONFIGDIR.get().resolve(ForgeTelegramBridge.MOD_ID)
 
-    private fun getRecipients(chat: ChatConfig): List<ServerPlayerEntity>? {
-        val server = ServerLifecycleHooks.getCurrentServer()
-        val module = TelegramBridge.INSTANCE.chatModule
-        val players = if (module == null) {
-            server.playerManager.playerList.takeIf { chat.isDefault }
-        } else {
-            module.getChatRecipients(chat)?.map { it.toNative() }
-        }
-        return players?.filterNot { MuteService.isMuted(it.uuid) }
-    }
-
-    override fun getChatRecipients(chat: ChatConfig) =
-        getRecipients(chat)?.map { it.toTgbridge() }
-
-    override fun broadcastMessage(chat: ChatConfig, text: Component) {
+    override fun broadcastMessage(recipients: List<ITgbridgePlayer>, text: Component) {
         val server = ServerLifecycleHooks.getCurrentServer()
         val message = text.toMinecraft()
         val packet = GameMessageS2CPacket(
@@ -42,8 +25,8 @@ class ForgePlatform : IPlatform {
             NIL_UUID,
         )
         server.sendSystemMessage(message, NIL_UUID)
-        getRecipients(chat)?.forEach { player ->
-            player.networkHandler.sendPacket(packet)
+        recipients.forEach { player ->
+            player.toNative()?.networkHandler?.sendPacket(packet)
         }
     }
 

@@ -63,3 +63,9 @@ data class TgbridgePlayerPlaceholdersEvent(
     var placeholders: Placeholders = Placeholders(),
     val originalEvent: Any?,
 )
+
+data class TgbridgeRecipientsEvent(
+    var chat: ChatConfig,
+    var recipients: List<ITgbridgePlayer> = emptyList(),
+    val originalEvent: Any?,
+)

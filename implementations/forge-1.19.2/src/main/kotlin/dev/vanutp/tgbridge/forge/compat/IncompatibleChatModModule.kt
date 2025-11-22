@@ -1,11 +1,12 @@
 package dev.vanutp.tgbridge.forge.compat
 
 import dev.vanutp.tgbridge.common.ConfigManager.config
-import dev.vanutp.tgbridge.common.modules.AbstractModule
-import dev.vanutp.tgbridge.common.modules.IChatModule
+import dev.vanutp.tgbridge.common.TgbridgeEvents
 import dev.vanutp.tgbridge.common.models.ChatConfig
 import dev.vanutp.tgbridge.common.models.ITgbridgePlayer
 import dev.vanutp.tgbridge.common.models.TgbridgeMcChatMessageEvent
+import dev.vanutp.tgbridge.common.modules.AbstractModule
+import dev.vanutp.tgbridge.common.modules.IChatModule
 import dev.vanutp.tgbridge.forge.ForgeTelegramBridge
 import dev.vanutp.tgbridge.forge.toAdventure
 import dev.vanutp.tgbridge.forge.toTgbridge
@@ -36,13 +37,16 @@ class IncompatibleChatModModule(override val bridge: ForgeTelegramBridge) : Abst
 
     override fun enable() {
         FORGE_BUS.register(this)
+        TgbridgeEvents.RECIPIENTS.addListener { e ->
+            e.recipients += getChatRecipients(e.chat) ?: emptyList()
+        }
     }
 
     override fun disable() {
         FORGE_BUS.unregister(this)
     }
 
-    override fun getChatRecipients(chat: ChatConfig): List<ITgbridgePlayer>? =
+    fun getChatRecipients(chat: ChatConfig): List<ITgbridgePlayer>? =
         ServerLifecycleHooks.getCurrentServer().playerList.players
             .takeIf { chat.isDefault }
             ?.map { it.toTgbridge() }
