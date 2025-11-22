@@ -192,7 +192,8 @@ abstract class TelegramBridge {
         }
         val textComponent = TelegramToMinecraftConverter.convert(msg, bot.me.id)
         val e = TgbridgeTgChatMessageEvent(
-            msg, chat, null,
+            chat,
+            msg,
             Placeholders(
                 mapOf("sender" to msg.senderName),
                 mapOf("text" to textComponent),
@@ -200,15 +201,7 @@ abstract class TelegramBridge {
         )
         if (!TgbridgeEvents.TG_CHAT_MESSAGE.invoke(e)) return
 
-        val placeholders = e.player
-            ?.let { player ->
-                val placeholdersEvt = TgbridgePlayerPlaceholdersEvent(player, e.placeholders, e)
-                TgbridgeEvents.PLAYER_PLACEHOLDERS.invoke(placeholdersEvt)
-                placeholdersEvt.placeholders
-            }
-            ?: e.placeholders
-
-        platform.broadcastMessage(chat, chat.minecraftFormat.formatMiniMessage(placeholders))
+        platform.broadcastMessage(chat, chat.minecraftFormat.formatMiniMessage(e.placeholders))
     }
 
     private fun tryReinit(ctx: TBCommandContext): Boolean = runBlocking {
