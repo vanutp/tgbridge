@@ -19,9 +19,6 @@ interface ITgbridgePlayer {
 
     fun isVanished() =
         TelegramBridge.INSTANCE.enabledModules
-            .find { it is IVanishModule }
-            ?.let {
-                (it as IVanishModule).isVanished(this)
-            }
-            ?: false
+            .filterIsInstance<IVanishModule>()
+            .any { it.isVanished(this) }
 }

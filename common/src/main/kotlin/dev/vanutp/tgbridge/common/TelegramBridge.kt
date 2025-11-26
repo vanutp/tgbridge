@@ -90,18 +90,6 @@ abstract class TelegramBridge {
         availableModules.add(module)
     }
 
-    private fun checkConflictingModules() {
-        var hasVanishModule = false
-        for (module in enabledModules) {
-            if (module is IVanishModule) {
-                if (hasVanishModule) {
-                    logger.error("Multiple vanish modules found (see above), this is not supported and won't work")
-                }
-                hasVanishModule = true
-            }
-        }
-    }
-
     fun onServerStarted() = coroutineScope.launch {
         // TODO: this will fail if there is no internet on server start
         if (!waitForInit()) {
@@ -250,7 +238,6 @@ abstract class TelegramBridge {
                 toEnable.forEach { it.enable() }
                 _enabledModules.addAll(toEnable)
             }
-        checkConflictingModules()
 
         runBlocking {
             bot.recoverPolling()
