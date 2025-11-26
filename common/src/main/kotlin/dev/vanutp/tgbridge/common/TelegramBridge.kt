@@ -50,7 +50,7 @@ abstract class TelegramBridge {
         ConfigManager.init(platform.configDir, platform::getLanguageKey)
         MuteService.init(logger, platform.configDir)
         TgbridgeEvents.RECIPIENTS.addListener { e ->
-            if (e.recipients.isEmpty() && e.chat.isDefault && chatModule == null) {
+            if (e.chat.isDefault && chatModule == null) {
                 e.recipients += platform.getOnlinePlayers()
             }
         }
