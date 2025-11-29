@@ -175,7 +175,7 @@ subprojects {
         repositories {
             maven {
                 name = "vanutp"
-                url = uri("https://mvn.vtp.sh/main")
+                url = uri("https://maven.vanutp.dev/main")
                 credentials {
                     username = System.getenv("REGISTRY_USERNAME")
                     password = System.getenv("REGISTRY_TOKEN")
