@@ -164,9 +164,9 @@ Include advancement descriptions in Telegram messages
 
 - **Type:** `boolean`
 
-### enableJoinMessages
+### joinMessages
 
-- **Type:** `boolean`
+- **Type:** `true | false | 'first_join_only'`
 
 ### enableLeaveMessages
 
@@ -180,7 +180,7 @@ Include advancement descriptions in Telegram messages
 If a player leaves and then joins within the specified time interval,
 the leave and join messages will be deleted.
 This is useful when players frequently re-join, for example because of connection problems.
-Only has effect when both enableJoinMessages and enableLeaveMessages are set to true.
+Only has effect when both joinMessages = true and enableLeaveMessages = true.
 The value is specified in seconds
 
 

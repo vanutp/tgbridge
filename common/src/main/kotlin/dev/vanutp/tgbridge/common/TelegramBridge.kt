@@ -5,7 +5,10 @@ import dev.vanutp.tgbridge.common.ConfigManager.lang
 import dev.vanutp.tgbridge.common.converters.MinecraftToTelegramConverter
 import dev.vanutp.tgbridge.common.converters.TelegramToMinecraftConverter
 import dev.vanutp.tgbridge.common.models.*
-import dev.vanutp.tgbridge.common.modules.*
+import dev.vanutp.tgbridge.common.modules.IChatModule
+import dev.vanutp.tgbridge.common.modules.ITgbridgeModule
+import dev.vanutp.tgbridge.common.modules.ReplacementsModule
+import dev.vanutp.tgbridge.common.modules.VoiceMessagesModule
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.withLock
 import net.kyori.adventure.text.Component
@@ -350,9 +353,14 @@ abstract class TelegramBridge {
     }
 
     fun onPlayerJoin(e: TgbridgeJoinEvent) = wrapMinecraftHandler {
-        if (!config.events.enableJoinMessages) return@wrapMinecraftHandler
         if (!TgbridgeEvents.JOIN.invoke(e)) return@wrapMinecraftHandler
         if (!e.ignoreVanish && e.player.isVanished()) return@wrapMinecraftHandler
+        if (
+            config.events.joinMessages == JoinMessagesMode.DISABLED
+            || config.events.joinMessages == JoinMessagesMode.FIRST_JOIN_ONLY
+            && e.hasPlayedBefore
+        )
+            return@wrapMinecraftHandler
 
         val placeholdersEvt = TgbridgePlayerPlaceholdersEvent(
             e.player,

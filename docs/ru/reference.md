@@ -165,9 +165,9 @@ Xaero's Minimap/World Map, будут отображаться как ссылк
 
 - **Тип:** `boolean`
 
-### enableJoinMessages
+### joinMessages
 
-- **Тип:** `boolean`
+- **Тип:** `true | false | 'first_join_only'`
 
 ### enableLeaveMessages
 
@@ -181,7 +181,7 @@ Xaero's Minimap/World Map, будут отображаться как ссылк
 Если игрок выходит и заходит в течение указанного интервала,
 сообщения входа и выхода будут удалены.
 Это полезно когда игроки часто переподключаются, например из-за проблем с соединением.
-Работает только когда и enableJoinMessages и enableLeaveMessages включены.
+Работает только когда и joinMessages = true и enableLeaveMessages = true.
 Значение указывается в секундах
 
 

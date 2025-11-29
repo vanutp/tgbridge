@@ -8,6 +8,8 @@ import com.charleskorn.kaml.YamlScalar
 import com.charleskorn.kaml.yamlMap
 import dev.vanutp.tgbridge.common.models.ChatConfig
 import dev.vanutp.tgbridge.common.models.Config
+import dev.vanutp.tgbridge.common.models.EventsConfig
+import dev.vanutp.tgbridge.common.models.JoinMessagesMode
 import dev.vanutp.tgbridge.common.models.Lang
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -115,6 +117,8 @@ object ConfigManager {
                 is YamlScalar -> node.content.toIntOrNull()
                 else -> null
             }
+            val oldEvents = data.yamlMap.get<YamlMap>("events")
+            val oldEnableJoinMessages = oldEvents?.getScalar("enableJoinMessages")?.content?.toBoolean() ?: true
             val langData = yaml.parseToYamlNode(langPath.readText())
             val langVersion = langData.yamlMap.getScalar("version")?.content?.toIntOrNull() ?: 1
             val oldMinecraftFormat = langData.yamlMap.get<YamlMap>("minecraft")?.getScalar("format")?.content!!
@@ -137,6 +141,12 @@ object ConfigManager {
                         minecraftFormat = oldMinecraftFormat,
                         telegramFormat = oldTelegramFormat,
                     )
+                ),
+                events = config.events.copy(
+                    joinMessages = if (oldEnableJoinMessages)
+                        JoinMessagesMode.ENABLED
+                    else
+                        JoinMessagesMode.DISABLED
                 )
             )
         } else if (config.version != LATEST_CONFIG_VERSION) {

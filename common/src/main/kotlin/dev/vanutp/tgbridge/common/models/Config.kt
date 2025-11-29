@@ -1,7 +1,15 @@
 package dev.vanutp.tgbridge.common.models
 
 import com.charleskorn.kaml.YamlComment
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.descriptors.PolymorphicKind
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.descriptors.buildSerialDescriptor
+import kotlinx.serialization.encoding.Encoder
 
 @Serializable
 data class Config(
@@ -99,16 +107,27 @@ data class IntegrationsDiscordConfig(
 )
 
 @Serializable
+enum class JoinMessagesMode {
+    @SerialName("true")
+    ENABLED,
+    @SerialName("first_join_only")
+    FIRST_JOIN_ONLY,
+    @SerialName("false")
+    DISABLED,
+}
+
+@Serializable
 data class EventsConfig(
     val advancementMessages: EventsAdvancementMessagesConfig = EventsAdvancementMessagesConfig(),
     val enableDeathMessages: Boolean = true,
-    val enableJoinMessages: Boolean = true,
+    @YamlComment("Available values: true, first_join_only, false")
+    val joinMessages: JoinMessagesMode = JoinMessagesMode.ENABLED,
     val enableLeaveMessages: Boolean = true,
     @YamlComment(
         "If a player leaves and then joins within the specified time interval,",
         "the leave and join messages will be deleted.",
         "This is useful when players frequently re-join, for example because of connection problems.",
-        "Only has effect when both enableJoinMessages and enableLeaveMessages are set to true.",
+        "Only has effect when both joinMessages = true and enableLeaveMessages = true.",
         "The value is specified in seconds",
         "Default value: 0 (disabled)",
     )
