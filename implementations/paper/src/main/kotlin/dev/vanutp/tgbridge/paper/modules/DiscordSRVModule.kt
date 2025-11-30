@@ -43,7 +43,7 @@ class DiscordSRVModule(bridge: PaperTelegramBridge) : AbstractPaperModule(bridge
                 mapOf("text" to text),
             )
         )
-        bridge.chatManager.sendMessage(chat, MessageContentText(message))
+        bridge.chatManager.sendMessage(chat, MessageContentMergeableText(message))
     }
 
     override fun enable() {
