@@ -8,12 +8,15 @@ import de.maxhenkel.voicechat.api.opus.OpusEncoder
 import dev.vanutp.tgbridge.common.*
 import dev.vanutp.tgbridge.common.ConfigManager.config
 import dev.vanutp.tgbridge.common.converters.MinecraftToTelegramConverter
+import dev.vanutp.tgbridge.common.converters.TelegramFormattedText
+import dev.vanutp.tgbridge.common.models.ChatConfig
 import dev.vanutp.tgbridge.common.models.TgbridgeRecipientsEvent
 import kotlinx.coroutines.launch
 import net.kyori.adventure.text.Component
 import ru.dimaskama.voicemessages.api.VoiceMessageReceivedCallback
 import ru.dimaskama.voicemessages.api.VoiceMessagesApi
 import ru.dimaskama.voicemessages.api.VoiceMessagesApiInitCallback
+import java.time.Clock
 import java.util.*
 
 
@@ -36,6 +39,25 @@ class VoiceChatPlugin : VoicechatPlugin {
         Companion.api = api
         decoder = api.createDecoder()
         encoder = api.createEncoder()
+    }
+}
+
+class MessageContentVoice(
+    val oggData: ByteArray,
+    val text: TelegramFormattedText,
+) : MessageContent() {
+    override suspend fun send(chat: ChatConfig, lastMessage: TgbridgeTgMessage?): TgbridgeTgMessage {
+        val tgMessage = TelegramBridge.INSTANCE.bot.sendVoice(
+            chat.chatId,
+            oggData,
+            text.text,
+            text.entities,
+            chat.topicId,
+            null,
+        )
+        return TgbridgeTgMessage(
+            chat, tgMessage.messageId, Clock.systemUTC().instant(), this
+        )
     }
 }
 
@@ -99,16 +121,8 @@ class VoiceMessagesModule(bridge: TelegramBridge) : AbstractModule(bridge) {
                 )
             )
             bridge.coroutineScope.launch {
-                bridge.bot.sendVoice(
-                    chat.chatId,
-                    oggData,
-                    tgText.text,
-                    tgText.entities,
-                    chat.topicId,
-                    null,
-                )
+                bridge.chatManager.sendMessage(chat, MessageContentVoice(oggData, tgText))
             }
-            bridge.merger.lastMessages.remove(chat.name)
             return@register false
         }
     }

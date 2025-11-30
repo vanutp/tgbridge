@@ -557,7 +557,7 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
         text: String,
         entities: List<TgEntity>? = null,
         replyToMessageId: Int? = null,
-        parseMode: String? = "HTML",
+        parseMode: String? = null,
         disableWebPagePreview: Boolean = true,
     ): TgMessage = retriableCall {
         client.sendMessage(
@@ -577,7 +577,7 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
         text: String,
         entities: List<TgEntity>? = null,
         replyToMessageId: Int? = null,
-        parseMode: String? = "HTML",
+        parseMode: String? = null,
         disableWebPagePreview: Boolean = true,
     ) = scope.future { sendMessage(chatId, text, entities, replyToMessageId, parseMode, disableWebPagePreview) }
 
@@ -588,7 +588,7 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
         caption: String? = null,
         captionEntities: List<TgEntity>? = null,
         replyToMessageId: Int? = null,
-        parseMode: String? = "HTML",
+        parseMode: String? = null,
     ): TgMessage = retriableCall {
         val requestVoiceFile = voice.toRequestBody(MultipartBody.FORM, 0, voice.size)
         val currentDateString = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"))
@@ -618,7 +618,7 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
         messageId: Int,
         text: String,
         entities: List<TgEntity>? = null,
-        parseMode: String? = "HTML",
+        parseMode: String? = null,
         disableWebPagePreview: Boolean = true,
     ) = retriableCall {
         client.editMessageText(
@@ -638,7 +638,7 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
         messageId: Int,
         text: String,
         entities: List<TgEntity>? = null,
-        parseMode: String? = "HTML",
+        parseMode: String? = null,
         disableWebPagePreview: Boolean = true,
     ) = scope.future {
         editMessageText(chatId, messageId, text, entities, parseMode, disableWebPagePreview)
