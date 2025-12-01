@@ -6,7 +6,7 @@ folia-supported: true
 commands:
   tgbridge:
     description: Minecraft Telegram Bridge
-    usage: /tgbridge <reload|toggle>
+    usage: /tgbridge <reload|toggle|send <format> <chat_name> <message>>
 softdepend:
   - voicechat
   - voicemessages

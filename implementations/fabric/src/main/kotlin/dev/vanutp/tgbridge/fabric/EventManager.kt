@@ -1,5 +1,7 @@
 package dev.vanutp.tgbridge.fabric
 
+import com.mojang.brigadier.arguments.StringArgumentType
+import com.mojang.brigadier.builder.ArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import dev.vanutp.tgbridge.common.TelegramBridge
 import dev.vanutp.tgbridge.common.models.*
@@ -115,8 +117,24 @@ object EventManager {
         return if (res) 1 else -1
     }
 
+    private fun onSendCommand(ctx: CommandContext<CommandSourceStack>): Int {
+        val format = ctx.nodes[2].node.name
+        val chatName = StringArgumentType.getString(ctx, "chatName")
+        val message = StringArgumentType.getString(ctx, "message")
+        val res = FabricTelegramBridge.onSendCommand(ctx.toTgbridge(), format, chatName, message)
+        return if (res) 1 else -1
+    }
+
     private fun registerCommandHandlers() {
         // TODO: get rid of code duplication between versions and loaders
+        val appendSendArgs = { builder: ArgumentBuilder<CommandSourceStack, *> ->
+            builder.then(
+                Commands.argument("chatName", StringArgumentType.string()).then(
+                    Commands.argument("message", StringArgumentType.greedyString())
+                        .executes(::onSendCommand)
+                )
+            )
+        }
         CommandRegistrationCallback.EVENT.register { dispatcher, _, _ ->
             dispatcher.register(
                 Commands.literal("tgbridge")
@@ -128,6 +146,14 @@ object EventManager {
                     .then(
                         Commands.literal("toggle")
                             .executes(::onToggleMuteCommand)
+                    )
+                    .then(
+                        Commands.literal("send")
+                            .requires { it.hasPermission(2) }
+                            .then(appendSendArgs(Commands.literal("plain")))
+                            .then(appendSendArgs(Commands.literal("mm")))
+                            .then(appendSendArgs(Commands.literal("html")))
+                            .then(appendSendArgs(Commands.literal("json")))
                     )
             )
         }

@@ -1,5 +1,7 @@
 package dev.vanutp.tgbridge.forge
 
+import com.mojang.brigadier.arguments.StringArgumentType
+import com.mojang.brigadier.builder.ArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import dev.vanutp.tgbridge.common.TelegramBridge
 import dev.vanutp.tgbridge.common.models.*
@@ -99,8 +101,24 @@ class EventManager(private val tgbridge: ForgeTelegramBridge) {
         return if (res) 1 else -1
     }
 
+    private fun onSendCommand(ctx: CommandContext<ServerCommandSource>): Int {
+        val format = ctx.nodes[2].node.name
+        val chatName = StringArgumentType.getString(ctx, "chatName")
+        val message = StringArgumentType.getString(ctx, "message")
+        val res = tgbridge.onSendCommand(ctx.toTgbridge(), format, chatName, message)
+        return if (res) 1 else -1
+    }
+
     private fun registerCommandHandlers() {
         // TODO: get rid of code duplication between versions and loaders
+        val appendSendArgs = { builder: ArgumentBuilder<ServerCommandSource, *> ->
+            builder.then(
+                CommandManager.argument("chatName", StringArgumentType.string()).then(
+                    CommandManager.argument("message", StringArgumentType.greedyString())
+                        .executes(::onSendCommand)
+                )
+            )
+        }
         EVENT_BUS.addListener { e: RegisterCommandsEvent ->
             e.dispatcher.register(
                 CommandManager.literal("tgbridge")
@@ -112,6 +130,14 @@ class EventManager(private val tgbridge: ForgeTelegramBridge) {
                     .then(
                         CommandManager.literal("toggle")
                             .executes(::onToggleMuteCommand)
+                    )
+                    .then(
+                        CommandManager.literal("send")
+                            .requires { it.hasPermissionLevel(2) }
+                            .then(appendSendArgs(CommandManager.literal("plain")))
+                            .then(appendSendArgs(CommandManager.literal("mm")))
+                            .then(appendSendArgs(CommandManager.literal("html")))
+                            .then(appendSendArgs(CommandManager.literal("json")))
                     )
             )
         }

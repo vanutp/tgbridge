@@ -2,6 +2,7 @@ package dev.vanutp.tgbridge.common
 
 import dev.vanutp.tgbridge.common.ConfigManager.config
 import dev.vanutp.tgbridge.common.ConfigManager.lang
+import dev.vanutp.tgbridge.common.converters.TelegramFormattedText
 import dev.vanutp.tgbridge.common.converters.TelegramToMinecraftConverter
 import dev.vanutp.tgbridge.common.models.*
 import dev.vanutp.tgbridge.common.modules.IChatModule
@@ -11,6 +12,7 @@ import dev.vanutp.tgbridge.common.modules.VoiceMessagesModule
 import kotlinx.coroutines.*
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TranslatableComponent
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 import kotlin.time.Duration.Companion.seconds
 
 abstract class TelegramBridge {
@@ -259,6 +261,41 @@ abstract class TelegramBridge {
             return true
         }
         return false
+    }
+
+    fun onSendCommand(ctx: TBCommandContext, format: String, chatName: String, message: String): Boolean {
+        val chat = config.getChat(chatName)
+        if (chat == null) {
+            ctx.reply("Chat '$chatName' not found")
+            return false
+        }
+        val content = try {
+            when (format) {
+                "plain" -> MessageContentText(TelegramFormattedText(message))
+                "mm" -> MessageContentText(message.formatMiniMessage())
+                "html" -> MessageContentHTMLText(message)
+                "json" -> MessageContentText(GsonComponentSerializer.gson().deserialize(message))
+                else -> throw IllegalStateException("Unknown format")
+            }
+        } catch (e: Exception) {
+            ctx.reply("Error parsing message: $e")
+            return false
+        }
+        coroutineScope.launch {
+            // TODO: do commands run on the main thread?
+            try {
+                chatManager.sendMessage(chat, content)
+                ctx.reply("Message sent")
+            } catch (e: TelegramException) {
+                ctx.reply("Error sending message: ${e.responseBody}")
+                return@launch
+            } catch (e: Exception) {
+                ctx.reply("Error sending message: $e")
+                return@launch
+            }
+        }
+        // TODO: is it ok to ever return false?
+        return true
     }
 
     fun onChatMessage(e: TgbridgeMcChatMessageEvent) = wrapMinecraftHandler {

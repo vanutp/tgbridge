@@ -88,6 +88,13 @@ class EventManager(private val plugin: PaperBootstrap) : Listener {
         }, plugin)
     }
 
+    private fun onSendCommand(ctx: TBCommandContext, args: Array<String>): Boolean {
+        val format = args[1]
+        val chatName = args[2]
+        val message = args.slice(3 until args.size).joinToString(" ")
+        return plugin.tgbridge.onSendCommand(ctx, format, chatName, message)
+    }
+
     private fun registerCommandHandlers() {
         plugin.getCommand("tgbridge")!!.setExecutor { commandSender, _, _, args ->
             if (args.contentDeepEquals(arrayOf("reload"))) {
@@ -98,6 +105,12 @@ class EventManager(private val plugin: PaperBootstrap) : Listener {
             }
             if (args.contentDeepEquals(arrayOf("toggle"))) {
                 return@setExecutor plugin.tgbridge.onToggleMuteCommand(commandSender.toTgbridge())
+            }
+            if (args.size >= 4 && args[0] == "send") {
+                if (!commandSender.isOp) {
+                    return@setExecutor false
+                }
+                return@setExecutor onSendCommand(commandSender.toTgbridge(), args)
             }
             return@setExecutor false
         }

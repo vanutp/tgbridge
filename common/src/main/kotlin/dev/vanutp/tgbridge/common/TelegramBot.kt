@@ -331,6 +331,10 @@ data class TgDeleteMessageRequest(
     val messageId: Int,
 )
 
+class TelegramException(val responseBody: String?) : Exception(
+    "Telegram exception: ${responseBody ?: "no response body"}"
+)
+
 interface TgApi {
     @GET("getMe")
     suspend fun getMe(): TgResponse<TgUser>
@@ -496,8 +500,7 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
             return f().result!!
         } catch (e: HttpException) {
             val resp = e.response() ?: throw e
-            // TODO: replace with custom exception class
-            throw Exception("Telegram exception: ${resp.errorBody()?.string() ?: "no response body"}")
+            throw TelegramException(resp.errorBody()?.string())
         }
     }
 
