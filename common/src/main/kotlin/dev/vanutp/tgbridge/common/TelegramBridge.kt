@@ -242,7 +242,7 @@ abstract class TelegramBridge {
             bot.recoverPolling()
             chatManager.unlock()
         }
-        ctx.reply("Config reloaded. Note that the bot token can't be changed without a restart")
+        ctx.reply("Config reloaded. Note that the bot token and settings under \"advanced\" can't be changed without a restart")
         coroutineScope.launch {
             TgbridgeEvents.POST_RELOAD.invoke(Unit)
         }

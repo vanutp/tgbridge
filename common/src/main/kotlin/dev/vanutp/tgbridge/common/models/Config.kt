@@ -1,20 +1,21 @@
 package dev.vanutp.tgbridge.common.models
 
 import com.charleskorn.kaml.YamlComment
-import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.descriptors.PolymorphicKind
-import kotlinx.serialization.descriptors.PrimitiveKind
-import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.descriptors.buildSerialDescriptor
-import kotlinx.serialization.encoding.Encoder
 
 @Serializable
 data class Config(
     val botToken: String = "your bot token",
-    val chats: List<ChatConfig> = listOf(ChatConfig(name = "global", isDefault = true, chatId = 0, minecraftFormat = "<aqua>\\<<sender>></aqua> <text>", telegramFormat = "<b>[<username>]</b> <text>")),
+    val chats: List<ChatConfig> = listOf(
+        ChatConfig(
+            name = "global",
+            isDefault = true,
+            chatId = 0,
+            minecraftFormat = "<aqua>\\<<sender>></aqua> <text>",
+            telegramFormat = "<b>[<username>]</b> <text>"
+        )
+    ),
     val messages: MessagesConfig = MessagesConfig(),
     val integrations: IntegrationsConfig = IntegrationsConfig(),
     val events: EventsConfig = EventsConfig(),
@@ -110,8 +111,10 @@ data class IntegrationsDiscordConfig(
 enum class JoinMessagesMode {
     @SerialName("true")
     ENABLED,
+
     @SerialName("first_join_only")
     FIRST_JOIN_ONLY,
+
     @SerialName("false")
     DISABLED,
 }
@@ -166,7 +169,30 @@ data class EventsAdvancementMessagesConfig(
 @Serializable
 data class AdvancedConfig(
     val botApiUrl: String = "https://api.telegram.org",
+    val proxy: AdvancedProxyConfig = AdvancedProxyConfig(),
     val connectionRetry: AdvancedConnectionRetryConfig = AdvancedConnectionRetryConfig(),
+)
+
+@Serializable
+enum class ProxyType {
+    @SerialName("none")
+    NONE,
+
+    @SerialName("socks5")
+    SOCKS5,
+
+    @SerialName("http")
+    HTTP,
+}
+
+@Serializable
+data class AdvancedProxyConfig(
+    @YamlComment("Supported types: none, socks5, http")
+    val type: ProxyType = ProxyType.NONE,
+    val host: String = "",
+    val port: Int = 0,
+    val username: String? = null,
+    val password: String? = null,
 )
 
 @Serializable

@@ -1,12 +1,13 @@
 package dev.vanutp.tgbridge.common
 
 import dev.vanutp.tgbridge.common.ConfigManager.config
+import dev.vanutp.tgbridge.common.models.ProxyType
 import kotlinx.coroutines.*
 import kotlinx.coroutines.future.future
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import okhttp3.Credentials
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
@@ -18,10 +19,7 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import retrofit2.http.*
-import java.net.ConnectException
-import java.net.SocketException
-import java.net.SocketTimeoutException
-import java.net.UnknownHostException
+import java.net.*
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -380,8 +378,45 @@ interface TgApi {
 const val POLL_TIMEOUT_SECONDS = 60
 
 class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogger, private val scope: CoroutineScope) {
+    init {
+        val proxy = config.advanced.proxy
+        if (proxy.type == ProxyType.SOCKS5 && proxy.username != null && proxy.password != null) {
+            Authenticator.setDefault(object : Authenticator() {
+                override fun getPasswordAuthentication(): PasswordAuthentication? =
+                    if (
+                        requestingHost.equals(proxy.host, ignoreCase = true)
+                        && (requestingPort == proxy.port)
+                    ) {
+                        PasswordAuthentication(proxy.username, proxy.password.toCharArray())
+                    } else {
+                        null
+                    }
+            })
+        }
+    }
+
     private val okhttpClient = OkHttpClient.Builder()
         .readTimeout(Duration.ofSeconds((POLL_TIMEOUT_SECONDS + 10).toLong()))
+        .let { builder ->
+            val proxy = config.advanced.proxy
+            val addr = InetSocketAddress(proxy.host, proxy.port)
+            when (proxy.type) {
+                ProxyType.NONE -> builder
+                ProxyType.SOCKS5 -> builder.proxy(Proxy(Proxy.Type.SOCKS, addr))
+                ProxyType.HTTP -> builder
+                    .proxy(Proxy(Proxy.Type.HTTP, addr))
+                    .let { builder ->
+                        if (proxy.username != null && proxy.password != null) {
+                            builder.proxyAuthenticator { _, response ->
+                                val credential = Credentials.basic(proxy.username, proxy.password)
+                                response.request.newBuilder().header("Proxy-Authorization", credential).build()
+                            }
+                        } else {
+                            builder
+                        }
+                    }
+            }
+        }
         .build()
     private val fileBaseUrl = "$botApiUrl/file/bot$botToken/"
     private val json = Json {

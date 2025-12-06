@@ -1,14 +1,8 @@
 package dev.vanutp.tgbridge.common
 
-import com.charleskorn.kaml.Yaml
-import com.charleskorn.kaml.YamlConfiguration
-import com.charleskorn.kaml.YamlMap
-import com.charleskorn.kaml.YamlNode
-import com.charleskorn.kaml.YamlScalar
-import com.charleskorn.kaml.yamlMap
+import com.charleskorn.kaml.*
 import dev.vanutp.tgbridge.common.models.ChatConfig
 import dev.vanutp.tgbridge.common.models.Config
-import dev.vanutp.tgbridge.common.models.EventsConfig
 import dev.vanutp.tgbridge.common.models.JoinMessagesMode
 import dev.vanutp.tgbridge.common.models.Lang
 import kotlinx.serialization.decodeFromString
@@ -83,7 +77,7 @@ object ConfigManager {
                         .replace("{deathMessage}", "<death_message>")
                 ),
             )
-        }  else if (lang.version == 3) {
+        } else if (lang.version == 3) {
             lang = lang.copy(version = 4)
         } else if (lang.version != LATEST_LANG_VERSION) {
             throw Exception("Unsupported lang version ${lang.version}")
