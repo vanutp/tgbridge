@@ -4,7 +4,7 @@ import com.google.gson.Gson
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import dev.vanutp.tgbridge.common.TelegramBridge
-import dev.vanutp.tgbridge.forge.compat.IncompatibleChatModModule
+import dev.vanutp.tgbridge.forge.modules.IncompatibleChatModModule
 import net.minecraft.client.resources.language.ClientLanguage
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.locale.Language

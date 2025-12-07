@@ -1,4 +1,4 @@
-package dev.vanutp.tgbridge.fabric.compat
+package dev.vanutp.tgbridge.fabric.modules
 
 import dev.vanutp.tgbridge.common.modules.IVanishModule
 import dev.vanutp.tgbridge.common.modules.AbstractModule

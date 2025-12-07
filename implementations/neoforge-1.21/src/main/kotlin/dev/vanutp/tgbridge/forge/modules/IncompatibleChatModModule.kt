@@ -1,4 +1,4 @@
-package dev.vanutp.tgbridge.forge.compat
+package dev.vanutp.tgbridge.forge.modules
 
 import dev.vanutp.tgbridge.common.ConfigManager.config
 import dev.vanutp.tgbridge.common.TgbridgeEvents
