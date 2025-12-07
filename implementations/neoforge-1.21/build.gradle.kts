@@ -26,7 +26,7 @@ dependencies {
 
     implementation("thedarkcolour:kotlinforforge-neoforge:${forgeKotlinVersion}")
 
-    implementation(project(":common"))
+    api(project(":common"))
     shadow(project(":common"))
 }
 

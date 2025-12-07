@@ -24,9 +24,9 @@ dependencies {
 	modImplementation("net.fabricmc.fabric-api:fabric-api:${fabricApiVersion}")
 	modImplementation("net.fabricmc:fabric-language-kotlin:${fabricKotlinVersion}")
 
-	implementation(project(":common"))
+	api(project(":common"))
 	shadow(project(":common"))
-	implementation(project(":common-jvm21"))
+    implementation(project(":common-jvm21"))
 	shadow(project(":common-jvm21"))
 
 	modCompileOnly("maven.modrinth:vanish:$vanishVersion")

@@ -26,7 +26,7 @@ dependencies {
     forge("net.minecraftforge:forge:${minecraftVersion}-${forgeVersion}")
     mappings("net.fabricmc:yarn:${yarnMappings}:v2")
 
-    implementation(project(":common"))
+    api(project(":common"))
     shadow(project(":common"))
 }
 

@@ -31,7 +31,7 @@ dependencies {
 
     implementation("thedarkcolour:kotlinforforge:${forgeKotlinVersion}")
 
-    implementation(project(":common"))
+    api(project(":common"))
     shadow(project(":common"))
 }
 
