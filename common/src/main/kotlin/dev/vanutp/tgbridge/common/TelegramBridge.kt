@@ -332,6 +332,9 @@ abstract class TelegramBridge {
     fun onPlayerDeath(e: TgbridgeDeathEvent) = wrapMinecraftHandler {
         if (!config.events.enableDeathMessages) return@wrapMinecraftHandler
 
+        if (!TgbridgeEvents.DEATH.invoke(e)) return@wrapMinecraftHandler
+        if (e.player.isVanished()) return@wrapMinecraftHandler
+
         val convertedMessage = when (val msg = e.message) {
             is TranslatableComponent -> {
                 val args = mutableListOf<Component>(Component.text(e.player.getName()))
@@ -342,9 +345,6 @@ abstract class TelegramBridge {
             null -> Component.translatable("death.attack.generic", Component.text(e.player.getName()))
             else -> msg
         }
-
-        if (!TgbridgeEvents.DEATH.invoke(e)) return@wrapMinecraftHandler
-        if (e.player.isVanished()) return@wrapMinecraftHandler
 
         val placeholdersEvt = TgbridgePlayerPlaceholdersEvent(
             e.player,
@@ -404,6 +404,8 @@ abstract class TelegramBridge {
     fun onPlayerAdvancement(e: TgbridgeAdvancementEvent) = wrapMinecraftHandler {
         val advancementsCfg = config.events.advancementMessages
         if (!advancementsCfg.enable) return@wrapMinecraftHandler
+        if (!TgbridgeEvents.ADVANCEMENT.invoke(e)) return@wrapMinecraftHandler
+        if (e.player.isVanished()) return@wrapMinecraftHandler
 
         val advancementName = e.title.asString()
         val advancementDescription = if (advancementsCfg.showDescription) {
@@ -411,9 +413,6 @@ abstract class TelegramBridge {
         } else {
             ""
         }
-
-        if (!TgbridgeEvents.ADVANCEMENT.invoke(e)) return@wrapMinecraftHandler
-        if (e.player.isVanished()) return@wrapMinecraftHandler
 
         val placeholdersEvt = TgbridgePlayerPlaceholdersEvent(
             e.player,
