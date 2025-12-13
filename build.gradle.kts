@@ -159,7 +159,7 @@ subprojects {
     }
 
     publishing {
-        if (project.name == "common" || project.name == "paper") {
+        if (listOf("common", "common-jvm21", "paper").contains(project.name)) {
             publishing {
                 publications {
                     create<MavenPublication>("maven") {
