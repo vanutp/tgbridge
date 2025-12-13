@@ -21,8 +21,8 @@ fun String.escapeHTML(): String = this
 fun Component.asString() = MinecraftToTelegramConverter.convert(this).text
 
 data class Placeholders(
-    var plain: Map<String, String> = emptyMap(),
-    var component: Map<String, Component> = emptyMap(),
+    val plain: Map<String, String> = emptyMap(),
+    val component: Map<String, Component> = emptyMap(),
 ) {
     operator fun plus(other: Placeholders) = Placeholders(
         plain + other.plain,
