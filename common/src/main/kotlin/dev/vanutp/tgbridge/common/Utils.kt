@@ -109,19 +109,3 @@ fun Config.getError(): String? {
         null
     }
 }
-
-fun Config.getDefaultChat(): ChatConfig {
-    return chats.find { it.isDefault }!!
-}
-
-fun Config.getChat(name: String?): ChatConfig? {
-    return if (name == null) {
-        getDefaultChat()
-    } else {
-        chats.find { it.name.equals(name, true) }
-    }
-}
-
-fun Config.getChat(chatId: Long, topicId: Int?): ChatConfig? {
-    return chats.find { it.chatId == chatId && (it.topicId == topicId || it.topicId == null && topicId == 1) }
-}

@@ -24,7 +24,19 @@ data class Config(
         "Config file version. Don't change manually",
     )
     val version: Int = 1,
-)
+) {
+    fun getDefaultChat() = chats.find { it.isDefault }!!
+
+    fun getChat(name: String?) =
+        if (name == null) {
+            getDefaultChat()
+        } else {
+            chats.find { it.name.equals(name, true) }
+        }
+
+    fun getChat(chatId: Long, topicId: Int?) =
+        chats.find { it.chatId == chatId && (it.topicId == topicId || it.topicId == null && topicId == 1) }
+}
 
 @Serializable
 data class ChatConfig(
