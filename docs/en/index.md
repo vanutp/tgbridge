@@ -18,7 +18,7 @@ features:
     link: /en/quickstart
   - title: Compatible
     details: Supports Fabric, (Neo)Forge and Paper. Aims to support most of the mods and plugins
-    link: /en/compatibility
+    link: /en/integrations
   - title: Feature-rich
     details: Contains a lot of useful features, including unique ones
     link: /en/features

@@ -46,6 +46,7 @@ data class Placeholders(
 
 
 fun String.formatLang(placeholders: Placeholders = Placeholders()): String {
+    // TODO: use escapeHTML here?
     val placeholdersMerged = placeholders.plain + placeholders.component.mapValues { it.value.asString() }
     var res = this
     placeholdersMerged.forEach {

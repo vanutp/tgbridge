@@ -6,10 +6,12 @@ export default {
   sidebar: [
     {text: 'Быстрый старт', link: '/ru/quickstart'},
     {text: 'Фичи', link: '/ru/features'},
+    {text: 'Интеграции', link: '/ru/integrations'},
+    {text: 'Команды', link: '/ru/commands'},
     {text: 'Опции конфигурации', link: '/ru/reference'},
     {text: 'Локализация', link: '/ru/localization'},
-    {text: 'Совместимость', link: '/ru/compatibility'},
     {text: 'Решение проблем', link: '/ru/troubleshooting'},
+    {text: 'API', link: '/en/api'},
   ],
 
   lastUpdated: {

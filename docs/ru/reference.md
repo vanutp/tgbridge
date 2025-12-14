@@ -6,45 +6,47 @@
 - **Тип:** `string`
 - **Обязательно**
 
+<p id="chats"></p>
+
 ## chats[]
 
-### name
+## chats[].name
 
 - **Тип:** `string`
 - **Обязательно**
 
-### isDefault
+## chats[].isDefault
 
 - **Тип:** `boolean`
 - **По умолчанию:** `false`
 
-### chatId
+## chats[].chatId
 
 - **Тип:** `number`
 - **Обязательно**
 
-### topicId
+## chats[].topicId
 
 - **Тип:** `number | null`
 - **По умолчанию:** `null`
 
-### minecraftFormat
+## chats[].minecraftFormat
 
 - **Тип:** `string`
 - **По умолчанию:** `"<aqua>\\<<sender>></aqua> <text>"`
 
-Формат сообщений Telegram -> Minecraft. Использует форматирование MiniMessage.
+Формат сообщений Telegram -> Minecraft.
+Использует форматирование [MiniMessage](https://docs.advntr.dev/minimessage/format.html).
 
-### telegramFormat
+## chats[].telegramFormat
 
 - **Тип:** `string`
 - **По умолчанию:** `"<b>[<username>]</b> <text>"`
 
-Формат сообщений Minecraft -> Telegram. Использует форматирование MiniMessage.
+Формат сообщений Minecraft -> Telegram.
+Использует форматирование [MiniMessage](https://docs.advntr.dev/minimessage/format.html).
 
-## messages
-
-### requirePrefixInMinecraft
+## messages.requirePrefixInMinecraft
 
 - **Тип:** `string | null`
 - **По умолчанию:** `null` (отключено)
@@ -57,15 +59,14 @@
 Если эта опция задана, сообщения без указанного префикса не будет переслано в Telegram.
 
 
-### keepPrefix
+## messages.keepPrefix
 
 - **Тип:** `boolean`
 - **По умолчанию:** `false`
 
 Установите значение `true`, чтобы оставлять префикс, указанный в настройке выше, в сообщении
 
-
-### mergeWindow
+## messages.mergeWindow
 
 - **Тип:** `number`
 - **По умолчанию:** `0` (отключено)
@@ -73,8 +74,7 @@
 Сообщения, отправленные в течение указанного интервала, будут объединены в одно.
 Значение указывается в секундах
 
-
-### useRealUsername
+## messages.useRealUsername
 
 - **Тип:** `boolean`
 - **По умолчанию:** `false`
@@ -82,10 +82,7 @@
 Установите значение `true`, чтобы использовать реальный ник игрока вместо отображаемого имени
 во всех сообщениях в Telegram
 
-
-## integrations
-
-### bluemapUrl
+## integrations.bluemapUrl
 
 - **Тип:** `string | null`
 - **По умолчанию:** `null` (отключено)
@@ -94,8 +91,7 @@
 Если эта опция задана, вейпойнты, которыми игроки поделились с помощью
 Xaero's Minimap/World Map, будут отображаться как ссылки на указанный инстанс BlueMap
 
-
-### incompatiblePluginChatPrefix
+## integrations.incompatiblePluginChatPrefix
 
 - **Тип:** `string | null`
 - **По умолчанию:** `null` (отключено)
@@ -108,72 +104,60 @@ Xaero's Minimap/World Map, будут отображаться как ссылк
 и будет отправлять только сообщения, начинающиеся с указанного префикса.
 Поддерживается только на Paper и Forge/NeoForge.
 
+{ #integrations-discord }
 
-### discord
-
-#### toDiscordFmt
+## integrations.discord.toDiscordFmt
 
 - **Тип:** `string`
 - **По умолчанию:** `"**[{sender}]** {text}"`
 
 Формат сообщений Telegram -> Discord. Использует форматирование Discord (Markdown).
 
-#### toTelegramFmt
+## integrations.discord.toTelegramFmt
 
 - **Тип:** `string`
 - **По умолчанию:** `"<b>[<sender>]</b> <text>"`
 
-Формат сообщений Discord -> Telegram. Использует форматирование MiniMessage.
+Формат сообщений Discord -> Telegram.
+Использует форматирование [MiniMessage](https://docs.advntr.dev/minimessage/format.html).
 
-## events
+{ #events }
 
-### advancementMessages
-
-#### enable
-
-- **Тип:** `boolean`
-
-#### enableTask
+## events.advancementMessages.enable
 
 - **Тип:** `boolean`
 
-Настройка пересылки каждого типа ачивок
-
-
-#### enableGoal
+## events.advancementMessages.enableTask
 
 - **Тип:** `boolean`
 
-Настройка пересылки каждого типа ачивок
-
-
-#### enableChallenge
+## events.advancementMessages.enableGoal
 
 - **Тип:** `boolean`
 
-Настройка пересылки каждого типа ачивок
+## events.advancementMessages.enableChallenge
 
+- **Тип:** `boolean`
 
-#### showDescription
+## events.advancementMessages.showDescription
 
 - **Тип:** `boolean`
 
 Добавлять описания достижений при пересылке в Telegram
 
-
-### enableDeathMessages
+## events.enableDeathMessages
 
 - **Тип:** `boolean`
 
-### joinMessages
+## events.joinMessages
 
 - **Тип:** `true | false | 'first_join_only'`
 
-### enableLeaveMessages
+## events.enableLeaveMessages
 
 - **Тип:** `boolean`
 
-### leaveJoinMergeWindow
+## events.leaveJoinMergeWindow
 
 - **Тип:** `number`
 - **По умолчанию:** `0` (отключено)
@@ -184,57 +168,69 @@ Xaero's Minimap/World Map, будут отображаться как ссылк
 Работает только когда и joinMessages = true и enableLeaveMessages = true.
 Значение указывается в секундах
 
-
-### enableStartMessages
+## events.enableStartMessages
 
 - **Тип:** `boolean`
 
 Отправлять ли сообщение в Telegram при старте сервера
 
-
-### enableStopMessages
+## events.enableStopMessages
 
 - **Тип:** `boolean`
 
 Отправлять ли сообщение в Telegram при остановке сервера
 
-
-## advanced
-
-### botApiUrl
+## advanced.botApiUrl
 
 - **Тип:** `string`
 - **По умолчанию:** `"https://api.telegram.org"`
 
-### connectionRetry
+<p id="advanced-proxy"></p>
 
-#### maxAttempts
+## advanced.proxy.type
+
+- **Тип:** `'none' | 'socks5' | 'http'`
+- **По умолчанию:** `'none'`
+
+## advanced.proxy.host
+
+- **Тип:** `string`
+
+## advanced.proxy.port
+
+- **Тип:** `number`
+
+## advanced.proxy.username
+
+- **Тип:** `string | null`
+
+## advanced.proxy.password
+
+- **Тип:** `string | null`
+
+## connectionRetry.maxAttempts
 
 - **Тип:** `number`
 - **По умолчанию:** `10`
 
 Максимальное количество попыток подключения. При значении меньше 1 количество попыток бесконечно
 
-
-#### initialDelay
+## connectionRetry.initialDelay
 
 - **Тип:** `number`
 - **По умолчанию:** `1000`
 
 Задержка перед первой попыткой повторного подключения в миллисекундах
 
-
-#### maxDelay
+## connectionRetry.maxDelay
 
 - **Тип:** `number`
 - **По умолчанию:** `300000`
 
 Максимальная задержка между попытками повторного подключения в миллисекундах
 
-
 ## version
 
 - **Тип:** `number`
 
 Версия конфига. Не меняйте вручную
-

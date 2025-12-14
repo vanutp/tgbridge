@@ -45,6 +45,9 @@ You can then get your topic id using the first method, if you need it.
 4. Use the `/tgbridge reload` command to reload the config
 5. The bot should work now
 
-To learn more about mod features, check out the [Features](/en/features) page.
+If you require proxy to connect to Telegram, you can configure it in the
+[`advanced.proxy`](/en/reference#advanced-proxy) config section.
+
+To learn more about mod features, check out [Features](/en/features) and [Commands](/en/commands).
 
 If something doesn't work, check the [Troubleshooting](/en/troubleshooting) section.

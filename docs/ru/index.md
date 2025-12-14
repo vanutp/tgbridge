@@ -18,7 +18,7 @@ features:
     link: /ru/quickstart
   - title: Совместимый
     details: Поддерживает Fabric, (Neo)Forge и Paper, а также множество модов и плагинов
-    link: /ru/compatibility
+    link: /ru/integrations
   - title: Функциональный
     details: Содержит много фич, в том числе уникальных
     link: /ru/features

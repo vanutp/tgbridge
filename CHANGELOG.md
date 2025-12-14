@@ -1,3 +1,16 @@
+### 0.9.0
+
+- Support multiple chats (via chat plugins; see https://tgbridge.vanutp.dev/en/integrations#chat)
+- DiscordSRV integration
+- FlectonePulse support
+- Carbon Chat support on Fabric
+- Show inline usages (via bot) in Minecraft
+- Kotlin plugin now required on Paper (e.g. https://modrinth.com/plugin/kotlinmc)
+- Allow to disable all join messages except first joins
+- Support HTTP and Socks5 proxies for Telegram
+- Add a command to send messages to Telegram (see https://tgbridge.vanutp.dev/en/commands#tgbridge-send)
+- Implement API (see https://tgbridge.vanutp.dev/en/api)
+
 ### 0.8.6-p2
 
 - fabric: mark 1.21.10 as supported

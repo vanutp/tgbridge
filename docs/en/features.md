@@ -7,7 +7,8 @@ such as spoilers and quoted replies. You can change how the messages are rendere
 in the `lang.yml` config file.
 
 The mod also supports groups with topics enabled.
-For the mod to work in such groups, set the [`general.topicId`](/en/reference#topicid) option. 
+For the mod to work in such groups, set [`topicId`](/en/reference#chats-topicid)
+for the corresponding chat.
 
 ## All event messages are configurable
 
@@ -17,19 +18,25 @@ You can also toggle advancement description forwarding.
 
 Config options: [`events`](/en/reference#events)
 
+## Join messages
+
+You can enable all join messages or only the first join message for each player.
+
+Config option: [`events.joinMessages`](/en/reference#events-joinmessages)
+
 ## Message merge window
 
 You can enable merging messages sent within a specified time window into
 one to reduce amount of messages sent to the Telegram chat.
 
-Config option: [`messages.mergeWindow`](/en/reference#mergewindow)
+Config option: [`messages.mergeWindow`](/en/reference#messages-mergewindow)
 
 ## Leave/join merge window
 
 Enable this feature to delete leave and join messages if a player
 leaves and then joins within a specified time window.
 
-Config option: [`events.leaveJoinMergeWindow`](/en/reference#leavejoinmergewindow)
+Config option: [`events.leaveJoinMergeWindow`](/en/reference#events-leavejoinmergewindow)
 
 ## Telegram commands
 
@@ -41,8 +48,8 @@ Config option: [`events.leaveJoinMergeWindow`](/en/reference#leavejoinmergewindo
 Feel free to edit `lang.yml` however you see fit.
 It's meant to be customized by the server owner and is never overwritten by the mod.
 
-## Compatibility
+## Compatibility and integrations
 
-See the [Compatibility](/en/compatibility) page for the list of compatible/incompatible mods
+See [Integrations](/en/integrations) for the list of compatible/incompatible mods
 and implemented integrations.
 

@@ -17,8 +17,11 @@ Also, `lang.yml` is meant to be customized by the server owner and is never over
 
 By default `minecraft_lang.json` doesn't exist and the bot will use the default English translations
 provided by the server.
-If you want to use another language, you need to install this mod on the client, change the language
+
+If you want to use another language, you need to install tgbridge on the client, change the language
 to the desired one and execute the `/tgbridge dump_lang` command.
-It will create this file in the mod configuration directory. You can then copy it to the server.
+
+It will create this file in the mod configuration directory (`config/tgbridge`).
+You can then copy it in the mod config dir on the server (`plugins/tgbridge` or `config/tgbridge` depending on the loader).
 The generated file will include translations for all currently installed mods, so if you add a new mod, 
 you'll need to generate the language again.
