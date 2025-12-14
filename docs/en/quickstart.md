@@ -38,7 +38,8 @@ You can then get your topic id using the first method, if you need it.
 
 ## Installing the mod
 
-1. Download and install the latest release for your loader from the Modrinth page: https://modrinth.com/mod/tgbridge
+1. Download and install the latest release for your loader from the Modrinth page: https://modrinth.com/mod/tgbridge.
+   Don't forget to install the dependencies listed on the version page.
 2. Start the server
 3. Put your bot token, chat id and topic id (if applicable) in the generated config file located at
 `config/tgbridge/config.yml` (or `plugins/tgbridge/config.yml` for Paper)
