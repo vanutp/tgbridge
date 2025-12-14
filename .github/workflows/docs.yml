@@ -13,8 +13,7 @@ on:
   workflow_dispatch: {}
 
 permissions:
-  statuses: write
-  deployments: write
+  packages: write
 
 jobs:
   docs:
@@ -25,30 +24,30 @@ jobs:
         working-directory: docs
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: yarn
-          cache-dependency-path: docs/yarn.lock
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
 
-      - name: Build
-        run: yarn build
-
-      - name: Deploy to Netlify
-        uses: nwtgck/actions-netlify@v3.0
+      - name: GHCR login
+        uses: docker/login-action@v3
         with:
-          publish-dir: './docs/.vitepress/dist'
-          production-branch: master
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          deploy-message: "Deploy from GitHub Actions"
-          enable-pull-request-comment: false
-          enable-commit-comment: false
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: docs
+          tags: ghcr.io/${{ github.repository }}:latest
+          push: true
+
+      - name: Deploy
         env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-        timeout-minutes: 1
+          UPDATE_POST_KEY: ${{ secrets.UPDATE_POST_KEY }}
+        run: |
+          curl --request POST \
+               --url https://vhap-update.vanutp.dev/update \
+               --header "Content-Type: application/json" \
+               --data '{"key":"'$UPDATE_POST_KEY'"}' \
+               --fail
