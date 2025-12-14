@@ -105,7 +105,7 @@ kotlin {
 }
 
 modrinth {
-    uploadFile.set(tasks.reobfJar.get().outputJar)
+    uploadFile.set(tasks.shadowJar)
     gameVersions.addAll(
         "1.19", "1.19.1", "1.19.2", "1.19.3", "1.19.4",
         "1.20", "1.20.1", "1.20.2", "1.20.3", "1.20.4",
