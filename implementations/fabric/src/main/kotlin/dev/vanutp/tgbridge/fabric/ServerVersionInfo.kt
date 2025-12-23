@@ -27,4 +27,7 @@ class ServerVersionInfo(server: MinecraftServer) {
         "1.21.4",
         "1.21.5",
     ).contains(server.serverVersion)
+    val IS_2111 = arrayOf(
+        "1.21.11",
+    ).contains(server.serverVersion)
 }

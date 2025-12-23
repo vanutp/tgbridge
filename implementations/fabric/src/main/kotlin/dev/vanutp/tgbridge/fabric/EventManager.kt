@@ -10,6 +10,8 @@ import net.fabricmc.fabric.api.message.v1.ServerMessageEvents
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands
 import net.minecraft.network.chat.PlayerChatMessage
+import net.minecraft.server.permissions.Permission
+import net.minecraft.server.permissions.PermissionLevel
 import net.minecraft.network.chat.Component as Text
 
 
@@ -140,7 +142,7 @@ object EventManager {
                 Commands.literal("tgbridge")
                     .then(
                         Commands.literal("reload")
-                            .requires { it.hasPermission(4) }
+                            .requires { it.hasOwnerPermission() }
                             .executes(::onReloadCommand)
                     )
                     .then(
@@ -149,7 +151,7 @@ object EventManager {
                     )
                     .then(
                         Commands.literal("send")
-                            .requires { it.hasPermission(2) }
+                            .requires { it.hasOwnerPermission() }
                             .then(appendSendArgs(Commands.literal("plain")))
                             .then(appendSendArgs(Commands.literal("mm")))
                             .then(appendSendArgs(Commands.literal("html")))
@@ -158,4 +160,13 @@ object EventManager {
             )
         }
     }
+
+    private fun CommandSourceStack.hasOwnerPermission(): Boolean =
+        if (FabricTelegramBridge.versionInfo.IS_2111) {
+            permissions().hasPermission(Permission.HasCommandLevel(PermissionLevel.OWNERS))
+        } else {
+            val cls = this.javaClass
+            val hasPermission = cls.getMethod("method_9259", Int::class.javaPrimitiveType)
+            hasPermission.invoke(this, 2) as Boolean
+        }
 }
