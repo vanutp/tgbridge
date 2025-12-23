@@ -1,3 +1,7 @@
+### 0.9.1
+
+- Support 1.21.11 on Fabric
+
 ### 0.9.0
 
 - Support multiple chats (via chat plugins; see https://tgbridge.vanutp.dev/en/integrations#chat)
