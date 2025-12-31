@@ -20,7 +20,9 @@ object FabricTelegramBridge : DedicatedServerModInitializer, TelegramBridge() {
 
     override fun onInitializeServer() {
         addModule(VanishModule(this))
-        TgbridgeJvm21.register(this)
+        if (Runtime.version().feature() >= 21) {
+            TgbridgeJvm21.register(this)
+        }
         EventManager.register()
         ServerLifecycleEvents.SERVER_STARTING.register { server ->
             versionInfo = ServerVersionInfo(server)
