@@ -163,7 +163,7 @@ object EventManager {
 
     private fun CommandSourceStack.hasOwnerPermission(): Boolean =
         if (FabricTelegramBridge.versionInfo.IS_2111) {
-            permissions().hasPermission(Permission.HasCommandLevel(PermissionLevel.OWNERS))
+            permissions().hasPermission(Permission.HasCommandLevel(PermissionLevel.GAMEMASTERS))
         } else {
             val cls = this.javaClass
             val hasPermission = cls.getMethod("method_9259", Int::class.javaPrimitiveType)
