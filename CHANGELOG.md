@@ -1,3 +1,8 @@
+### 0.9.2
+
+- fabric: use correct permission level for commands on 1.21.11+
+- fabric: fix startup on java 17
+
 ### 0.9.1
 
 - Support 1.21.11 on Fabric
