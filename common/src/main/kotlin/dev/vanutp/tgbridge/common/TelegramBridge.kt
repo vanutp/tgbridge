@@ -49,15 +49,15 @@ abstract class TelegramBridge {
     fun init() {
         logger.info("tgbridge starting on ${platform.name}")
         ConfigManager.init(platform.configDir, platform::getLanguageKey)
+        config.getError()?.let {
+            logger.error(it)
+            return
+        }
         MuteService.init(logger, platform.configDir)
         TgbridgeEvents.RECIPIENTS.addListener { e ->
             if (e.chat.isDefault && chatModule == null) {
                 e.recipients += platform.getOnlinePlayers()
             }
-        }
-        config.getError()?.let {
-            logger.error(it)
-            return
         }
         bot = TelegramBot(config.advanced.botApiUrl, config.botToken, logger, coroutineScope)
         addModule(ReplacementsModule(this))
