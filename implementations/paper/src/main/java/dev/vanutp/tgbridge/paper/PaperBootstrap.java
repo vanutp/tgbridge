@@ -27,7 +27,8 @@ public class PaperBootstrap extends JavaPlugin {
         }
     }
 
-    public PaperBootstrap() {
+    @Override
+    public void onLoad() {
         checkLibs();
         if (missingLibs.isEmpty()) {
             tgbridge = new PaperTelegramBridge(this);
