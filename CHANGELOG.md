@@ -1,3 +1,8 @@
+### 0.9.3
+
+- fix duplicate ingame messages after first-time /tgbridge reload
+- (hopefully) fix initialization errors on Paper in certain cases
+
 ### 0.9.2
 
 - fabric: use correct permission level for commands on 1.21.11+
