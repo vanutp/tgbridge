@@ -12,8 +12,8 @@ repositories {
         }
     }
     maven {
-        name = "KvotheShaed Releases"
-        url = uri("https://maven.kvotheshaed.ru/releases")
+        name = "dimaskama"
+        url = uri("https://maven.dimaskama.net/releases")
         content {
             includeGroup("ru.dimaskama.voicemessages")
         }
