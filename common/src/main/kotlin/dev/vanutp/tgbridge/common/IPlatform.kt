@@ -7,6 +7,7 @@ import java.nio.file.Path
 interface IPlatform {
     val name: String
     val configDir: Path
+    val dataDir: Path
 
     fun broadcastMessage(recipients: List<ITgbridgePlayer>, text: Component)
     fun getOnlinePlayers(): List<ITgbridgePlayer>

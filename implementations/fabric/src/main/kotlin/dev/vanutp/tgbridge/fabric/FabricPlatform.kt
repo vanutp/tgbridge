@@ -12,6 +12,7 @@ import net.minecraft.server.level.ServerPlayer
 class FabricPlatform : IPlatform {
     override val name = "fabric"
     override val configDir = FabricLoader.getInstance().configDir.resolve(FabricTelegramBridge.MOD_ID)
+    override val dataDir = FabricLoader.getInstance().gameDir.resolve(FabricTelegramBridge.MOD_ID)
 
     override fun broadcastMessage(recipients: List<ITgbridgePlayer>, text: Component) {
         val message = text.toMinecraft()

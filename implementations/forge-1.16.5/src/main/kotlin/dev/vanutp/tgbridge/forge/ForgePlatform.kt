@@ -15,6 +15,7 @@ import net.minecraftforge.fml.server.ServerLifecycleHooks
 class ForgePlatform : IPlatform {
     override val name = "forge"
     override val configDir = FMLPaths.CONFIGDIR.get().resolve(ForgeTelegramBridge.MOD_ID)
+    override val dataDir = FMLPaths.GAMEDIR.get().resolve(ForgeTelegramBridge.MOD_ID)
 
     override fun broadcastMessage(recipients: List<ITgbridgePlayer>, text: Component) {
         val server = ServerLifecycleHooks.getCurrentServer()

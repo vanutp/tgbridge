@@ -12,6 +12,7 @@ import net.neoforged.neoforge.server.ServerLifecycleHooks
 class NeoForgePlatform : IPlatform {
     override val name = "forge"
     override val configDir = FMLPaths.CONFIGDIR.get().resolve(NeoForgeTelegramBridge.MOD_ID)
+    override val dataDir = FMLPaths.GAMEDIR.get().resolve(NeoForgeTelegramBridge.MOD_ID)
 
     override fun broadcastMessage(recipients: List<ITgbridgePlayer>, text: Component) {
         val server = ServerLifecycleHooks.getCurrentServer() ?: return

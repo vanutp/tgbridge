@@ -22,7 +22,7 @@ class PaperTelegramBridge(val plugin: PaperBootstrap) : TelegramBridge() {
         addModule(GenericVanishModule(this))
         addModule(SuperVanishModule(this))
         addModule(IncompatibleChatPluginModule(this))
-        addModule(VoiceMessagesPaperModule(this))
+//        addModule(VoiceMessagesPaperModule(this))
         TgbridgeJvm21.register(this)
     }
 

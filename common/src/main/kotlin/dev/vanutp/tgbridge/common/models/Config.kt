@@ -19,6 +19,7 @@ data class Config(
     val messages: MessagesConfig = MessagesConfig(),
     val integrations: IntegrationsConfig = IntegrationsConfig(),
     val events: EventsConfig = EventsConfig(),
+    val auth: AuthConfig = AuthConfig(),
     val advanced: AdvancedConfig = AdvancedConfig(),
     @YamlComment(
         "Config file version. Don't change manually",
@@ -221,4 +222,17 @@ data class AdvancedConnectionRetryConfig(
         "Maximum delay between reconnection attempts in milliseconds",
     )
     val maxDelay: Long = 300000,
+)
+
+@Serializable
+data class AuthConfig(
+    @YamlComment(
+        "Enable Telegram authentication on login",
+    )
+    val enabled: Boolean = false,
+    @YamlComment(
+        "Telegram group ID. Players must be in this group to be able to login.",
+        "Can be a public group username (e.g. @smetana_mc) or a numeric ID for private groups.",
+    )
+    val groupId: String = "",
 )

@@ -110,6 +110,24 @@ data class LangMinecraft(
 )
 
 @Serializable
+data class LangAuth(
+    @YamlComment("This message is sent to the user when they are kicked from the server if they are not authenticated.")
+    val kickMessage: String = "<green>You need to authenticate via Telegram to join this server. Your code is {code}. Send it to @smetana_mc.",
+    @YamlComment("This message is sent to the user when they are kicked from the server if they are not in the Telegram group.")
+    val notInGroupMessage: String = "<red>You need to join the Telegram group to play on this server. Join @smetana_mc and try again.",
+    @YamlComment("This message is sent to the user when they send the /start command to the bot.")
+    val startMessage: String = "To authenticate, send me the code you received in Minecraft. You also need to join our group @smetana_mc.",
+    @YamlComment("This message is sent to the user when they have successfully authenticated.")
+    val successMessage: String = "You have successfully authenticated your account. You can now join the server.",
+    @YamlComment("This message is sent to the user when they send an invalid authentication code.")
+    val invalidCodeMessage: String = "Invalid authentication code.",
+    @YamlComment("This message is sent when a user tries to link an already linked Telegram account.")
+    val alreadyLinkedMessage: String = "Your Telegram account is already linked to the Minecraft account: {player}. Use /unlink in-game to unlink it.",
+    val unlinkSuccess: String = "Your Telegram account has been unlinked.",
+    val notLinked: String = "Your Minecraft account is not linked to a Telegram account.",
+)
+
+@Serializable
 data class Lang(
     @YamlComment("Translations to other languages can be downloaded from https://github.com/vanutp/tgbridge")
     val telegram: LangTelegram = LangTelegram(),
@@ -119,6 +137,7 @@ data class Lang(
         "Additionally, {variable} syntax can be used instead of <variable> for plain-text placeholders."
     )
     val minecraft: LangMinecraft = LangMinecraft(),
+    val auth: LangAuth = LangAuth(),
     @YamlComment("Don't change the version manually")
     val version: Int = 1,
 )

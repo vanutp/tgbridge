@@ -43,6 +43,7 @@ data class TgUser(
 @Serializable
 data class TgChat(
     val id: Long,
+    val type: String,
     val title: String = "",
     val username: String? = null,
 )
@@ -373,6 +374,12 @@ interface TgApi {
     @Streaming
     @GET
     suspend fun downloadFile(@Url filePath: String): Response<ResponseBody>
+
+    @GET("getChatMember")
+    suspend fun getChatMember(
+        @Query("chat_id") chatId: String,
+        @Query("user_id") userId: Long,
+    ): TgResponse<TgAny>
 }
 
 const val POLL_TIMEOUT_SECONDS = 60
@@ -702,5 +709,18 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
 
     fun downloadFileAsync(fileId: String) = scope.future {
         downloadFile(fileId)
+    }
+
+    suspend fun isUserInGroup(userId: Long, groupId: String): Boolean {
+        return try {
+            retriableCall { client.getChatMember(groupId, userId) }
+            true
+        } catch (e: TelegramException) {
+            if (e.responseBody?.contains("user not found") == true) {
+                false
+            } else {
+                throw e
+            }
+        }
     }
 }

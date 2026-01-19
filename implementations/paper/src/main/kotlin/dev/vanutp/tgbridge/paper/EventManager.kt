@@ -1,18 +1,37 @@
 package dev.vanutp.tgbridge.paper
 
+import dev.vanutp.tgbridge.common.ConfigManager
 import dev.vanutp.tgbridge.common.TelegramBridge
 import dev.vanutp.tgbridge.common.models.*
 import io.papermc.paper.event.player.AsyncChatEvent
+import kotlinx.coroutines.launch
+import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.PlayerDeathEvent
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent
 import org.bukkit.event.player.PlayerAdvancementDoneEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.event.server.ServerLoadEvent
+import java.util.*
 
 class EventManager(private val plugin: PaperBootstrap) : Listener {
+    @EventHandler
+    fun onPlayerPreLogin(event: AsyncPlayerPreLoginEvent) {
+        if (!ConfigManager.config.auth.enabled) {
+            return
+        }
+        val playerName = event.name
+        val telegramId = plugin.tgbridge.authStorage.getTelegramId(playerName)
+        if (telegramId == null) {
+            val code = (10000..999999).random().toString()
+            plugin.tgbridge.authCodes[playerName.lowercase()] = code
+            val kickMessage = ConfigManager.lang.auth.kickMessage.replace("{code}", code)
+            event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, MiniMessage.miniMessage().deserialize(kickMessage))
+        }
+    }
     fun register() {
         registerChatMessageListener()
         registerJoinLeaveListener()
@@ -72,6 +91,20 @@ class EventManager(private val plugin: PaperBootstrap) : Listener {
         plugin.server.pluginManager.registerEvents(object : Listener {
             @EventHandler(priority = EventPriority.MONITOR)
             fun onPlayerJoin(e: PlayerJoinEvent) {
+                if (ConfigManager.config.auth.enabled) {
+                    val player = e.player
+                    val telegramId = plugin.tgbridge.authStorage.getTelegramId(player.name)
+                    if (telegramId != null) {
+                        plugin.tgbridge.coroutineScope.launch {
+                            val isMember = plugin.tgbridge.bot.isUserInGroup(telegramId, ConfigManager.config.auth.groupId)
+                            if (!isMember) {
+                                plugin.server.scheduler.runTask(plugin, Runnable {
+                                    player.kick(MiniMessage.miniMessage().deserialize(ConfigManager.lang.auth.notInGroupMessage))
+                                })
+                            }
+                        }
+                    }
+                }
                 plugin.tgbridge.onPlayerJoin(
                     TgbridgeJoinEvent(
                         e.player.toTgbridge(),
@@ -105,6 +138,20 @@ class EventManager(private val plugin: PaperBootstrap) : Listener {
             }
             if (args.contentDeepEquals(arrayOf("toggle"))) {
                 return@setExecutor plugin.tgbridge.onToggleMuteCommand(commandSender.toTgbridge())
+            }
+            if (args.contentDeepEquals(arrayOf("unlink"))) {
+                val player = commandSender.toTgbridge()
+                val source = player.source
+                if (source == null) {
+                    return@setExecutor false
+                }
+                if (plugin.tgbridge.authStorage.getTelegramId(source.getName()) != null) {
+                    plugin.tgbridge.authStorage.unlinkPlayer(source.getName())
+                    player.reply(ConfigManager.lang.auth.unlinkSuccess)
+                } else {
+                    player.reply(ConfigManager.lang.auth.notLinked)
+                }
+                return@setExecutor true
             }
             if (args.size >= 4 && args[0] == "send") {
                 if (!commandSender.isOp) {

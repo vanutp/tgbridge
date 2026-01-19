@@ -8,7 +8,7 @@ import dev.vanutp.tgbridge.common.models.*
 import dev.vanutp.tgbridge.common.modules.IChatModule
 import dev.vanutp.tgbridge.common.modules.ITgbridgeModule
 import dev.vanutp.tgbridge.common.modules.ReplacementsModule
-import dev.vanutp.tgbridge.common.modules.VoiceMessagesModule
+//import dev.vanutp.tgbridge.common.modules.VoiceMessagesModule
 import kotlinx.coroutines.*
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TranslatableComponent
@@ -16,7 +16,7 @@ import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 import kotlin.time.Duration.Companion.seconds
 
 abstract class TelegramBridge {
-    internal val coroutineScope = CoroutineScope(Dispatchers.IO).plus(SupervisorJob())
+    val coroutineScope = CoroutineScope(Dispatchers.IO).plus(SupervisorJob())
     abstract val logger: ILogger
     abstract val platform: IPlatform
     private var initialized = CompletableDeferred<Unit>()
@@ -46,9 +46,14 @@ abstract class TelegramBridge {
         _INSTANCE = this
     }
 
+    lateinit var authStorage: AuthStorage
+        private set
+    val authCodes = mutableMapOf<String, String>()
+
     fun init() {
         logger.info("tgbridge starting on ${platform.name}")
         ConfigManager.init(platform.configDir, platform::getLanguageKey)
+        authStorage = AuthStorage(platform.dataDir)
         config.getError()?.let {
             logger.error(it)
             return
@@ -61,7 +66,7 @@ abstract class TelegramBridge {
         }
         bot = TelegramBot(config.advanced.botApiUrl, config.botToken, logger, coroutineScope)
         addModule(ReplacementsModule(this))
-        addModule(VoiceMessagesModule(this))
+//        addModule(VoiceMessagesModule(this))
         coroutineScope.launch {
             bot.init()
             logger.info("Logged in as @${bot.me.username}")
@@ -127,10 +132,41 @@ abstract class TelegramBridge {
         coroutineScope.cancel()
     }
 
+    private suspend fun onTelegramAuthMessage(msg: TgMessage) {
+        if (msg.chat.type != "private") {
+            return
+        }
+        val text = msg.text ?: return
+        val player = authCodes.entries.find { it.value == text }?.key
+        if (player != null) {
+            val alreadyLinked = authStorage.getMinecraftUsername(msg.from!!.id)
+            if (alreadyLinked != null) {
+                bot.sendMessage(msg.chat.id, lang.auth.alreadyLinkedMessage.replace("{player}", alreadyLinked))
+                return
+            }
+            authStorage.linkPlayer(player, msg.from!!.id)
+            authCodes.remove(player)
+            bot.sendMessage(msg.chat.id, lang.auth.successMessage)
+        } else {
+            bot.sendMessage(msg.chat.id, lang.auth.invalidCodeMessage)
+        }
+    }
+
     private fun registerTelegramHandlers() {
         bot.registerCommandHandler("tps", this::onTelegramTpsCommand)
         bot.registerCommandHandler("list", this::onTelegramListCommand)
-        bot.registerMessageHandler(this::onTelegramMessage)
+        bot.registerCommandHandler("start") {
+            if (it.chat.type == "private") {
+                bot.sendMessage(it.chat.id, lang.auth.startMessage)
+            }
+        }
+        bot.registerMessageHandler {
+            if (it.chat.type == "private") {
+                onTelegramAuthMessage(it)
+            } else {
+                onTelegramMessage(it)
+            }
+        }
     }
 
     private fun getMessageChat(msg: TgMessage): ChatConfig? {

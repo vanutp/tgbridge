@@ -1,129 +1,36 @@
 package dev.vanutp.tgbridge.common.modules
 
-import de.maxhenkel.voicechat.api.ForgeVoicechatPlugin
-import de.maxhenkel.voicechat.api.VoicechatApi
-import de.maxhenkel.voicechat.api.VoicechatPlugin
-import de.maxhenkel.voicechat.api.opus.OpusDecoder
-import de.maxhenkel.voicechat.api.opus.OpusEncoder
-import dev.vanutp.tgbridge.common.*
-import dev.vanutp.tgbridge.common.ConfigManager.config
-import dev.vanutp.tgbridge.common.converters.MinecraftToTelegramConverter
-import dev.vanutp.tgbridge.common.converters.TelegramFormattedText
-import dev.vanutp.tgbridge.common.models.ChatConfig
-import dev.vanutp.tgbridge.common.models.TgbridgeRecipientsEvent
-import kotlinx.coroutines.launch
-import net.kyori.adventure.text.Component
-import ru.dimaskama.voicemessages.api.VoiceMessageReceivedCallback
-import ru.dimaskama.voicemessages.api.VoiceMessagesApi
-import ru.dimaskama.voicemessages.api.VoiceMessagesApiInitCallback
-import java.time.Clock
-import java.util.*
-
-
-@ForgeVoicechatPlugin
-class VoiceChatPlugin : VoicechatPlugin {
-    override fun getPluginId() = "tgbridge"
-
-    companion object {
-        internal lateinit var api: VoicechatApi private set
-        internal lateinit var decoder: OpusDecoder
-        internal lateinit var encoder: OpusEncoder
-
-        fun transcodeOpus(packets: List<ByteArray>) =
-            packets.map {
-                encoder.encode(decoder.decode(it))
-            }
-    }
-
-    override fun initialize(api: VoicechatApi) {
-        Companion.api = api
-        decoder = api.createDecoder()
-        encoder = api.createEncoder()
-    }
-}
-
-class MessageContentVoice(
-    val oggData: ByteArray,
-    val text: TelegramFormattedText,
-) : MessageContent() {
-    override suspend fun send(chat: ChatConfig, lastMessage: TgbridgeTgMessage?): TgbridgeTgMessage {
-        val tgMessage = TelegramBridge.INSTANCE.bot.sendVoice(
-            chat.chatId,
-            oggData,
-            text.text,
-            text.entities,
-            chat.topicId,
-            null,
-        )
-        return TgbridgeTgMessage(
-            chat, tgMessage.messageId, Clock.systemUTC().instant(), this
-        )
-    }
-}
-
-class VoiceMessagesModule(bridge: TelegramBridge) : AbstractModule(bridge) {
-    override val fabricId = "voicemessages"
-    override val forgeId = "voicemessages"
-    override val paperId = "voicemessages"
-    private lateinit var voiceMessages: VoiceMessagesApi
-
-    companion object {
-        fun voiceMessagesExists() = try {
-            Class.forName("ru.dimaskama.voicemessages.api.VoiceMessagesApiInitCallback")
-            true
-        } catch (_: ClassNotFoundException) {
-            false
-        }
-    }
-
-    init {
-        if (voiceMessagesExists()) {
-            VoiceMessagesApiInitCallback.EVENT.register {
-                voiceMessages = it
-            }
-        }
-    }
-
-    override fun enable() {
-        TgbridgeEvents.TG_CHAT_MESSAGE.addListener { e ->
-            val msg = e.message
-            if (msg.voice?.mimeType != "audio/ogg") return@addListener
-
-            val fileResponse = bridge.bot.downloadFile(msg.voice.fileId)
-            val bytes = fileResponse.body()!!.bytes()
-            val frames = extractOpusPackets(bytes)
-            val transcoded = VoiceChatPlugin.transcodeOpus(frames)
-
-            val recipientsEvt = TgbridgeRecipientsEvent(e.chat, originalEvent = e)
-            TgbridgeEvents.RECIPIENTS.invoke(recipientsEvt)
-
-            val senderNameMsg = e.chat.minecraftFormat.formatMiniMessage(
-                Placeholders(
-                    mapOf("sender" to msg.senderName),
-                    mapOf("text" to Component.text("")),
-                )
-            )
-            bridge.platform.broadcastMessage(recipientsEvt.recipients, senderNameMsg)
-            val emptyUuid = UUID.fromString("00000000-0000-0000-0000-000000000000")
-            voiceMessages.sendVoiceMessage(emptyUuid, recipientsEvt.recipients.map { it.uuid }, transcoded, "all")
-            e.isCancelled = true
-        }
-        VoiceMessageReceivedCallback.EVENT.register { player, message, target ->
-            if (target != "all") return@register false
-            val oggData = createOgg(message)
-            val chat = config.getDefaultChat()
-            val tgText = MinecraftToTelegramConverter.convert(
-                chat.telegramFormat.formatMiniMessage(
-                    Placeholders(
-                        mapOf("username" to (bridge.platform.playerToTgbridge(player)?.getName() ?: "???")),
-                        mapOf("text" to Component.text(""))
-                    )
-                )
-            )
-            bridge.coroutineScope.launch {
-                bridge.chatManager.sendMessage(chat, MessageContentVoice(oggData, tgText))
-            }
-            return@register false
-        }
-    }
-}
+//import dev.vanutp.tgbridge.common.IPlatform
+//import dev.vanutp.tgbridge.common.TgbridgeEvents
+//import dev.vanutp.tgbridge.common.models.TgMessageMedia
+//import dev.vanutp.tgbridge.common.models.TgbridgeTgVoiceMessageEvent
+//import io.ktor.client.*
+//import io.ktor.client.engine.cio.*
+//import io.ktor.client.request.*
+//import io.ktor.client.statement.*
+//import kotlinx.coroutines.launch
+//import ru.dimaskama.voicemessages.network.packets.client.VoiceMessagePacket
+//import ru.dimaskama.voicemessages.network.packets.server.SendVoiceMessagePacket
+//import ru.dimaskama.voicemessages.network.packets.server.VoiceMessageReceivedPacket
+//
+//class VoiceMessagesModule(bridge: dev.vanutp.tgbridge.common.TelegramBridge) :
+//    dev.vanutp.tgbridge.common.modules.AbstractTgbridgeModule(bridge) {
+//    override fun shouldEnable(): Boolean {
+//        return platform.isModLoadedMulti("voicemessages", "voicemessages", "voicemessages")
+//    }
+//
+//    override fun enable() {
+//        TgbridgeEvents.TG_VOICE_MESSAGE.addListener(this::onTelegramVoiceMessage)
+//    }
+//
+//    private fun onTelegramVoiceMessage(e: TgbridgeTgVoiceMessageEvent) = bridge.coroutineScope.launch {
+//        val httpClient = HttpClient(CIO)
+//        val response = httpClient.get(e.url)
+//        val bytes = response.bodyAsChannel().toByteArray()
+//        httpClient.close()
+//        val packet = SendVoiceMessagePacket(bytes, e.chat.isDefault, e.message.messageId)
+//        platform.getOnlinePlayers().forEach {
+//            it.toNative()?.connection?.send(packet)
+//        }
+//    }
+//}

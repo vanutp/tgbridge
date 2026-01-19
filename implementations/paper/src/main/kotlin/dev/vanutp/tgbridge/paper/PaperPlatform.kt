@@ -11,6 +11,7 @@ import kotlin.io.path.absolute
 class PaperPlatform(private val plugin: JavaPlugin) : IPlatform {
     override val name = "paper"
     override val configDir = plugin.dataFolder.toPath().absolute()
+    override val dataDir = plugin.dataFolder.toPath().absolute()
 
     override fun broadcastMessage(recipients: List<ITgbridgePlayer>, text: Component) {
         plugin.server.consoleSender.sendMessage(text)
