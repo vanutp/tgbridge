@@ -3,12 +3,11 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
-    id("org.jetbrains.kotlin.jvm") version "2.2.21"
-    id("org.jetbrains.kotlin.plugin.serialization") version "2.2.21" apply false
+    id("org.jetbrains.kotlin.jvm") version "2.3.0"
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.3.0" apply false
     id("com.gradleup.shadow") version "8.3.9"  // TODO: will new version work with forge 1.16.5?
     id("io.papermc.paperweight.userdev") version "2.0.0-beta.19" apply false
     id("xyz.jpenilla.run-paper") version "2.3.1" apply false
-    id("dev.architectury.loom") version "1.13-SNAPSHOT" apply false
     id("com.modrinth.minotaur") version "2.+"
     `maven-publish`
 }
@@ -92,7 +91,7 @@ subprojects {
         // TODO: are these 3 lines AND tasks.withType<JavaCompile> both needed? also for subprojects
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-        toolchain.languageVersion = JavaLanguageVersion.of(21)
+        toolchain.languageVersion = JavaLanguageVersion.of(25)
         withSourcesJar()
     }
 

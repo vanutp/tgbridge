@@ -3,7 +3,7 @@ import net.fabricmc.loom.task.RemapJarTask
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    id("dev.architectury.loom")
+    id("dev.architectury.loom") version "1.13-SNAPSHOT"
 }
 
 repositories {
@@ -33,7 +33,6 @@ dependencies {
 java {
     sourceCompatibility = JavaVersion.VERSION_21
     targetCompatibility = JavaVersion.VERSION_21
-    toolchain.languageVersion = JavaLanguageVersion.of(21)
 }
 
 kotlin {

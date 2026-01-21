@@ -21,6 +21,7 @@ listOf(
     "forge-1.20.1",
     "neoforge-1.21",
     "fabric",
+    "fabric-obf",
 ).forEach {
     include(it)
     project(":$it").projectDir = file("implementations/$it")

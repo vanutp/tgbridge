@@ -30,7 +30,13 @@ object EventManager {
             if (TelegramBridge.INSTANCE.chatModule != null) {
                 return@register
             }
-            val messageContent = message.decoratedContent()
+            val messageContent = if (FabricTelegramBridge.versionInfo.IS_192) {
+                val cls = message.javaClass
+                val getContent = cls.getMethod("method_44125")
+                getContent.invoke(message) as Text
+            } else {
+                message.decoratedContent()
+            }
             FabricTelegramBridge.onChatMessage(
                 TgbridgeMcChatMessageEvent(
                     sender.toTgbridge(),
@@ -156,5 +162,11 @@ object EventManager {
     }
 
     private fun CommandSourceStack.hasOwnerPermission(): Boolean =
-        permissions().hasPermission(Permission.HasCommandLevel(PermissionLevel.GAMEMASTERS))
+        if (FabricTelegramBridge.versionInfo.IS_2111) {
+            permissions().hasPermission(Permission.HasCommandLevel(PermissionLevel.GAMEMASTERS))
+        } else {
+            val cls = this.javaClass
+            val hasPermission = cls.getMethod("method_9259", Int::class.javaPrimitiveType)
+            hasPermission.invoke(this, 2) as Boolean
+        }
 }

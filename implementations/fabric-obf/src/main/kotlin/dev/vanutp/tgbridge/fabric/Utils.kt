@@ -1,0 +1,96 @@
+package dev.vanutp.tgbridge.fabric
+
+import com.google.gson.JsonElement
+import com.google.gson.JsonParseException
+import com.mojang.brigadier.context.CommandContext
+import com.mojang.serialization.JsonOps
+import dev.vanutp.tgbridge.common.models.TBCommandContext
+import dev.vanutp.tgbridge.fabric.FabricTelegramBridge.server
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
+import net.minecraft.commands.CommandSourceStack
+import net.minecraft.core.HolderLookup
+import net.minecraft.network.chat.ComponentSerialization
+import net.minecraft.network.chat.Component as Text
+
+
+fun Component.toMinecraft(): Text {
+    val serializedTree = GsonComponentSerializer.gson().serializeToTree(this)
+
+    return if (FabricTelegramBridge.versionInfo.IS_19_204) {
+        // net.minecraft.text.Text$Serializer
+        val textCls = Class.forName("net.minecraft.class_2561\$class_2562")
+        // called fromJson on older versions
+        val fromJsonTree = textCls.getMethod("method_10872", JsonElement::class.java)
+        fromJsonTree(null, serializedTree) as Text
+    } else if (FabricTelegramBridge.versionInfo.IS_205_215) {
+        // 1.20.5+
+        // net.minecraft.text.Text$Serialization
+        val textCls = Class.forName("net.minecraft.class_2561\$class_2562")
+        val fromJsonTree =
+            textCls.getMethod("method_10872", JsonElement::class.java, HolderLookup.Provider::class.java)
+        fromJsonTree(
+            null,
+            serializedTree,
+            server.registryAccess(),
+        ) as Text
+    } else {
+        // 1.21.6+
+        ComponentSerialization.CODEC
+            .decode(server.registryAccess().createSerializationContext(JsonOps.INSTANCE), serializedTree)
+            .getOrThrow(::JsonParseException)
+            .first
+    }
+}
+
+fun Text.toAdventure(): Component {
+    return if (FabricTelegramBridge.versionInfo.IS_19_204) {
+        // net.minecraft.text.Text$Serializer
+        val textCls = Class.forName("net.minecraft.class_2561\$class_2562")
+        // called toJson on older versions
+        val toJsonString = textCls.getMethod("method_10867", Text::class.java)
+        val jsonString = toJsonString(null, this) as String
+        GsonComponentSerializer.gson().deserialize(jsonString)
+    } else if (FabricTelegramBridge.versionInfo.IS_205_215) {
+        // 1.20.5+
+        // net.minecraft.text.Text$Serialization
+        val textCls = Class.forName("net.minecraft.class_2561\$class_2562")
+        // TODO: can toJson be used here?
+        val toJsonString =
+            textCls.getMethod("method_10867", Text::class.java, HolderLookup.Provider::class.java)
+        val jsonString = toJsonString(
+            null,
+            this,
+            server.registryAccess(),
+        ) as String
+        GsonComponentSerializer.gson().deserialize(jsonString)
+    } else {
+        // 1.21.6+
+        val jsonTree = ComponentSerialization.CODEC
+            .encodeStart(server.registryAccess().createSerializationContext(JsonOps.INSTANCE), this)
+            .getOrThrow(::JsonParseException)
+        GsonComponentSerializer.gson().deserializeFromTree(jsonTree)
+    }
+}
+
+fun CommandContext<CommandSourceStack>.toTgbridge() = TBCommandContext(
+    source = source.player?.toTgbridge(),
+    reply = this::reply
+)
+
+fun CommandContext<CommandSourceStack>.reply(
+    text: String
+) {
+    val textComponent = Text.literal(text)
+    if (FabricTelegramBridge.versionInfo.IS_19) {
+        val cls = source.javaClass
+        val sendFeedback = cls.getMethod(
+            "method_9226",
+            Text::class.java,
+            Boolean::class.javaPrimitiveType
+        )
+        sendFeedback.invoke(source, textComponent, false)
+    } else {
+        source.sendSuccess({ textComponent }, false)
+    }
+}

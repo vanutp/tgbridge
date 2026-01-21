@@ -2,7 +2,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import net.fabricmc.loom.task.RemapJarTask
 
 plugins {
-    id("dev.architectury.loom")
+    id("dev.architectury.loom") version "1.13-SNAPSHOT"
 }
 
 loom {

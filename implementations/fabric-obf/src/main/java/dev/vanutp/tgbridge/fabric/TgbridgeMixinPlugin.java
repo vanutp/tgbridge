@@ -16,7 +16,6 @@ import java.util.Set;
 
 public final class TgbridgeMixinPlugin implements IMixinConfigPlugin {
     private static final String version;
-    private static final int major;
     private static final int minor;
     private static final int patch;
 
@@ -33,12 +32,21 @@ public final class TgbridgeMixinPlugin implements IMixinConfigPlugin {
         }
 
         final var splitVersion = version.split("\\.");
-        major = Integer.parseInt(splitVersion[0]);
         minor = Integer.parseInt(splitVersion[1]);
+        // TODO: can it be == 2?
         patch = splitVersion.length > 2 ? Integer.parseInt(splitVersion[2]) : 0;
     }
 
-    private static final Map<String, Boolean> CONDITIONS = ImmutableMap.of();
+    private static final boolean isLte201 = minor < 20 || minor == 20 && patch <= 1;
+    private static final boolean isLte215 = minor < 21 || minor == 21 && patch <= 5;
+    private static final Map<String, Boolean> CONDITIONS = ImmutableMap.of(
+        "PlayerListMixin_201", isLte201,
+        "PlayerListMixin_modern", !isLte201,
+        "PlayerAdvancementsMixin_201", isLte201,
+        "PlayerAdvancementsMixin_modern", !isLte201,
+        "ServerPlayerMixin_215", isLte215,
+        "ServerPlayerMixin_modern", !isLte215
+    );
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {

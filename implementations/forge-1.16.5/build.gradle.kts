@@ -1,10 +1,9 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import net.fabricmc.loom.task.RemapJarTask
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 plugins {
-    id("dev.architectury.loom")
+    id("dev.architectury.loom") version "1.13-SNAPSHOT"
 }
 
 loom {
@@ -33,7 +32,6 @@ dependencies {
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
-    toolchain.languageVersion = JavaLanguageVersion.of(21)
 }
 
 kotlin {

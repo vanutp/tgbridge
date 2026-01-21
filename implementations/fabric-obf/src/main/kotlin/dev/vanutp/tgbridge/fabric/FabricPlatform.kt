@@ -28,7 +28,15 @@ class FabricPlatform : IPlatform {
 
     override fun getLanguageKey(key: String) = with(Language.getInstance()) {
         if (has(key)) {
-            getOrDefault(key)
+            if (FabricTelegramBridge.versionInfo.IS_192) {
+                // this::class.java is net.minecraft.locale.Language$1 and calling get on it
+                // fails with IllegalAccessException for some reason
+                val cls = Class.forName("net.minecraft.class_2477")  // net.minecraft.locale.Language
+                val get = cls.getMethod("method_4679", String::class.javaObjectType)
+                get.invoke(this, key) as String
+            } else {
+                getOrDefault(key)
+            }
         } else {
             null
         }

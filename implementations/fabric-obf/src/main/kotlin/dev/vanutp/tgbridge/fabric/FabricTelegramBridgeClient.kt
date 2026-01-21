@@ -3,7 +3,7 @@ package dev.vanutp.tgbridge.fabric
 import com.google.gson.Gson
 import com.mojang.brigadier.context.CommandContext
 import net.fabricmc.api.ClientModInitializer
-import net.fabricmc.fabric.api.client.command.v2.ClientCommands
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
 import net.fabricmc.loader.api.FabricLoader
@@ -27,13 +27,13 @@ object FabricTelegramBridgeClient : ClientModInitializer {
     override fun onInitializeClient() {
         ClientCommandRegistrationCallback.EVENT.register { dispatcher, _ ->
             dispatcher.register(
-                ClientCommands.literal("tgbridge")
+                ClientCommandManager.literal("tgbridge")
                     .then(
-                        ClientCommands.literal("dump_lang")
+                        ClientCommandManager.literal("dump_lang")
                             .executes(::onDumpLangCommand)
                     )
                     .then(
-                        ClientCommands.literal("toggle")
+                        ClientCommandManager.literal("toggle")
                     )
             )
         }
