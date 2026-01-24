@@ -303,6 +303,8 @@ data class TgSendMessageRequest(
     val parseMode: String? = null,
     @SerialName("disable_web_page_preview")
     val disableWebPagePreview: Boolean,
+    @SerialName("disable_notification")
+    val disableNotification: Boolean = false,
 )
 
 @Serializable
@@ -597,6 +599,7 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
         replyToMessageId: Int? = null,
         parseMode: String? = null,
         disableWebPagePreview: Boolean = true,
+        disableNotification: Boolean = false,
     ): TgMessage = retriableCall {
         client.sendMessage(
             TgSendMessageRequest(
@@ -605,7 +608,8 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
                 entities,
                 replyToMessageId,
                 parseMode,
-                disableWebPagePreview
+                disableWebPagePreview,
+                disableNotification,
             )
         )
     }

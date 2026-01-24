@@ -109,8 +109,12 @@ abstract class TelegramBridge {
         // Doing this here to ensure spark is loaded
         spark = SparkHelper.createOrNull()
         if (config.events.enableStartMessages) {
+            val disableNotification = config.messages.silentEvents.contains(TgMessageType.SERVER_STARTUP)
             coroutineScope.launch {
-                chatManager.sendMessage(config.getDefaultChat(), MessageContentHTMLText(lang.telegram.serverStarted))
+                chatManager.sendMessage(
+                    config.getDefaultChat(),
+                    MessageContentHTMLText(lang.telegram.serverStarted, disableNotification = disableNotification),
+                )
             }
         }
         started = true
@@ -120,7 +124,11 @@ abstract class TelegramBridge {
         runBlocking {
             MuteService.shutdown()
             if (config.events.enableStopMessages && initialized.isCompleted) {
-                chatManager.sendMessage(config.getDefaultChat(), MessageContentHTMLText(lang.telegram.serverStopped))
+                val disableNotification = config.messages.silentEvents.contains(TgMessageType.SERVER_SHUTDOWN)
+                chatManager.sendMessage(
+                    config.getDefaultChat(),
+                    MessageContentHTMLText(lang.telegram.serverStopped, disableNotification = disableNotification),
+                )
             }
             bot.shutdown()
         }
@@ -151,7 +159,10 @@ abstract class TelegramBridge {
             logger.error("Unable to get spark data")
             return
         }
-        chatManager.sendMessage(chat, MessageContentHTMLText(lang.telegram.tps.formatLang(durations)))
+        chatManager.sendMessage(
+            chat,
+            MessageContentHTMLText(lang.telegram.tps.formatLang(durations), disableNotification = true)
+        )
     }
 
     private suspend fun onTelegramListCommand(msg: TgMessage) {
@@ -169,7 +180,7 @@ abstract class TelegramBridge {
         } else {
             lang.telegram.playerListZeroOnline
         }
-        chatManager.sendMessage(chat, MessageContentHTMLText(text))
+        chatManager.sendMessage(chat, MessageContentHTMLText(text, disableNotification = true))
     }
 
     private suspend fun onTelegramMessage(msg: TgMessage) {
@@ -326,7 +337,11 @@ abstract class TelegramBridge {
         TgbridgeEvents.PLAYER_PLACEHOLDERS.invoke(placeholdersEvt)
 
         val text = chat.telegramFormat.formatMiniMessage(placeholdersEvt.placeholders)
-        chatManager.sendMessage(chat, MessageContentMergeableText(text))
+        val disableNotification = config.messages.silentEvents.contains(TgMessageType.CHAT)
+        chatManager.sendMessage(
+            chat,
+            MessageContentMergeableText(text, disableNotification = disableNotification),
+        )
     }
 
     fun onPlayerDeath(e: TgbridgeDeathEvent) = wrapMinecraftHandler {
@@ -355,7 +370,11 @@ abstract class TelegramBridge {
 
         val chat = config.getDefaultChat()
         val text = lang.telegram.playerDied.formatMiniMessage(placeholdersEvt.placeholders)
-        chatManager.sendMessage(chat, MessageContentText(text))
+        val disableNotification = config.messages.silentEvents.contains(TgMessageType.DEATH)
+        chatManager.sendMessage(
+            chat,
+            MessageContentText(text, disableNotification = disableNotification),
+        )
     }
 
     fun onPlayerJoin(e: TgbridgeJoinEvent) = wrapMinecraftHandler {
@@ -447,7 +466,8 @@ abstract class TelegramBridge {
         }
         val chat = config.getDefaultChat()
         val text = langKey.formatLang(placeholdersEvt.placeholders)
-        chatManager.sendMessage(chat, MessageContentHTMLText(text))
+        val disableNotification = config.messages.silentEvents.contains(TgMessageType.ADVANCEMENT)
+        chatManager.sendMessage(chat, MessageContentHTMLText(text, disableNotification = disableNotification))
     }
 
     fun wrapMinecraftHandler(fn: suspend () -> Unit) {

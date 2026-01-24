@@ -69,3 +69,13 @@ data class TgbridgeRecipientsEvent(
     var recipients: List<ITgbridgePlayer> = emptyList(),
     val originalEvent: Any?,
 )
+
+enum class TgMessageType {
+    SERVER_STARTUP,
+    SERVER_SHUTDOWN,
+    CHAT,
+    DEATH,
+    JOIN,
+    LEAVE,
+    ADVANCEMENT,
+}

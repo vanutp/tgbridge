@@ -5,6 +5,7 @@ import dev.vanutp.tgbridge.common.converters.MinecraftToTelegramConverter
 import dev.vanutp.tgbridge.common.converters.TelegramFormattedText
 import dev.vanutp.tgbridge.common.models.ChatConfig
 import dev.vanutp.tgbridge.common.models.ITgbridgePlayer
+import dev.vanutp.tgbridge.common.models.TgMessageType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.future.future
 import kotlinx.coroutines.sync.Mutex
@@ -29,10 +30,30 @@ abstract class MessageContent {
 class MessageContentText(
     val text: TelegramFormattedText,
     val replyToMessageId: Int? = null,
+    val disableNotification: Boolean = false,
 ) : MessageContent() {
-    constructor(component: Component, replyToMessageId: Int? = null) : this(
+    constructor(
+        component: Component,
+        replyToMessageId: Int? = null,
+        disableNotification: Boolean = false,
+    ) : this(
         MinecraftToTelegramConverter.convert(component),
         replyToMessageId,
+        disableNotification,
+    )
+
+    // backwards compatibility on java
+    @Deprecated("This constructor is deprecated", level = DeprecationLevel.HIDDEN)
+    constructor(text: TelegramFormattedText, replyToMessageId: Int?) : this(
+        text,
+        replyToMessageId = replyToMessageId,
+        disableNotification = false
+    )
+    @Deprecated("This constructor is deprecated", level = DeprecationLevel.HIDDEN)
+    constructor(text: Component, replyToMessageId: Int?) : this(
+        text,
+        replyToMessageId = replyToMessageId,
+        disableNotification = false
     )
 
     override suspend fun send(chat: ChatConfig, lastMessage: TgbridgeTgMessage?): TgbridgeTgMessage {
@@ -41,6 +62,7 @@ class MessageContentText(
             text.text,
             text.entities,
             replyToMessageId = replyToMessageId ?: chat.topicId,
+            disableNotification = disableNotification,
         )
         return TgbridgeTgMessage(
             chat, tgMessage.messageId, Clock.systemUTC().instant(), this
@@ -51,13 +73,23 @@ class MessageContentText(
 class MessageContentHTMLText(
     val text: String,
     val replyToMessageId: Int? = null,
+    val disableNotification: Boolean = false,
 ) : MessageContent() {
+    // backwards compatibility on java
+    @Deprecated("This constructor is deprecated", level = DeprecationLevel.HIDDEN)
+    constructor(text: String, replyToMessageId: Int?) : this(
+        text,
+        replyToMessageId = replyToMessageId,
+        disableNotification = false
+    )
+
     override suspend fun send(chat: ChatConfig, lastMessage: TgbridgeTgMessage?): TgbridgeTgMessage {
         val tgMessage = TelegramBridge.INSTANCE.bot.sendMessage(
             chat.chatId,
             text,
             parseMode = "HTML",
             replyToMessageId = replyToMessageId ?: chat.topicId,
+            disableNotification = disableNotification,
         )
         return TgbridgeTgMessage(
             chat, tgMessage.messageId, Clock.systemUTC().instant(), this
@@ -65,10 +97,20 @@ class MessageContentHTMLText(
     }
 }
 
-class MessageContentMergeableText(val text: TelegramFormattedText) : MessageContent() {
-    constructor(component: Component) : this(
-        MinecraftToTelegramConverter.convert(component)
+class MessageContentMergeableText(
+    val text: TelegramFormattedText,
+    val disableNotification: Boolean = false,
+) : MessageContent() {
+    constructor(component: Component, disableNotification: Boolean = false) : this(
+        MinecraftToTelegramConverter.convert(component),
+        disableNotification,
     )
+
+    // backwards compatibility on java
+    @Deprecated("This constructor is deprecated", level = DeprecationLevel.HIDDEN)
+    constructor(text: TelegramFormattedText) : this(text, disableNotification = false)
+    @Deprecated("This constructor is deprecated", level = DeprecationLevel.HIDDEN)
+    constructor(text: Component) : this(text, disableNotification = false)
 
     private suspend fun sendNewMessage(chat: ChatConfig): TgbridgeTgMessage {
         val tgMessage = TelegramBridge.INSTANCE.bot.sendMessage(
@@ -76,6 +118,7 @@ class MessageContentMergeableText(val text: TelegramFormattedText) : MessageCont
             text.text,
             text.entities,
             replyToMessageId = chat.topicId,
+            disableNotification = disableNotification,
         )
         return TgbridgeTgMessage(
             chat, tgMessage.messageId, Clock.systemUTC().instant(), this
@@ -118,6 +161,7 @@ class MessageContentLeave(
             text,
             parseMode = "HTML",
             replyToMessageId = chat.topicId,
+            disableNotification = config.messages.silentEvents.contains(TgMessageType.LEAVE),
         )
         return TgbridgeTgMessage(
             chat, tgMessage.messageId, Clock.systemUTC().instant(), this
@@ -135,6 +179,7 @@ class MessageContentJoin(
             text,
             parseMode = "HTML",
             replyToMessageId = chat.topicId,
+            disableNotification = config.messages.silentEvents.contains(TgMessageType.JOIN),
         )
         return TgbridgeTgMessage(
             chat, tgMessage.messageId, Clock.systemUTC().instant(), this

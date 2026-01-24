@@ -80,6 +80,11 @@ data class MessagesConfig(
         "Set to `true` to use real player username instead of display name in all Telegram messages",
     )
     val useRealUsername: Boolean = false,
+    @YamlComment(
+        "A list of event types that will be sent to Telegram \"without sound\"",
+        "Available types: SERVER_STARTUP, SERVER_SHUTDOWN, CHAT, DEATH, JOIN, LEAVE, ADVANCEMENT",
+    )
+    val silentEvents: Set<TgMessageType> = emptySet()
 )
 
 @Serializable

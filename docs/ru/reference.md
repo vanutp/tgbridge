@@ -82,6 +82,14 @@
 Установите значение `true`, чтобы использовать реальный ник игрока вместо отображаемого имени
 во всех сообщениях в Telegram
 
+## messages.silentEvents
+
+- **Тип:** `list<TgMessageType>`
+- **По умолчанию:** `[]`
+
+Список типов событий, которые будут отправлены в Telegram "без звука".
+Доступные типы: `SERVER_STARTUP`, `SERVER_SHUTDOWN`, `CHAT`, `DEATH`, `JOIN`, `LEAVE`, `ADVANCEMENT`
+
 ## integrations.bluemapUrl
 
 - **Тип:** `string | null`
