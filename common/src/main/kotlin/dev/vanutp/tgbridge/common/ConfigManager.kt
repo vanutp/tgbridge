@@ -115,14 +115,16 @@ object ConfigManager {
             val oldEnableJoinMessages = oldEvents?.getScalar("enableJoinMessages")?.content?.toBoolean() ?: true
             val langData = yaml.parseToYamlNode(langPath.readText())
             val langVersion = langData.yamlMap.getScalar("version")?.content?.toIntOrNull() ?: 1
-            val oldMinecraftFormat = langData.yamlMap.get<YamlMap>("minecraft")?.getScalar("format")?.content!!
-            val oldTelegramFormat = langData.yamlMap.get<YamlMap>("telegram")?.getScalar("chatMessage")?.content!!.let {
-                if (langVersion < 2) {
-                    it.replace("{sender}", "<username>").replace("{text}", "<text>")
-                } else {
-                    "$it <text>"
-                }
-            }
+            val oldMinecraftFormat = langData.yamlMap.get<YamlMap>("minecraft")?.getScalar("format")?.content
+                ?: "<aqua>\\<<sender>></aqua> <text>"
+            val oldTelegramFormat = langData.yamlMap.get<YamlMap>("telegram")?.getScalar("chatMessage")?.content
+                ?.let {
+                    if (langVersion < 2) {
+                        it.replace("{sender}", "<username>").replace("{text}", "<text>")
+                    } else {
+                        "$it <text>"
+                    }
+                } ?: "<b>[<username>]</b> <text>"
             config = config.copy(
                 version = 4,
                 botToken = oldToken,
