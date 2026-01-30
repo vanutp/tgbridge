@@ -47,6 +47,11 @@ public class PaperBootstrap extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
+        if (tgbridge == null) {
+            getLogger().severe("tgbridge initialization failed, see logs above for details");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
 
         new EventManager(this).register();
         tgbridge.onEnable$tgbridge_paper();
