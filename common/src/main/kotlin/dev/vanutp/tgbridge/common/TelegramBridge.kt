@@ -12,6 +12,7 @@ import dev.vanutp.tgbridge.common.modules.VoiceMessagesModule
 import kotlinx.coroutines.*
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TranslatableComponent
+import net.kyori.adventure.text.event.HoverEvent
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 import kotlin.time.Duration.Companion.seconds
 
@@ -350,10 +351,18 @@ abstract class TelegramBridge {
         if (!TgbridgeEvents.DEATH.invoke(e)) return@wrapMinecraftHandler
         if (e.player.isVanished()) return@wrapMinecraftHandler
 
+        val players = platform.getOnlinePlayers()
         val convertedMessage = when (val msg = e.message) {
             is TranslatableComponent -> {
-                val args = mutableListOf<Component>(Component.text(e.player.getName()))
-                args.addAll(msg.args().map { it.asComponent() }.drop(1))
+                val args = msg.args().map { arg ->
+                    val entity = arg.hoverEvent()
+                        ?.value() as? HoverEvent.ShowEntity
+                        ?: return@map arg
+                    return@map players
+                        .find { it.uuid == entity.id() }
+                        ?.let { Component.text(it.getName()) }
+                        ?: arg
+                }
                 msg.args(args)
             }
 
