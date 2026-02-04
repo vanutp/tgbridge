@@ -49,7 +49,7 @@ Unreleased versions from the `master` branch are published by CI as `1.0-SNAPSHO
 
 tgbridge is written in Kotlin, but you should also be able to interface with it from Java.
 
-You need to add Kotlin dependency to your project like so:
+In some cases, you may need to add Kotlin dependency to your project
 
 ::: code-group
 ```kotlin [Gradle KTS]
@@ -74,8 +74,9 @@ each suspend method has a corresponding method suffixed with `Async`
 that returns a `CompletableFuture` instance.
 For example, `suspend fun sendMessage(...)` -> `fun sendMessageAsync(...): CompletableFuture`.
 
-Similarly, all event registration methods that accept functions have 2 overloads:
-one for `suspend` functions and other for regular ones.
+Similarly, all event registration methods that accept functions have 3 overloads:
+one for `suspend` functions, one for async functions returning `CompletableFuture`,
+and one for normal functions (`Consumer`).
 
 ## tgbridge instance
 

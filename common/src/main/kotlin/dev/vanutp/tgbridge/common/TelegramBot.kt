@@ -24,6 +24,7 @@ import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeoutException
+import java.util.function.Consumer
 import kotlin.reflect.KClass
 
 
@@ -443,8 +444,13 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
         messageHandlers.add(handler)
     }
 
+    @Deprecated("Deprecated, use registerMessageHandler(Consumer<TgMessage>) instead", level = DeprecationLevel.WARNING)
     fun registerMessageHandler(handler: Function1<TgMessage>) {
         messageHandlers.add(handler::apply)
+    }
+
+    fun registerMessageHandler(handler: Consumer<TgMessage>) {
+        messageHandlers.add(handler::accept)
     }
 
     fun registerCommandHandler(command: String, handler: suspend (TgMessage) -> Unit) {
@@ -459,9 +465,13 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
         }
     }
 
+    @Deprecated("Deprecated, use registerCommandHandler(String, Consumer<TgMessage>) instead", level = DeprecationLevel.WARNING)
     fun registerCommandHandler(command: String, handler: Function1<TgMessage>) {
-        val suspendHandler: suspend (TgMessage) -> Unit = handler::apply
-        registerCommandHandler(command, suspendHandler)
+        registerCommandHandler(command) { handler.apply(it) }
+    }
+
+    fun registerCommandHandler(command: String, handler: Consumer<TgMessage>) {
+        registerCommandHandler(command) { handler.accept(it) }
     }
 
     suspend fun init() {

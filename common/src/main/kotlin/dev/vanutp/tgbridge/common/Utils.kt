@@ -9,6 +9,11 @@ import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 
+@Deprecated(
+    "Deprecated, use Consumer<A> instead",
+    level = DeprecationLevel.WARNING,
+    replaceWith = ReplaceWith("java.util.function.Consumer<A>"),
+)
 fun interface Function1<A> {
     fun apply(arg: A)
 }
@@ -35,11 +40,15 @@ data class Placeholders(
         component
     )
 
+    fun addPlain(key: String, value: String) = this + Pair(key, value)
+
     @JvmName("addComponent")
     operator fun plus(other: Pair<String, Component>) = Placeholders(
         plain,
         component + mapOf(other)
     )
+
+    fun addComponent(key: String, value: Component) = this + Pair(key, value)
 
     fun withDefaults(other: Placeholders) = other + this
 }

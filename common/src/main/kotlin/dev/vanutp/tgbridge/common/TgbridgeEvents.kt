@@ -1,6 +1,11 @@
 package dev.vanutp.tgbridge.common
 
 import dev.vanutp.tgbridge.common.models.*
+import kotlinx.coroutines.future.await
+import kotlinx.coroutines.future.future
+import java.util.concurrent.CompletableFuture
+import java.util.function.Consumer
+import java.util.function.Function
 
 enum class EventPriority {
     HIGHEST,
@@ -17,15 +22,35 @@ class TgbridgeEventHandler<E> internal constructor() {
         }
     }
 
+    @Deprecated("This signature is deprecated, use addListener(EventPriority, Consumer<E>) instead", level = DeprecationLevel.WARNING)
     fun addListener(priority: EventPriority, listener: Function1<E>) {
         listeners[priority]!!.add(listener::apply)
+    }
+
+    fun addListener(priority: EventPriority, listener: Consumer<E>) {
+        listeners[priority]!!.add(listener::accept)
+    }
+
+    fun addListener(priority: EventPriority, listener: Function<E, CompletableFuture<Void>>) {
+        listeners[priority]!!.add {
+            listener.apply(it).await()
+        }
     }
 
     fun addListener(priority: EventPriority, listener: suspend (E) -> Unit) {
         listeners[priority]!!.add(listener)
     }
 
+    @Deprecated("This signature is deprecated, use addListener(Consumer<E>) instead", level = DeprecationLevel.WARNING)
     fun addListener(listener: Function1<E>) {
+        addListener(EventPriority.NORMAL, listener::apply)
+    }
+
+    fun addListener(listener: Consumer<E>) {
+        addListener(EventPriority.NORMAL, listener)
+    }
+
+    fun addListener(listener: Function<E, CompletableFuture<Void>>) {
         addListener(EventPriority.NORMAL, listener)
     }
 
@@ -33,7 +58,16 @@ class TgbridgeEventHandler<E> internal constructor() {
         addListener(EventPriority.NORMAL, listener)
     }
 
+    @Deprecated("This signature is deprecated, use removeListener(EventPriority, Consumer<E>) instead", level = DeprecationLevel.WARNING)
     fun removeListener(priority: EventPriority, listener: Function1<E>) {
+        listeners[priority]!!.remove(listener::apply)
+    }
+
+    fun removeListener(priority: EventPriority, listener: Consumer<E>) {
+        listeners[priority]!!.remove(listener::accept)
+    }
+
+    fun removeListener(priority: EventPriority, listener: Function<E, CompletableFuture<Void>>) {
         listeners[priority]!!.remove(listener::apply)
     }
 
@@ -41,7 +75,20 @@ class TgbridgeEventHandler<E> internal constructor() {
         listeners[priority]!!.remove(listener)
     }
 
+    @Deprecated("This signature is deprecated, use removeListener(Consumer<E>) instead", level = DeprecationLevel.WARNING)
     fun removeListener(listener: Function1<E>) {
+        EventPriority.entries.forEach {
+            listeners[it]!!.remove(listener::apply)
+        }
+    }
+
+    fun removeListener(listener: Consumer<E>) {
+        EventPriority.entries.forEach {
+            listeners[it]!!.remove(listener::accept)
+        }
+    }
+
+    fun removeListener(listener: Function<E, CompletableFuture<Void>>) {
         EventPriority.entries.forEach {
             listeners[it]!!.remove(listener::apply)
         }
@@ -63,6 +110,10 @@ class TgbridgeEventHandler<E> internal constructor() {
             }
         }
         return true
+    }
+
+    fun invokeAsync(event: E) = TelegramBridge.INSTANCE.coroutineScope.future {
+        invoke(event)
     }
 }
 
