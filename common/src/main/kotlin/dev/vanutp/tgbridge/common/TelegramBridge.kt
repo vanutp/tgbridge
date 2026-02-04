@@ -83,13 +83,15 @@ abstract class TelegramBridge {
         }
 
     fun addModule(module: ITgbridgeModule) {
-        if (started) {
-            throw IllegalStateException("Can't add module ${module::class.simpleName} after the server has started")
-        }
         if (availableModules.contains(module)) {
             throw IllegalStateException("Module ${module::class.simpleName} is already added")
         }
         availableModules.add(module)
+        if (started && module.shouldEnable()) {
+            logger.info("Enabling module " + (module::class.simpleName ?: "unknown"))
+            module.enable()
+            _enabledModules.add(module)
+        }
     }
 
     fun onServerStarted() = coroutineScope.launch {

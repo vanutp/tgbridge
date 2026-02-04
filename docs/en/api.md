@@ -165,13 +165,13 @@ You can call `PLAYER_PLACEHOLDERS` and `RECIPIENTS` events manually using `Tgbri
 ## Modules
 
 Modules are an internal tgbridge mechanism to separate non-core features.
-Currently, you only need to use modules if you want to add vanish or chat plugin integration.
+Using modules is optional if you don't want to add vanish or chat plugin integrations.
 
 To create a module, you first need to implement `ITgbridgeModule`.
 The only method you must implement is `enable`. It will be called after the server is started.
 
 Then add a module instance using `bridge.addModule(moduleInstance)`.
-You must do this before the server is started (e.g. in `onEnable` method of your plugin).
+It's recommended to do this before the server is started (e.g. in `onEnable` method of your plugin).
 
 
 [//]: # (Instead of implementing `ITgbridgeModule` directly, you can also extend `AbstractModule` or `AbstractPaperModule`)
