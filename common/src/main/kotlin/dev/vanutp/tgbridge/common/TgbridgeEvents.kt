@@ -58,19 +58,22 @@ class TgbridgeEventHandler<E> internal constructor() {
         addListener(EventPriority.NORMAL, listener)
     }
 
-    @Deprecated("This signature is deprecated, use removeListener(EventPriority, Consumer<E>) instead", level = DeprecationLevel.WARNING)
+    @Deprecated("This signature is deprecated, use removeListener(handler) instead", level = DeprecationLevel.ERROR)
     fun removeListener(priority: EventPriority, listener: Function1<E>) {
         listeners[priority]!!.remove(listener::apply)
     }
 
+    @Deprecated("This signature is deprecated, use removeListener(handler) instead", level = DeprecationLevel.ERROR)
     fun removeListener(priority: EventPriority, listener: Consumer<E>) {
         listeners[priority]!!.remove(listener::accept)
     }
 
+    @Deprecated("This signature is deprecated, use removeListener(handler) instead", level = DeprecationLevel.ERROR)
     fun removeListener(priority: EventPriority, listener: Function<E, CompletableFuture<Void>>) {
         listeners[priority]!!.remove(listener::apply)
     }
 
+    @Deprecated("This signature is deprecated, use removeListener(handler) instead", level = DeprecationLevel.ERROR)
     fun removeListener(priority: EventPriority, listener: suspend (E) -> Unit) {
         listeners[priority]!!.remove(listener)
     }
