@@ -14,14 +14,14 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.event.HoverEvent
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
-import kotlin.time.Duration.Companion.seconds
 
 abstract class TelegramBridge {
     internal val coroutineScope = CoroutineScope(Dispatchers.IO).plus(SupervisorJob())
     abstract val logger: ILogger
     abstract val platform: IPlatform
-    private var initialized = CompletableDeferred<Unit>()
-    private var started: Boolean = false
+    private var initialized = false
+    private var shouldStartAfterInit = false
+    private var started = false
     lateinit var bot: TelegramBot private set
     private var spark: SparkHelper? = null
 
@@ -47,7 +47,7 @@ abstract class TelegramBridge {
         _INSTANCE = this
     }
 
-    fun init() {
+    fun init(sync: Boolean = false) {
         logger.info("tgbridge starting on ${platform.name}")
         ConfigManager.init(platform.configDir, platform::getLanguageKey)
         config.getError()?.let {
@@ -63,24 +63,26 @@ abstract class TelegramBridge {
         bot = TelegramBot(config.advanced.botApiUrl, config.botToken, logger, coroutineScope)
         addModule(ReplacementsModule(this))
         addModule(VoiceMessagesModule(this))
-        coroutineScope.launch {
+        val initLambda = suspend {
             bot.init()
             logger.info("Logged in as @${bot.me.username}")
             registerTelegramHandlers()
             bot.startPolling()
-            initialized.complete(Unit)
+            initialized = true
+            if (shouldStartAfterInit) {
+                onServerStarted()
+            }
+        }
+        if (sync) {
+            runBlocking {
+                initLambda()
+            }
+        } else {
+            coroutineScope.launch {
+                initLambda()
+            }
         }
     }
-
-    suspend fun waitForInit(): Boolean =
-        try {
-            withTimeout(5.seconds) {
-                initialized.await()
-            }
-            true
-        } catch (_: TimeoutCancellationException) {
-            false
-        }
 
     fun addModule(module: ITgbridgeModule) {
         if (availableModules.contains(module)) {
@@ -94,14 +96,16 @@ abstract class TelegramBridge {
         }
     }
 
-    fun onServerStarted() = coroutineScope.launch {
+    fun onServerStarted() {
         // TODO: this will fail if there is no internet on server start
-        if (!waitForInit()) {
+        if (!initialized) {
             if (config.getError() != null) {
                 logger.error("Error initializing the mod, check the server console for errors")
             }
-            return@launch
+            shouldStartAfterInit = true
+            return
         }
+        shouldStartAfterInit = false
         availableModules
             .filter { it.shouldEnable() }
             .also { toEnable ->
@@ -126,7 +130,7 @@ abstract class TelegramBridge {
     fun shutdown() {
         runBlocking {
             MuteService.shutdown()
-            if (config.events.enableStopMessages && initialized.isCompleted) {
+            if (config.events.enableStopMessages && initialized) {
                 val disableNotification = config.messages.silentEvents.contains(TgMessageType.SERVER_SHUTDOWN)
                 chatManager.sendMessage(
                     config.getDefaultChat(),
@@ -206,28 +210,25 @@ abstract class TelegramBridge {
         platform.broadcastMessage(recipientsEvt.recipients, chat.minecraftFormat.formatMiniMessage(e.placeholders))
     }
 
-    private fun tryReinit(ctx: TBCommandContext): Boolean = runBlocking {
-        initialized = CompletableDeferred()
-        init()
-        val success = waitForInit()
-        if (success) {
-            onServerStarted()
+    private fun tryReinit(ctx: TBCommandContext): Boolean {
+        init(sync = true)
+        if (initialized) {
             ctx.reply("tgbridge initialized")
         } else {
             ctx.reply(config.getError() ?: "Error initializing the mod, check the server console for errors")
         }
-        return@runBlocking success
+        return initialized
     }
 
     fun onReloadCommand(ctx: TBCommandContext): Boolean {
-        if (!initialized.isCompleted) {
+        if (!initialized) {
             try {
                 if (config.getError() != null) {
                     return tryReinit(ctx)
                 }
             } catch (_: UninitializedPropertyAccessException) {
             }
-            ctx.reply("Mod was not properly initialized, please restart the server")
+            ctx.reply("Mod was not properly initialized, check the server console for errors")
             return false
         }
         try {
@@ -482,7 +483,7 @@ abstract class TelegramBridge {
     }
 
     fun wrapMinecraftHandler(fn: suspend () -> Unit) {
-        if (!initialized.isCompleted) {
+        if (!initialized) {
             return
         }
         coroutineScope.launch {
