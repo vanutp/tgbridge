@@ -13,23 +13,15 @@ loom {
 
 repositories {
     maven("https://maven.minecraftforge.net/releases")
-    maven {
-        name = "Kotlin for Forge"
-        url = uri("https://thedarkcolour.github.io/KotlinForForge/")
-        content { includeGroup("thedarkcolour") }
-    }
 }
 
 val minecraftVersion: String by project
 val forgeVersion: String by project
-val forgeKotlinVersion: String by project
 
 dependencies {
     minecraft("com.mojang:minecraft:${minecraftVersion}")
     forge("net.minecraftforge:forge:${minecraftVersion}-${forgeVersion}")
     mappings(loom.officialMojangMappings())
-
-    implementation("thedarkcolour:kotlinforforge:${forgeKotlinVersion}")
 
     api(project(":common"))
     shadow(project(":common"))
@@ -60,7 +52,4 @@ modrinth {
     uploadFile.set(tasks.remapJar)
     gameVersions.addAll("1.19.2")
     loaders.addAll("forge")
-    dependencies {
-        required.project("kotlin-for-forge")
-    }
 }

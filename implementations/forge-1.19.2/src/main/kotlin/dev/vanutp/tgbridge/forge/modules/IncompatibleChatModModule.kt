@@ -10,11 +10,11 @@ import dev.vanutp.tgbridge.common.modules.IChatModule
 import dev.vanutp.tgbridge.forge.ForgeTelegramBridge
 import dev.vanutp.tgbridge.forge.toAdventure
 import dev.vanutp.tgbridge.forge.toTgbridge
+import net.minecraftforge.common.MinecraftForge.EVENT_BUS
 import net.minecraftforge.event.ServerChatEvent
 import net.minecraftforge.eventbus.api.EventPriority
 import net.minecraftforge.eventbus.api.SubscribeEvent
 import net.minecraftforge.server.ServerLifecycleHooks
-import thedarkcolour.kotlinforforge.forge.FORGE_BUS
 
 class IncompatibleChatModModule(override val bridge: ForgeTelegramBridge) : AbstractModule(bridge), IChatModule {
     override val canBeDisabled = true
@@ -36,14 +36,14 @@ class IncompatibleChatModModule(override val bridge: ForgeTelegramBridge) : Abst
     }
 
     override fun enable() {
-        FORGE_BUS.register(this)
+        EVENT_BUS.register(this)
         TgbridgeEvents.RECIPIENTS.addListener { e ->
             e.recipients += getChatRecipients(e.chat) ?: emptyList()
         }
     }
 
     override fun disable() {
-        FORGE_BUS.unregister(this)
+        EVENT_BUS.unregister(this)
     }
 
     fun getChatRecipients(chat: ChatConfig): List<ITgbridgePlayer>? =

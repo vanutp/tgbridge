@@ -20,8 +20,9 @@ val kotlinxCoroutinesVersion: String by project
 val kotlinxSerializationVersion: String by project
 val adventureVersion: String by project
 
-// kotlinforforge for 1.16.5 hasn't been updated for a long time
-fun shouldBundleKotlin(projectName: String) = projectName == "forge-1.16.5"
+// kotlinforforge isn't updated for older minecraft versions
+fun shouldBundleKotlin(projectName: String) =
+    projectName == "forge-1.16.5" || projectName == "forge-1.19.2"
 
 subprojects {
     apply {

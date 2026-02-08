@@ -8,42 +8,50 @@ import dev.vanutp.tgbridge.forge.modules.IncompatibleChatModModule
 import net.minecraft.client.resources.language.ClientLanguage
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.locale.Language
+import net.minecraftforge.api.distmarker.Dist
 import net.minecraftforge.client.event.RegisterClientCommandsEvent
+import net.minecraftforge.common.MinecraftForge.EVENT_BUS
 import net.minecraftforge.event.server.ServerStartedEvent
 import net.minecraftforge.event.server.ServerStoppingEvent
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext
+import net.minecraftforge.fml.loading.FMLEnvironment
 import net.minecraftforge.fml.loading.FMLPaths
-import thedarkcolour.kotlinforforge.forge.FORGE_BUS
-import thedarkcolour.kotlinforforge.forge.MOD_BUS
-import thedarkcolour.kotlinforforge.forge.runForDist
 import kotlin.io.path.createDirectories
 import kotlin.io.path.writeText
 import net.minecraft.network.chat.Component as Text
 
 @Mod(ForgeTelegramBridge.MOD_ID)
-object ForgeTelegramBridge : TelegramBridge() {
-    const val MOD_ID = "tgbridge"
+class ForgeTelegramBridge : TelegramBridge() {
+    companion object {
+        const val MOD_ID = "tgbridge"
+    }
+
     override val logger = ForgeLogger()
     override val platform = ForgePlatform()
 
     init {
-        runForDist(
-            clientTarget = {
-                MOD_BUS.addListener(::onClientSetup)
-            },
-            serverTarget = {
+        val modBus = FMLJavaModLoadingContext.get().modEventBus
+        when (FMLEnvironment.dist) {
+            Dist.CLIENT -> {
+                modBus.addListener(::onClientSetup)
+            }
+
+            Dist.DEDICATED_SERVER -> {
                 addModule(IncompatibleChatModModule(this))
-                EventManager.register()
+                EventManager(this).register()
                 init()
-                FORGE_BUS.addListener { _: ServerStartedEvent ->
+                EVENT_BUS.addListener { _: ServerStartedEvent ->
                     onServerStarted()
                 }
-                FORGE_BUS.addListener { _: ServerStoppingEvent ->
+                EVENT_BUS.addListener { _: ServerStoppingEvent ->
                     shutdown()
                 }
             }
-        )
+
+            else -> throw IllegalArgumentException("Unknown dist ${FMLEnvironment.dist}")
+        }
     }
 
     private fun onDumpLangCommand(ctx: CommandContext<CommandSourceStack>): Int {
@@ -57,7 +65,7 @@ object ForgeTelegramBridge : TelegramBridge() {
     }
 
     private fun onClientSetup(event: FMLClientSetupEvent) {
-        FORGE_BUS.addListener { e: RegisterClientCommandsEvent ->
+        EVENT_BUS.addListener { e: RegisterClientCommandsEvent ->
             e.dispatcher.register(
                 LiteralArgumentBuilder.literal<CommandSourceStack>("tgbridge")
                     .then(

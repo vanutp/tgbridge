@@ -8,14 +8,14 @@ import dev.vanutp.tgbridge.common.models.*
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands
 import net.minecraft.world.entity.player.Player
+import net.minecraftforge.common.MinecraftForge.EVENT_BUS
 import net.minecraftforge.event.RegisterCommandsEvent
 import net.minecraftforge.event.ServerChatEvent
 import net.minecraftforge.event.entity.living.LivingDeathEvent
 import net.minecraftforge.event.entity.player.AdvancementEvent
 import net.minecraftforge.event.entity.player.PlayerEvent
-import thedarkcolour.kotlinforforge.forge.FORGE_BUS
 
-object EventManager {
+class EventManager(private val tgbridge: ForgeTelegramBridge) {
     fun register() {
         registerChatMessageListener()
         registerPlayerDeathListener()
@@ -26,11 +26,11 @@ object EventManager {
     }
 
     private fun registerChatMessageListener() {
-        FORGE_BUS.addListener { e: ServerChatEvent ->
+        EVENT_BUS.addListener { e: ServerChatEvent ->
             if (TelegramBridge.INSTANCE.chatModule != null) {
                 return@addListener
             }
-            ForgeTelegramBridge.onChatMessage(
+            tgbridge.onChatMessage(
                 TgbridgeMcChatMessageEvent(
                     e.player.toTgbridge(),
                     e.message.toAdventure(),
@@ -42,13 +42,13 @@ object EventManager {
     }
 
     private fun registerPlayerDeathListener() {
-        FORGE_BUS.addListener { e: LivingDeathEvent ->
+        EVENT_BUS.addListener { e: LivingDeathEvent ->
             val player = e.entity
             if (player !is Player) {
                 return@addListener
             }
             val deathMessage = e.source.getLocalizedDeathMessage(player)
-            ForgeTelegramBridge.onPlayerDeath(
+            tgbridge.onPlayerDeath(
                 TgbridgeDeathEvent(
                     player.toTgbridge(), deathMessage.toAdventure(), e,
                 )
@@ -57,28 +57,28 @@ object EventManager {
     }
 
     private fun registerPlayerJoinListener() {
-        FORGE_BUS.addListener { e: PlayerEvent.PlayerLoggedInEvent ->
+        EVENT_BUS.addListener { e: PlayerEvent.PlayerLoggedInEvent ->
             val hasPlayedBefore = (e.entity as IHasPlayedBefore).`tgbridge$getHasPlayedBefore`()
-            ForgeTelegramBridge.onPlayerJoin(
+            tgbridge.onPlayerJoin(
                 TgbridgeJoinEvent(e.entity.toTgbridge(), hasPlayedBefore, e)
             )
         }
     }
 
     private fun registerPlayerLeaveListener() {
-        FORGE_BUS.addListener { e: PlayerEvent.PlayerLoggedOutEvent ->
-            ForgeTelegramBridge.onPlayerLeave(TgbridgeLeaveEvent(e.entity.toTgbridge(), e))
+        EVENT_BUS.addListener { e: PlayerEvent.PlayerLoggedOutEvent ->
+            tgbridge.onPlayerLeave(TgbridgeLeaveEvent(e.entity.toTgbridge(), e))
         }
     }
 
     private fun registerPlayerAdvancementListener() {
-        FORGE_BUS.addListener { e: AdvancementEvent.AdvancementEarnEvent ->
+        EVENT_BUS.addListener { e: AdvancementEvent.AdvancementEarnEvent ->
             val display = e.advancement.display
             if (display == null || !display.shouldAnnounceChat()) {
                 return@addListener
             }
             val type = display.frame.getName()
-            ForgeTelegramBridge.onPlayerAdvancement(
+            tgbridge.onPlayerAdvancement(
                 TgbridgeAdvancementEvent(
                     e.entity.toTgbridge(),
                     type,
@@ -91,12 +91,12 @@ object EventManager {
     }
 
     private fun onReloadCommand(ctx: CommandContext<CommandSourceStack>): Int {
-        val res = ForgeTelegramBridge.onReloadCommand(ctx.toTgbridge())
+        val res = tgbridge.onReloadCommand(ctx.toTgbridge())
         return if (res) 1 else -1
     }
 
     private fun onToggleMuteCommand(ctx: CommandContext<CommandSourceStack>): Int {
-        val res = ForgeTelegramBridge.onToggleMuteCommand(ctx.toTgbridge())
+        val res = tgbridge.onToggleMuteCommand(ctx.toTgbridge())
         return if (res) 1 else -1
     }
 
@@ -104,7 +104,7 @@ object EventManager {
         val format = ctx.nodes[2].node.name
         val chatName = StringArgumentType.getString(ctx, "chatName")
         val message = StringArgumentType.getString(ctx, "message")
-        val res = ForgeTelegramBridge.onSendCommand(ctx.toTgbridge(), format, chatName, message)
+        val res = tgbridge.onSendCommand(ctx.toTgbridge(), format, chatName, message)
         return if (res) 1 else -1
     }
 
@@ -118,7 +118,7 @@ object EventManager {
                 )
             )
         }
-        FORGE_BUS.addListener { e: RegisterCommandsEvent ->
+        EVENT_BUS.addListener { e: RegisterCommandsEvent ->
             e.dispatcher.register(
                 Commands.literal("tgbridge")
                     .then(
