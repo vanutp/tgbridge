@@ -233,31 +233,35 @@ abstract class TelegramBridge {
         }
         try {
             ConfigManager.reload()
+
+            enabledModules
+                .filter { !it.shouldEnable() && it.canBeDisabled }
+                .also { toDisable ->
+                    if (toDisable.isEmpty()) return@also
+                    logger.info("Disabling modules: " + toDisable.joinToString { it::class.simpleName ?: "unknown" })
+                    toDisable.forEach { it.disable() }
+                    _enabledModules.removeAll(toDisable)
+                }
+            availableModules
+                .filter { it.shouldEnable() && !_enabledModules.contains(it) }
+                .also { toEnable ->
+                    if (toEnable.isEmpty()) return@also
+                    logger.info("Enabling modules: " + toEnable.joinToString { it::class.simpleName ?: "unknown" })
+                    toEnable.forEach { it.enable() }
+                    _enabledModules.addAll(toEnable)
+                }
+
+            runBlocking {
+                bot.recoverPolling()
+                chatManager.unlock()
+            }
+
+            ctx.reply("Config reloaded. Note that the bot token and settings under \"advanced\" can't be changed without a restart")
         } catch (e: Exception) {
-            ctx.reply("Error reloading config: " + (e.message ?: e.javaClass.name))
+            logger.error("Reloading error", e)
+            ctx.reply("Error reloading: " + (e.message ?: e.javaClass.name))
             return false
         }
-
-        enabledModules
-            .filter { !it.shouldEnable() && it.canBeDisabled }
-            .also { toDisable ->
-                logger.info("Disabling modules: " + toDisable.joinToString { it::class.simpleName ?: "unknown" })
-                toDisable.forEach { it.disable() }
-                _enabledModules.removeAll(toDisable)
-            }
-        availableModules
-            .filter { it.shouldEnable() && !_enabledModules.contains(it) }
-            .also { toEnable ->
-                logger.info("Enabling modules: " + toEnable.joinToString { it::class.simpleName ?: "unknown" })
-                toEnable.forEach { it.enable() }
-                _enabledModules.addAll(toEnable)
-            }
-
-        runBlocking {
-            bot.recoverPolling()
-            chatManager.unlock()
-        }
-        ctx.reply("Config reloaded. Note that the bot token and settings under \"advanced\" can't be changed without a restart")
         coroutineScope.launch {
             TgbridgeEvents.POST_RELOAD.invoke(Unit)
         }
