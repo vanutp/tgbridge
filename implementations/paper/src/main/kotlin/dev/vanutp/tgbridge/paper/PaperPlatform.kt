@@ -1,6 +1,7 @@
 package dev.vanutp.tgbridge.paper
 
 import dev.vanutp.tgbridge.common.IPlatform
+import dev.vanutp.tgbridge.common.IResourceContainer
 import dev.vanutp.tgbridge.common.models.ITgbridgePlayer
 import net.kyori.adventure.text.Component
 import net.minecraft.locale.Language
@@ -10,6 +11,7 @@ import kotlin.io.path.absolute
 
 class PaperPlatform(private val plugin: JavaPlugin) : IPlatform {
     override val name = "paper"
+    override val gameDir = plugin.server.worldContainer.toPath().absolute()
     override val configDir = plugin.dataFolder.toPath().absolute()
 
     override fun broadcastMessage(recipients: List<ITgbridgePlayer>, text: Component) {
@@ -34,5 +36,7 @@ class PaperPlatform(private val plugin: JavaPlugin) : IPlatform {
     override fun isModLoaded(modId: String) =
         plugin.server.pluginManager.isPluginEnabled(modId)
 
+    override fun getModResources() = emptyList<IResourceContainer>()
+    override fun getMinecraftVersion() = plugin.server.minecraftVersion
     override fun playerToTgbridge(player: Any) = (player as Player).toTgbridge()
 }

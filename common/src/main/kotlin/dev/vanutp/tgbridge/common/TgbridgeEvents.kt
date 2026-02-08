@@ -131,4 +131,5 @@ object TgbridgeEvents {
     val POST_RELOAD = TgbridgeEventHandler<Unit>()
     val PLAYER_PLACEHOLDERS = TgbridgeEventHandler<TgbridgePlayerPlaceholdersEvent>()
     val RECIPIENTS = TgbridgeEventHandler<TgbridgeRecipientsEvent>()
+    val RESOURCE_RELOAD = TgbridgeEventHandler<ResourceReloadEvent>()
 }

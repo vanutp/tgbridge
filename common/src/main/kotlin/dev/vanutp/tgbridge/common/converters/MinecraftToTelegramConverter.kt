@@ -1,6 +1,6 @@
 package dev.vanutp.tgbridge.common.converters
 
-import dev.vanutp.tgbridge.common.ConfigManager.getMinecraftLangKey
+import dev.vanutp.tgbridge.common.LanguageService
 import dev.vanutp.tgbridge.common.TgEntity
 import dev.vanutp.tgbridge.common.TgEntityType
 import net.kyori.adventure.text.Component
@@ -49,7 +49,7 @@ object MinecraftToTelegramConverter {
         var res = when (comp) {
             is TranslatableComponent -> {
                 var curr = TelegramFormattedText(
-                    getMinecraftLangKey(comp.key()) ?: comp.key()
+                    LanguageService.getString(comp.key()) ?: comp.key()
                 )
                 // We're using older versions of kyori on some platforms, so using deprecated args() is ok
                 comp.args().forEachIndexed { i, x ->

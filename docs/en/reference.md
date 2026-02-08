@@ -85,6 +85,23 @@ Set to `true` to use real player username instead of display name in all Telegra
 A list of event types that will be sent to Telegram "without sound".
 Available types: `SERVER_STARTUP`, `SERVER_SHUTDOWN`, `CHAT`, `DEATH`, `JOIN`, `LEAVE`, `ADVANCEMENT`
 
+## messages.autoMessagesLanguage
+
+- **Type:** `string | null`
+- **Default:** `null` (disabled)
+
+Set this option to automatically find translations for advancement and death messages.
+The value must be a valid Minecraft language code, for example `en_us` or `ru_ru`.
+You can find the full list at https://minecraft.wiki/w/Language (see the "In-game" column).
+If this setting is set, "minecraft_lang.json" config file will be managed by tgbridge
+automatically and your changes to this file will be lost.
+See [Localization](https://tgbridge.vanutp.dev/en/localization) for details.
+
+By setting this option you are indicating that you have accepted Mojang's EULA (https://aka.ms/MinecraftEULA),
+you confirm that you own a license to Minecraft (Java Edition),
+and you agree that tgbridge will download and use Minecraft client files (depending on the Minecraft version) from Mojang's servers.
+This file contains resources that belong to Mojang and you must not redistribute it or do anything else that is not compliant with Mojang's EULA.
+
 ## integrations.bluemapUrl
 
 - **Type:** `string | null`

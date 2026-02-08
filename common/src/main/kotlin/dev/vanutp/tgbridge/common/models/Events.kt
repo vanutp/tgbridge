@@ -1,5 +1,6 @@
 package dev.vanutp.tgbridge.common.models
 
+import dev.vanutp.tgbridge.common.IResourceContainer
 import dev.vanutp.tgbridge.common.Placeholders
 import dev.vanutp.tgbridge.common.TgMessage
 import net.kyori.adventure.text.Component
@@ -68,6 +69,10 @@ data class TgbridgeRecipientsEvent(
     var chat: ChatConfig,
     var recipients: List<ITgbridgePlayer> = emptyList(),
     val originalEvent: Any?,
+)
+
+data class ResourceReloadEvent(
+    var containers: List<IResourceContainer>
 )
 
 enum class TgMessageType {

@@ -90,6 +90,23 @@
 Список типов событий, которые будут отправлены в Telegram "без звука".
 Доступные типы: `SERVER_STARTUP`, `SERVER_SHUTDOWN`, `CHAT`, `DEATH`, `JOIN`, `LEAVE`, `ADVANCEMENT`
 
+## messages.autoMessagesLanguage
+
+- **Тип:** `string | null`
+- **По умолчанию:** `null` (отключено)
+
+Задайте эту опцию, чтобы автоматически найти переводы для ачивок и сообщений смерти.
+Значение должно быть валидным кодом языка Minecraft, например `en_us` или `ru_ru`.
+Полный список доступен на https://minecraft.wiki/w/Language (см. колонку "In-game").
+Если эта опция установлена, конфиг "minecraft_lang.json" будет автоматически генерироваться
+tgbridge, и ваши изменения будут перезаписаны.
+См. [Локализация](https://tgbridge.vanutp.dev/ru/localization) для подробной информации.
+
+Задавая эту опцию, вы подтверждаете, что принимаете Mojang EULA (https://aka.ms/MinecraftEULA),
+подтверждаете, что у вас есть лицензия на Minecraft (Java Edition),
+и соглашаетесь, что tgbridge будет загружать и использовать файлы клиента Minecraft (в зависимости от версии Minecraft) с серверов Mojang.
+Этот файл содержит ресурсы, принадлежащие Mojang, и вы не должны распространять его или делать что-либо еще, нарушающее Mojang EULA.
+
 ## integrations.bluemapUrl
 
 - **Тип:** `string | null`

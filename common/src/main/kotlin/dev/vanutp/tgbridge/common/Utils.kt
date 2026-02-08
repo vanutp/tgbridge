@@ -2,12 +2,18 @@ package dev.vanutp.tgbridge.common
 
 import dev.vanutp.tgbridge.common.ConfigManager.config
 import dev.vanutp.tgbridge.common.converters.MinecraftToTelegramConverter
-import dev.vanutp.tgbridge.common.models.ChatConfig
 import dev.vanutp.tgbridge.common.models.Config
+import dev.vanutp.tgbridge.common.models.ProxyType
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
+import okhttp3.Credentials
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.coroutines.executeAsync
+import java.net.InetSocketAddress
+import java.net.Proxy
 
 @Deprecated(
     "Deprecated, use Consumer<A> instead",
@@ -119,3 +125,30 @@ fun Config.getError(): String? {
         null
     }
 }
+
+
+fun OkHttpClient.Builder.withProxyConfig(): OkHttpClient.Builder {
+    val proxy = config.advanced.proxy
+    val addr = InetSocketAddress(proxy.host, proxy.port)
+    return when (proxy.type) {
+        ProxyType.NONE -> this
+        ProxyType.SOCKS5 -> this.proxy(Proxy(Proxy.Type.SOCKS, addr))
+        ProxyType.HTTP -> this
+            .proxy(Proxy(Proxy.Type.HTTP, addr))
+            .let { builder ->
+                if (proxy.username != null && proxy.password != null) {
+                    builder.proxyAuthenticator { _, response ->
+                        val credential = Credentials.basic(proxy.username, proxy.password)
+                        response.request.newBuilder().header("Proxy-Authorization", credential).build()
+                    }
+                } else {
+                    builder
+                }
+            }
+    }
+}
+
+suspend fun OkHttpClient.get(url: String) =
+    newCall(Request.Builder().url(url).build()).executeAsync().use {
+        it.body.string()
+    }

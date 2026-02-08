@@ -34,6 +34,13 @@ dependencies {
         exclude(module = "kotlinx-serialization-core")
         exclude(module = "kotlinx-serialization-json")
     }
+    implementation("com.squareup.okhttp3:okhttp:5.3.2") {
+        exclude(module = "kotlin-stdlib")
+    }
+    implementation("com.squareup.okhttp3:okhttp-coroutines:5.3.2") {
+        exclude(module = "kotlin-stdlib")
+        exclude(module = "kotlinx-coroutines-core")
+    }
     implementation("com.squareup.retrofit2:converter-kotlinx-serialization:${"retrofitVersion"()}") {
         exclude(module = "kotlin-stdlib")
         exclude(module = "kotlinx-serialization-core")

@@ -6,12 +6,15 @@ import java.nio.file.Path
 
 interface IPlatform {
     val name: String
+    val gameDir: Path
     val configDir: Path
 
     fun broadcastMessage(recipients: List<ITgbridgePlayer>, text: Component)
     fun getOnlinePlayers(): List<ITgbridgePlayer>
     fun getLanguageKey(key: String): String?
     fun isModLoaded(modId: String): Boolean
+    fun getModResources(): List<IResourceContainer>
+    fun getMinecraftVersion(): String
 
     /**
      * Converts a native player object to a TgbridgePlayer.

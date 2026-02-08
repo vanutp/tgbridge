@@ -7,7 +7,6 @@ import kotlinx.coroutines.future.future
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import okhttp3.Credentials
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
@@ -400,26 +399,7 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
 
     private val okhttpClient = OkHttpClient.Builder()
         .readTimeout(Duration.ofSeconds((POLL_TIMEOUT_SECONDS + 10).toLong()))
-        .let { builder ->
-            val proxy = config.advanced.proxy
-            val addr = InetSocketAddress(proxy.host, proxy.port)
-            when (proxy.type) {
-                ProxyType.NONE -> builder
-                ProxyType.SOCKS5 -> builder.proxy(Proxy(Proxy.Type.SOCKS, addr))
-                ProxyType.HTTP -> builder
-                    .proxy(Proxy(Proxy.Type.HTTP, addr))
-                    .let { builder ->
-                        if (proxy.username != null && proxy.password != null) {
-                            builder.proxyAuthenticator { _, response ->
-                                val credential = Credentials.basic(proxy.username, proxy.password)
-                                response.request.newBuilder().header("Proxy-Authorization", credential).build()
-                            }
-                        } else {
-                            builder
-                        }
-                    }
-            }
-        }
+        .withProxyConfig()
         .build()
     private val fileBaseUrl = "$botApiUrl/file/bot$botToken/"
     private val json = Json {
@@ -465,7 +445,10 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
         }
     }
 
-    @Deprecated("Deprecated, use registerCommandHandler(String, Consumer<TgMessage>) instead", level = DeprecationLevel.WARNING)
+    @Deprecated(
+        "Deprecated, use registerCommandHandler(String, Consumer<TgMessage>) instead",
+        level = DeprecationLevel.WARNING
+    )
     fun registerCommandHandler(command: String, handler: Function1<TgMessage>) {
         registerCommandHandler(command) { handler.apply(it) }
     }

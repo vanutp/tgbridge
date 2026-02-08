@@ -87,7 +87,7 @@ abstract class AnyForgeServer extends Server {
       ];
     } else if (versionMinor == 20 || this.version == '1.19.4') {
       return [
-        'https://cdn.modrinth.com/data/ordsPcFz/versions/hmeyC41q/kotlinforforge-4.11.0-all.jar',
+        'https://cdn.modrinth.com/data/ordsPcFz/versions/Zsh14XeQ/kotlinforforge-4.12.0-all.jar',
       ];
     } else if ([19, 18].includes(versionMinor)) {
       return [

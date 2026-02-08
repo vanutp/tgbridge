@@ -17,13 +17,13 @@ import net.minecraft.network.chat.Component as Text
 fun Component.toMinecraft(): Text {
     val serializedTree = GsonComponentSerializer.gson().serializeToTree(this)
 
-    return if (FabricTelegramBridge.versionInfo.IS_19_204) {
+    return if (VersionInfo.IS_19_204) {
         // net.minecraft.text.Text$Serializer
         val textCls = Class.forName("net.minecraft.class_2561\$class_2562")
         // called fromJson on older versions
         val fromJsonTree = textCls.getMethod("method_10872", JsonElement::class.java)
         fromJsonTree(null, serializedTree) as Text
-    } else if (FabricTelegramBridge.versionInfo.IS_205_215) {
+    } else if (VersionInfo.IS_205_215) {
         // 1.20.5+
         // net.minecraft.text.Text$Serialization
         val textCls = Class.forName("net.minecraft.class_2561\$class_2562")
@@ -44,14 +44,14 @@ fun Component.toMinecraft(): Text {
 }
 
 fun Text.toAdventure(): Component {
-    return if (FabricTelegramBridge.versionInfo.IS_19_204) {
+    return if (VersionInfo.IS_19_204) {
         // net.minecraft.text.Text$Serializer
         val textCls = Class.forName("net.minecraft.class_2561\$class_2562")
         // called toJson on older versions
         val toJsonString = textCls.getMethod("method_10867", Text::class.java)
         val jsonString = toJsonString(null, this) as String
         GsonComponentSerializer.gson().deserialize(jsonString)
-    } else if (FabricTelegramBridge.versionInfo.IS_205_215) {
+    } else if (VersionInfo.IS_205_215) {
         // 1.20.5+
         // net.minecraft.text.Text$Serialization
         val textCls = Class.forName("net.minecraft.class_2561\$class_2562")
@@ -82,7 +82,7 @@ fun CommandContext<CommandSourceStack>.reply(
     text: String
 ) {
     val textComponent = Text.literal(text)
-    if (FabricTelegramBridge.versionInfo.IS_19) {
+    if (VersionInfo.IS_19) {
         val cls = source.javaClass
         val sendFeedback = cls.getMethod(
             "method_9226",

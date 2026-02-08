@@ -10,6 +10,7 @@ import dev.vanutp.tgbridge.common.modules.ITgbridgeModule
 import dev.vanutp.tgbridge.common.modules.ReplacementsModule
 import dev.vanutp.tgbridge.common.modules.VoiceMessagesModule
 import kotlinx.coroutines.*
+import kotlinx.serialization.SerializationException
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.event.HoverEvent
@@ -19,11 +20,13 @@ abstract class TelegramBridge {
     internal val coroutineScope = CoroutineScope(Dispatchers.IO).plus(SupervisorJob())
     abstract val logger: ILogger
     abstract val platform: IPlatform
-    private var initialized = false
-    private var shouldStartAfterInit = false
-    private var started = false
     lateinit var bot: TelegramBot private set
     private var spark: SparkHelper? = null
+
+    private var initialized = false
+    private var canRetryFailedInit = false
+    private var shouldStartAfterInit = false
+    private var started = false
 
     val chatManager: ChatManager = ChatManager(coroutineScope)
 
@@ -49,9 +52,18 @@ abstract class TelegramBridge {
 
     fun init(sync: Boolean = false) {
         logger.info("tgbridge starting on ${platform.name}")
-        ConfigManager.init(platform.configDir, platform::getLanguageKey)
+        canRetryFailedInit = false
+        ConfigManager.init(platform.configDir)
         config.getError()?.let {
+            canRetryFailedInit = true
             logger.error(it)
+            return
+        }
+        try {
+            LanguageService.init()
+        } catch (e: SerializationException) {
+            canRetryFailedInit = true
+            logger.error("Failed to load language data", e)
             return
         }
         MuteService.init(logger, platform.configDir)
@@ -99,7 +111,7 @@ abstract class TelegramBridge {
     fun onServerStarted() {
         // TODO: this will fail if there is no internet on server start
         if (!initialized) {
-            if (config.getError() != null) {
+            if (canRetryFailedInit) {
                 logger.error("Error initializing the mod, check the server console for errors")
             }
             shouldStartAfterInit = true
@@ -125,6 +137,9 @@ abstract class TelegramBridge {
             }
         }
         started = true
+        coroutineScope.launch {
+            LanguageService.updateLangIfNeeded()
+        }
     }
 
     fun shutdown() {
@@ -223,7 +238,7 @@ abstract class TelegramBridge {
     fun onReloadCommand(ctx: TBCommandContext): Boolean {
         if (!initialized) {
             try {
-                if (config.getError() != null) {
+                if (canRetryFailedInit) {
                     return tryReinit(ctx)
                 }
             } catch (_: UninitializedPropertyAccessException) {

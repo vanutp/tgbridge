@@ -22,22 +22,9 @@ object ConfigManager {
         private set
     lateinit var lang: Lang
         private set
-    private lateinit var fallbackMinecraftLangGetter: (String) -> String?
-    private var minecraftLang: Map<String, String>? = null
-    private val hardcodedDefaultMinecraftLang = mapOf(
-        "gui.xaero-deathpoint-old" to "Old Death",
-        "gui.xaero-deathpoint" to "Death",
-    )
 
-    fun getMinecraftLangKey(key: String): String? {
-        return minecraftLang?.get(key)
-            ?: fallbackMinecraftLangGetter(key)
-            ?: hardcodedDefaultMinecraftLang[key]
-    }
-
-    fun init(configDir: Path, fallbackMinecraftLangGetter: (String) -> String?) {
+    fun init(configDir: Path) {
         this.configDir = configDir
-        this.fallbackMinecraftLangGetter = fallbackMinecraftLangGetter
         reload()
     }
 
@@ -186,10 +173,5 @@ object ConfigManager {
         migrateLang()
         // write new keys & update docs
         langPath.writeText(yaml.encodeToString(lang))
-
-        val minecraftLangPath = configDir.resolve("minecraft_lang.json")
-        if (minecraftLangPath.exists()) {
-            minecraftLang = Json.decodeFromString<Map<String, String>>(minecraftLangPath.readText())
-        }
     }
 }

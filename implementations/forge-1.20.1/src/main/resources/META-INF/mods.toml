@@ -1,7 +1,7 @@
 # Make sure this is set to "kotlinforforge"
 modLoader="kotlinforforge"
 # Make sure this is set to the appropriate version range
-loaderVersion="[4,)"
+loaderVersion="[4.12,)"
 # License is REQUIRED after 1.16
 license='MIT'
 

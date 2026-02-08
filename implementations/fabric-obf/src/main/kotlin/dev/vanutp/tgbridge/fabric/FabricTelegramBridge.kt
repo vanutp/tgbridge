@@ -11,7 +11,6 @@ object FabricTelegramBridge : DedicatedServerModInitializer, TelegramBridge() {
     const val MOD_ID = "tgbridge"
     override val logger = FabricLogger()
     override val platform = FabricPlatform()
-    lateinit var versionInfo: ServerVersionInfo private set
     lateinit var server: MinecraftServer private set
 
     init {
@@ -25,7 +24,6 @@ object FabricTelegramBridge : DedicatedServerModInitializer, TelegramBridge() {
         }
         EventManager.register()
         ServerLifecycleEvents.SERVER_STARTING.register { server ->
-            versionInfo = ServerVersionInfo(server)
             this.server = server
         }
         ServerLifecycleEvents.SERVER_STARTED.register {
