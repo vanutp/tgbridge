@@ -72,12 +72,14 @@ object MinecraftToTelegramConverter {
         }
 
         val clickEvent = comp.style().clickEvent()
-        if (clickEvent?.action() == ClickEvent.Action.OPEN_URL && clickEvent.value() != res.text) {
+        val isLink = clickEvent?.action() == ClickEvent.Action.OPEN_URL && clickEvent.value() != res.text
+        if (isLink) {
             res += TgEntity(TgEntityType.TEXT_LINK, 0, res.text.length, clickEvent.value())
         }
         val hoverEvent = comp.style().hoverEvent()
         if (hoverEvent != null && hoverEvent.action() == HoverEvent.Action.SHOW_TEXT) {
             val hoverText = convert(hoverEvent.value() as Component)
+            // TODO: get config from Styled Chat
             if (res.text.all { it == '▌' } && hoverText.text.length == res.text.length) {
                 res = TelegramFormattedText(
                     hoverText.text,
@@ -92,7 +94,7 @@ object MinecraftToTelegramConverter {
             when (it.key) {
                 TextDecoration.BOLD -> TgEntityType.BOLD
                 TextDecoration.ITALIC -> TgEntityType.ITALIC
-                TextDecoration.UNDERLINED -> TgEntityType.UNDERLINE
+                TextDecoration.UNDERLINED -> TgEntityType.UNDERLINE.takeIf { !isLink }
                 TextDecoration.STRIKETHROUGH -> TgEntityType.STRIKETHROUGH
                 TextDecoration.OBFUSCATED -> TgEntityType.SPOILER
                 else -> null
