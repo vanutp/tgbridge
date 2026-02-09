@@ -1,0 +1,62 @@
+# Translations to other languages can be downloaded from https://github.com/vanutp/tgbridge
+telegram:
+  serverStarted: "✅ <b>Serveur lancé!</b>"
+  serverStopped: "❌ <b>Serveur coupé!</b>"
+  playerJoined: "👋 <b>{username} est arrivé·e</b>"
+  playerJoinedFirstTime: "🥳 <b>{username} a rejoint pour la première fois</b>"
+  playerLeft: "🚪 <b>{username} est parti·e</b>"
+  # This option uses MiniMessage formatting (see below for details)
+  playerDied: "☠️ <b><death_message></b>"
+  advancements:
+    regular: "👏 <b>{username} a eu le succès {title}</b>\n\n<i>{description}</i>"
+    goal: "🎯 <b>{username} a atteint l'objectif {title}</b>\n\n<i>{description}</i>"
+    challenge: "🏅 <b>{username} a réussi le défi {title}</b>\n\n<i>{description}</i>"
+  playerList: "📝 <b>{count} joueur·euses en ligne :</b> {usernames}"
+  playerListZeroOnline: "0️⃣ <b>Personne n'est en ligne</b>"
+  # Available placeholders: tps5s, tps10s, tps1m, tps5m, tps15m,
+  # mspt10sAvg, mspt1mAvg, mspt5mAvg
+  tps: "📊 <b>TPS:</b> <code>{tps10s}</code>\n⏱️ <b>MSPT:</b> <code>{mspt10sAvg}</code>"
+# This section uses MiniMessage formatting (in non-strict mode).
+# See https://docs.advntr.dev/minimessage/format.html for more information.
+# Additionally, {variable} syntax can be used instead of <variable> for plain-text placeholders.
+minecraft:
+  messageMeta:
+    reply: "<blue>[R <sender>: <text>]"
+    replyToMinecraft: "<blue>[R <text>]"
+    forward: "<gray>[F <from>]"
+    viaBot: "<gray>[via @<bot_username>]"
+    pin: "<dark_aqua>[épinglé un message]"
+    # Wrapper for all media types
+    mediaFormatting: "<green><media>"
+    gif: "[GIF]"
+    document: "[Document]"
+    photo: "[Photo]"
+    audio: "[Audio]"
+    sticker: "[Sticker]"
+    video: "[Vidéo]"
+    videoMessage: "[Message vidéo]"
+    voiceMessage: "[Message vocal]"
+    poll: "[Sondage: <title>]"
+  messageFormatting:
+    linkFormatting: "<#7878ff><underlined><hover:show_text:'<green><url>'><click:open_url:'{url}'><text>"
+    mentionFormatting: "<#7878ff><hover:show_text:'<green>Shift-clic pour mentionner'><insert:{username}><text>"
+    hashtagFormatting: "<#7878ff><text>"
+    codeFormatting: "<gray><hover:show_text:'<green>Clic pour copier'><click:copy_to_clipboard:'{text_plain}'><insert:'{text_plain}'><text>"
+    quoteFormatting: "<italic><text>"
+    spoilerFormatting: "<obfuscated><hover:show_text:'<text>'><text_plain>"
+  serviceMessages:
+    members:
+      joined: "<dark_purple>[a rejoint le groupe]"
+      left: "<dark_purple>[a quitté le groupe]"
+      added: "<dark_purple>[a ajouté <users> au groupe]"
+      removed: "<dark_purple>[a retiré <user> du groupe]"
+    videoChat:
+      scheduled: "<light_purple>[a planifié un salon vidéo]"
+      started: "<light_purple>[a démarré un salon vidéo]"
+      ended: "<light_purple>[a fermé le salon vidéo]"
+      invited: "<light_purple>[a invité <users> au salon vidéo]"
+    mute:
+      muted: "Vous ne recevrez plus de message de Telegram"
+      unmuted: "Vous recevrez des messages de Telegram"
+# Don't change the version manually
+version: 4
