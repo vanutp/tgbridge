@@ -30,13 +30,13 @@ public final class TgbridgeMixinPlugin implements IMixinConfigPlugin {
                 throw new IllegalStateException("Failed to load Minecraft version");
             }
             try (final var reader = new InputStreamReader(is)) {
-                fullVersion = GsonHelper.getAsString(GsonHelper.parse(reader), "name");
+                fullVersion = GsonHelper.getAsString(GsonHelper.parse(reader), "id");
             }
         } catch (JsonParseException | IOException exception) {
             throw new IllegalStateException("Failed to load Minecraft version", exception);
         }
 
-        final var fullVersionSplit = fullVersion.split(" ");
+        final var fullVersionSplit = fullVersion.split("-");
         version = fullVersionSplit[0];
         if (fullVersionSplit.length > 1) {
             logger.warn("[tgbridge] Minecraft snapshots aren't well supported, things may break!");
