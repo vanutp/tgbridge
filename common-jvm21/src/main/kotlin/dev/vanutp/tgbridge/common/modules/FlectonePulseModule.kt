@@ -120,7 +120,7 @@ class FlectonePulseModule(bridge: TelegramBridge) : AbstractModule(bridge), ICha
         fChatModule = fPulse.get(ChatModule::class.java)
         FlectonePulseListener(bridge)
         TgbridgeEvents.RECIPIENTS.addListener { e ->
-            e.recipients += getChatRecipients(e.chat)
+            e.recipients = getChatRecipients(e.chat)
         }
     }
 
