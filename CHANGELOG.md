@@ -1,3 +1,15 @@
+### 0.9.4
+
+- Implement automatic language file generation
+- Add an option to send Telegram messages silently
+- Fix useRealUsername not working for multiple players in death messages
+- Remove underline from links when converting minecraft messages
+- Fix running on forge 1.19.2
+- Fix running `/tgbridge reload` from the console on 1.16.5
+- API: improve java interop
+- API: allow to add modules at runtime
+- Misc fixes and improvements
+
 ### 0.9.3
 
 - fix duplicate ingame messages after first-time /tgbridge reload
