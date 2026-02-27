@@ -188,6 +188,7 @@ subprojects {
 tasks.register("modrinthAll") {
     group = "publishing"
     dependsOn(":fabric:modrinth")
+    dependsOn(":fabric-obf:modrinth")
     dependsOn(":forge-1.16.5:modrinth")
     dependsOn(":forge-1.19.2:modrinth")
     dependsOn(":forge-1.20.1:modrinth")
