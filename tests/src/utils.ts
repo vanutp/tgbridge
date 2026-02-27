@@ -11,26 +11,35 @@ export async function downloadFile(url: string, path: URL): Promise<void> {
   await resp.body!.pipeTo(file.writable)
 }
 
-export const nanoidAlnum = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789')
+export const nanoidAlnum = customAlphabet(
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',
+)
 
-export function assert(condition: unknown, message?: string): asserts condition {
+export function assert(
+  condition: unknown,
+  message?: string,
+): asserts condition {
   if (!condition) {
     throw new AssertionError(message)
   }
 }
 
-export function makeServer(type: ServerType, version: string, gradleProject: string) {
+export function makeServer(
+  type: ServerType,
+  version: string,
+  gradleProject: string,
+) {
   switch (type) {
     case ServerType.fabric:
-      return new FabricServer(version, gradleProject);
+      return new FabricServer(version, gradleProject)
     case ServerType.forge:
-      return new ForgeServer(version, gradleProject);
+      return new ForgeServer(version, gradleProject)
     case ServerType.neoforge:
-      return new NeoforgeServer(version, gradleProject);
+      return new NeoforgeServer(version, gradleProject)
     case ServerType.paper:
-      return new PaperServer(version, gradleProject);
+      return new PaperServer(version, gradleProject)
     default:
-      throw new Error(`Unknown server type: ${type}`);
+      throw new Error(`Unknown server type: ${type}`)
   }
 }
 
@@ -38,8 +47,8 @@ export async function logNoNewline(message: string) {
   await Deno.stdout.write(new TextEncoder().encode(message))
 }
 
-const JAVA_8_HOME = Deno.env.get("JAVA_HOME_8_X64")
+const JAVA_8_HOME = Deno.env.get('JAVA_HOME_8_X64')
 if (!JAVA_8_HOME) {
-  throw new Error("JAVA_HOME_8_X64 not set")
+  throw new Error('JAVA_HOME_8_X64 not set')
 }
-export const JAVA_8_PATH = JAVA_8_HOME + "/bin/java"
+export const JAVA_8_PATH = JAVA_8_HOME + '/bin/java'

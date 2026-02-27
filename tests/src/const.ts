@@ -1,11 +1,12 @@
-import { ensureDirSync } from '@std/fs';
+import { ensureDirSync } from '@std/fs'
 
-export const PROJECT_ROOT_DIR = new URL('../../', import.meta.url);
-export const RUN_DIR = new URL('../run/', import.meta.url);
-ensureDirSync(RUN_DIR);
-export const RELEASES_DIR = new URL('build/release/', PROJECT_ROOT_DIR);
-export const RELEASE_VER = Deno.readTextFileSync(new URL('gradle.properties', PROJECT_ROOT_DIR))
-  .match(/projectVersion=(.*)/)![1]
+export const PROJECT_ROOT_DIR = new URL('../../', import.meta.url)
+export const RUN_DIR = new URL('../run/', import.meta.url)
+ensureDirSync(RUN_DIR)
+export const RELEASES_DIR = new URL('build/release/', PROJECT_ROOT_DIR)
+export const RELEASE_VER =
+  Deno.readTextFileSync(new URL('gradle.properties', PROJECT_ROOT_DIR))
+    .match(/projectVersion=(.*)/)![1]
 
 export enum ServerType {
   fabric = 'fabric',
@@ -17,10 +18,10 @@ export enum ServerType {
 export const MAX_HEAP_SIZE = 1024 * 1024 * 2048
 
 interface TestMatrixProject {
-  project: string;
-  server: ServerType;
-  versions: string[];
-  runByDefault?: boolean;
+  project: string
+  server: ServerType
+  versions: string[]
+  runByDefault?: boolean
 }
 
 export const TEST_MATRIX: TestMatrixProject[] = [
@@ -55,4 +56,4 @@ export const TEST_MATRIX: TestMatrixProject[] = [
     server: ServerType.paper,
     versions: ['1.19.2', '1.21.8'],
   },
-];
+]

@@ -3,66 +3,66 @@ import type { ChatMessage } from 'prismarine-chat'
 import { TestFrameworkError } from './errors.ts'
 
 export class Client {
-  private readonly port: number;
-  private readonly bot: Bot;
+  private readonly port: number
+  private readonly bot: Bot
   // TODO: remove?
-  private chatMessages: ChatMessage[];
-  readonly username: string;
+  private chatMessages: ChatMessage[]
+  readonly username: string
 
   constructor(port: number, username: string) {
-    this.port = port;
-    this.username = username;
+    this.port = port
+    this.username = username
     this.bot = createBot({
       host: 'localhost',
       port,
       username: this.username,
-    });
-    this.chatMessages = [];
-    this.setupHandlers();
+    })
+    this.chatMessages = []
+    this.setupHandlers()
   }
 
   waitForSpawn(): Promise<void> {
     return new Promise((resolve) => {
       this.bot.once('spawn', () => {
-        resolve();
-      });
-    });
+        resolve()
+      })
+    })
   }
 
   private setupHandlers() {
     this.bot.on('message', (msg) => {
-      this.chatMessages.push(msg);
-    });
+      this.chatMessages.push(msg)
+    })
   }
 
   reset() {
-    this.chatMessages = [];
+    this.chatMessages = []
   }
 
   sendMessage(text: string): Promise<void> {
-    this.bot.chat(text);
+    this.bot.chat(text)
     return new Promise((resolve, reject) => {
       this.bot.once('message', (msg) => {
         if (!JSON.stringify(msg.json).includes(text)) {
-          reject(new TestFrameworkError('Wrong message received'));
+          reject(new TestFrameworkError('Wrong message received'))
         }
-        resolve();
-      });
-    });
+        resolve()
+      })
+    })
   }
 
   sendCommand(text: string) {
-    this.bot.chat(`/${text}`);
+    this.bot.chat(`/${text}`)
   }
 
   stop() {
-    this.bot.end();
+    this.bot.end()
   }
 
   findMessage(
     predicate: (msg: ChatMessage) => unknown,
   ): ChatMessage | undefined {
-    return this.chatMessages.find(predicate);
+    return this.chatMessages.find(predicate)
   }
 
   // TODO

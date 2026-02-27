@@ -1,6 +1,7 @@
 {
   "fmt": {
-    "singleQuote": true
+    "singleQuote": true,
+    "semiColons": false
   },
   "imports": {
     "@libs/xml": "jsr:@libs/xml@^6.0.4",

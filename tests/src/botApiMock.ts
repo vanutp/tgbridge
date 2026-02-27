@@ -4,94 +4,94 @@ import { BadRequestError, ChatNotFoundError, MessageToEditNotFoundError, ReplyNo
 import { portAllocator } from './portAllocator.ts'
 
 export interface TgUser {
-  id: number;
-  first_name: string;
-  last_name: string | null;
-  username: string | null;
+  id: number
+  first_name: string
+  last_name: string | null
+  username: string | null
 }
 
 export interface TgChat {
-  id: number;
-  title: string;
-  username: string | null;
+  id: number
+  title: string
+  username: string | null
 }
 
-export type TgAny = any;
+export type TgAny = any
 
 export interface TgPoll {
-  question: string;
+  question: string
 }
 
 export interface TgMessageMedia {
-  animation: TgAny | null;
-  photo: TgAny[] | null;
-  audio: TgAny | null;
-  document: TgAny | null;
-  sticker: TgAny | null;
-  video: TgAny | null;
-  video_note: TgAny | null;
-  voice: TgAny | null;
-  poll: TgPoll | null;
+  animation: TgAny | null
+  photo: TgAny[] | null
+  audio: TgAny | null
+  document: TgAny | null
+  sticker: TgAny | null
+  video: TgAny | null
+  video_note: TgAny | null
+  voice: TgAny | null
+  poll: TgPoll | null
 }
 
 export interface TgMessageOrigin {
-  sender_user: TgUser | null;
-  sender_user_name: string | null;
-  sender_chat: TgChat | null;
-  chat: TgChat | null;
+  sender_user: TgUser | null
+  sender_user_name: string | null
+  sender_chat: TgChat | null
+  chat: TgChat | null
 }
 
 export interface TgExternalReplyInfo extends TgMessageMedia {
-  origin: TgMessageOrigin;
-  chat: TgChat | null;
+  origin: TgMessageOrigin
+  chat: TgChat | null
 }
 
 export interface TgTextQuote {
-  text: string;
+  text: string
 }
 
 export interface TgMessage extends TgMessageMedia {
-  chat: TgChat;
-  message_id: number;
-  from: TgUser | null;
-  sender_chat: TgChat | null;
-  forward_from: TgUser | null;
-  forward_from_chat: TgChat | null;
-  reply_to_message: TgMessage | null;
-  external_reply: TgExternalReplyInfo | null;
-  quote: TgTextQuote | null;
-  message_thread_id: number | null;
-  author_signature: string | null;
-  text: string | null;
-  caption: string | null;
-  pinned_message: TgMessage | null;
+  chat: TgChat
+  message_id: number
+  from: TgUser | null
+  sender_chat: TgChat | null
+  forward_from: TgUser | null
+  forward_from_chat: TgChat | null
+  reply_to_message: TgMessage | null
+  external_reply: TgExternalReplyInfo | null
+  quote: TgTextQuote | null
+  message_thread_id: number | null
+  author_signature: string | null
+  text: string | null
+  caption: string | null
+  pinned_message: TgMessage | null
 }
 
 export interface TgUpdate {
-  update_id: number;
-  message: TgMessage | null;
+  update_id: number
+  message: TgMessage | null
 }
 
 export class BotApiMock {
-  private readonly port: number;
-  private readonly server: Deno.HttpServer;
+  private readonly port: number
+  private readonly server: Deno.HttpServer
   // TODO: remove?
-  private messages: TgMessage[];
-  private messageIdCounter: number;
-  private updateQueue: TgUpdate[];
-  private updateCounter: number;
-  private messageListenersOnce: ((msg: TgMessage) => any)[];
+  private messages: TgMessage[]
+  private messageIdCounter: number
+  private updateQueue: TgUpdate[]
+  private updateCounter: number
+  private messageListenersOnce: ((msg: TgMessage) => any)[]
 
   get token() {
-    return 'MEOW';
+    return 'MEOW'
   }
 
   get apiUrl() {
-    return 'http://localhost:' + this.port;
+    return 'http://localhost:' + this.port
   }
 
   get chatId() {
-    return -1001874000000;
+    return -1001874000000
   }
 
   get botUser(): TgUser {
@@ -100,26 +100,31 @@ export class BotApiMock {
       first_name: 'Telegram Bridge',
       last_name: null,
       username: 'test_bot',
-    };
+    }
   }
 
   constructor() {
-    this.port = portAllocator.next();
+    this.port = portAllocator.next()
     this.server = Deno.serve({
       hostname: 'localhost',
       port: this.port,
       onError: this.errorHandler.bind(this),
       handler: this.handler.bind(this),
       onListen() {},
-    });
-    this.messages = [];
-    this.messageIdCounter = 1;
-    this.updateQueue = [];
-    this.updateCounter = 1;
-    this.messageListenersOnce = [];
+    })
+    this.messages = []
+    this.messageIdCounter = 1
+    this.updateQueue = []
+    this.updateCounter = 1
+    this.messageListenersOnce = []
   }
 
-  private static error(code: number, message: string, method?: string, body?: any) {
+  private static error(
+    code: number,
+    message: string,
+    method?: string,
+    body?: any,
+  ) {
     return Response.json({
       description: message,
       error_code: code,
@@ -128,38 +133,38 @@ export class BotApiMock {
         method,
         ...body,
       },
-    }, { status: code });
+    }, { status: code })
   }
 
   private static ok(result: any) {
     return Response.json({
       result,
       ok: true,
-    });
+    })
   }
 
   private errorHandler(err: unknown): Response {
-    console.error(err);
-    return BotApiMock.error(500, (err as Error).toString());
+    console.error(err)
+    return BotApiMock.error(500, (err as Error).toString())
   }
 
   private async handler(req: Request): Promise<Response> {
-    const url = new URL(req.url);
-    const urlParams = Object.fromEntries(url.searchParams);
-    const contentType = req.headers.get('Content-Type') ?? '';
-    let body = {};
+    const url = new URL(req.url)
+    const urlParams = Object.fromEntries(url.searchParams)
+    const contentType = req.headers.get('Content-Type') ?? ''
+    let body = {}
     if (contentType.startsWith('application/json')) {
-      body = await req.json();
+      body = await req.json()
     } else if (contentType.startsWith('multipart/form-data')) {
-      body = Object.fromEntries((await req.formData()).entries());
+      body = Object.fromEntries((await req.formData()).entries())
     }
-    const args: any = { ...urlParams, ...body };
+    const args: any = { ...urlParams, ...body }
 
-    const [, token, _method] = url.pathname.match(/^\/bot(.*?)\/(.*)/)!;
+    const [, token, _method] = url.pathname.match(/^\/bot(.*?)\/(.*)/)!
     if (token != this.token) {
-      return BotApiMock.error(401, 'Unauthorized', _method, args);
+      return BotApiMock.error(401, 'Unauthorized', _method, args)
     }
-    const method = 'api_' + _method;
+    const method = 'api_' + _method
     const allowedMethods = [
       'api_getMe',
       'api_sendMessage',
@@ -168,72 +173,77 @@ export class BotApiMock {
       'api_getUpdates',
       'api_deleteWebhook',
       'api_setMyCommands',
-    ];
+    ]
     if (allowedMethods.includes(method)) {
       try {
         const _result =
-          (this[method as keyof typeof this] as (args: any) => any)(args);
-        const result = _result instanceof Promise ? await _result : _result;
-        return BotApiMock.ok(result);
+          (this[method as keyof typeof this] as (args: any) => any)(args)
+        const result = _result instanceof Promise ? await _result : _result
+        return BotApiMock.ok(result)
       } catch (e) {
         if (e instanceof BadRequestError) {
-          return BotApiMock.error(400, 'Bad Request: ' + e.message, _method, args);
+          return BotApiMock.error(
+            400,
+            'Bad Request: ' + e.message,
+            _method,
+            args,
+          )
         }
-        throw e;
+        throw e
       }
     } else {
-      console.warn(`Method ${_method} is not implemented in mock Bot API`);
-      return BotApiMock.error(404, 'Not found', _method, args);
+      console.warn(`Method ${_method} is not implemented in mock Bot API`)
+      return BotApiMock.error(404, 'Not found', _method, args)
     }
   }
 
   private api_getMe(): TgUser {
-    return this.botUser;
+    return this.botUser
   }
 
   private api_sendMessage(
     req: {
-      chat_id: number;
-      text: string;
-      reply_to_message_id: number | null;
+      chat_id: number
+      text: string
+      reply_to_message_id: number | null
     },
   ): TgMessage {
     if (req.chat_id != this.chatId) {
-      throw new ChatNotFoundError();
+      throw new ChatNotFoundError()
     }
     return this.sendMessage({
       text: req.text,
       reply_to_message_id: req.reply_to_message_id,
       isFromBot: true,
-    });
+    })
   }
 
   private api_editMessageText(req: {
-    chat_id: number;
-    message_id: number;
-    text: string;
+    chat_id: number
+    message_id: number
+    text: string
   }): TgMessage {
     if (req.chat_id != this.chatId) {
-      throw new ChatNotFoundError();
+      throw new ChatNotFoundError()
     }
-    const msgs = this.messages.filter((x) => x.message_id == req.message_id);
+    const msgs = this.messages.filter((x) => x.message_id == req.message_id)
     if (msgs.length == 0) {
-      throw new MessageToEditNotFoundError();
+      throw new MessageToEditNotFoundError()
     }
-    const msg = msgs[0];
-    msg.text = req.text;
-    return msg;
+    const msg = msgs[0]
+    msg.text = req.text
+    return msg
   }
 
   private api_deleteMessage(req: {
-    chat_id: number;
-    message_id: number;
+    chat_id: number
+    message_id: number
   }): boolean {
     if (req.chat_id != this.chatId) {
-      throw new ChatNotFoundError();
+      throw new ChatNotFoundError()
     }
-    this.messages = this.messages.filter((x) => x.message_id != req.message_id);
-    return true;
+    this.messages = this.messages.filter((x) => x.message_id != req.message_id)
+    return true
   }
 
   private async api_getUpdates(
@@ -242,29 +252,29 @@ export class BotApiMock {
     while (
       this.updateQueue.length > 0 && this.updateQueue[0].update_id < req.offset
     ) {
-      this.updateQueue.shift();
+      this.updateQueue.shift()
     }
 
     if (this.updateQueue.length == 0) {
-      await delay(100);
+      await delay(100)
     }
 
-    return this.updateQueue;
+    return this.updateQueue
   }
 
   private api_deleteWebhook(): boolean {
-    return true;
+    return true
   }
 
   private api_setMyCommands(): boolean {
-    return true;
+    return true
   }
 
   sendMessage(
     data: {
-      text: string;
-      reply_to_message_id?: number | null;
-      isFromBot?: boolean;
+      text: string
+      reply_to_message_id?: number | null
+      isFromBot?: boolean
     },
   ): TgMessage {
     const from: TgUser = data.isFromBot ? this.botUser : {
@@ -272,13 +282,13 @@ export class BotApiMock {
       first_name: 'Ванюта',
       last_name: null,
       username: 'vanutp',
-    };
+    }
     const reply_to_message: TgMessage | null = data.reply_to_message_id
       ? this.messages.find((x) => x.message_id == data.reply_to_message_id) ??
         null
-      : null;
+      : null
     if (data.reply_to_message_id && !reply_to_message) {
-      throw new ReplyNotFoundError();
+      throw new ReplyNotFoundError()
     }
     const msg: TgMessage = {
       chat: {
@@ -308,36 +318,36 @@ export class BotApiMock {
       video_note: null,
       voice: null,
       poll: null,
-    };
-    this.onMessage(msg);
-    return msg;
+    }
+    this.onMessage(msg)
+    return msg
   }
 
   reset() {
-    this.messages = [];
-    this.updateQueue = [];
-    this.messageListenersOnce = [];
+    this.messages = []
+    this.updateQueue = []
+    this.messageListenersOnce = []
   }
 
   async stop() {
-    await this.server.shutdown();
+    await this.server.shutdown()
   }
 
   private onMessage(msg: TgMessage) {
-    this.messages.push(msg);
+    this.messages.push(msg)
     if (msg.from?.id != this.botUser.id) {
       this.updateQueue.push({
         update_id: this.updateCounter++,
         message: msg,
-      });
+      })
     }
 
-    this.messageListenersOnce.forEach((fn) => fn(msg));
-    this.messageListenersOnce = [];
+    this.messageListenersOnce.forEach((fn) => fn(msg))
+    this.messageListenersOnce = []
   }
 
   findMessage(predicate: (msg: TgMessage) => unknown): TgMessage | undefined {
-    return this.messages.find(predicate);
+    return this.messages.find(predicate)
   }
 
   findBotMessage(
@@ -345,7 +355,7 @@ export class BotApiMock {
   ): TgMessage | undefined {
     return this.messages.find((msg) =>
       msg.from?.id == this.botUser.id && predicate(msg)
-    );
+    )
   }
 
   // async getBotMessage() {
