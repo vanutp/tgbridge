@@ -1,3 +1,8 @@
+### 0.9.5
+
+- fabric, paper: 26.1 support
+- fabric, paper: update FlectonePulse to 1.8.1
+
 ### 0.9.4
 
 - Implement automatic language file generation
