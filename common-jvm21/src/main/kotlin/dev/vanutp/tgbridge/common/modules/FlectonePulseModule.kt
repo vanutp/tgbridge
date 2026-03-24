@@ -91,9 +91,9 @@ class FlectonePulseListener(private val bridge: TelegramBridge) : PulseListener 
 
         bridge.onChatMessage(
             TgbridgeMcChatMessageEvent(
-                FlectonePulsePlayer.fromFEntity(meta.sender),
-                Component.text(meta.message ?: return),
-                meta.chatName,
+                FlectonePulsePlayer.fromFEntity(meta.sender()),
+                Component.text(meta.message() ?: return),
+                meta.chat.name,
                 e,
             )
         )
