@@ -1,3 +1,7 @@
+### 0.9.6
+
+- fabric, paper: fix crash when Plasmo Voice Messages is installed
+
 ### 0.9.5
 
 - fabric, paper: 26.1 support
