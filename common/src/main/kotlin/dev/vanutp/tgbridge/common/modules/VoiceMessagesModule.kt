@@ -84,6 +84,8 @@ class VoiceMessagesModule(bridge: TelegramBridge) : AbstractModule(bridge) {
         }
     }
 
+    override fun shouldEnable() = voiceMessagesExists()
+
     override fun enable() {
         TgbridgeEvents.TG_CHAT_MESSAGE.addListener { e ->
             val msg = e.message
