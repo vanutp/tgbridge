@@ -75,7 +75,7 @@ tasks {
 modrinth {
     uploadFile.set(tasks.shadowJar)
     gameVersions.addAll(
-        "26.1",
+        "26.1", "26.1.1",
     )
     loaders.add("fabric")
     dependencies {
