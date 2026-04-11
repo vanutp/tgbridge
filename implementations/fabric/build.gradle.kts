@@ -27,6 +27,8 @@ dependencies {
     shadow(project(":common"))
     implementation(project(":common-jvm21"))
     shadow(project(":common-jvm21"))
+    implementation(project(":common-jvm25"))
+    shadow(project(":common-jvm25"))
 }
 
 loom {

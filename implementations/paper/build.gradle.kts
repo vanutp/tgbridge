@@ -54,6 +54,7 @@ dependencies {
     paperweight.paperDevBundle("1.20.1-R0.1-SNAPSHOT")
     api(project(":common"))
     implementation(project(":common-jvm21"))
+    implementation(project(":common-jvm25"))
 
     compileOnly("com.charleskorn.kaml:kaml:${rootProject.properties["kamlVersion"]}")
 

@@ -125,8 +125,8 @@ subprojects {
             relocate("net.thauvin", "tgbridge.shaded.net.thauvin")
             relocate("com.charleskorn.kaml", "tgbridge.shaded.kaml")
 
-            if (project.name != "paper") {
-                // shadowJar is never ran for common
+            if (!listOf("paper", "common", "common-jvm21", "common-jvm25").contains(project.name)) {
+                // TODO: figure out why shadowJar is ran for common*
                 relocate("net.kyori", "tgbridge.shaded.kyori")
             }
             // Renames files in META-INF/services to relocated names

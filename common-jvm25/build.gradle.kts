@@ -6,17 +6,17 @@ repositories {
 
 dependencies {
     compileOnly(project(":common"))
-    compileOnly("de.hexaoxi:carbonchat-api:3.0.0-beta.36")
+    compileOnly("net.flectone.pulse:core:1.9.0")
 }
 
 kotlin {
     compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_21)
+        jvmTarget.set(JvmTarget.JVM_25)
     }
 }
 
 tasks {
     withType<JavaCompile> {
-        options.release = 21
+        options.release = 25
     }
 }

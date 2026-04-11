@@ -12,7 +12,7 @@ pluginManagement {
 }
 
 rootProject.name = "tgbridge"
-include("common", "common-jvm21")
+include("common", "common-jvm21", "common-jvm25")
 
 listOf(
     "paper",

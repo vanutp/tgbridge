@@ -17,7 +17,7 @@ import net.flectone.pulse.module.message.chat.model.ChatMetadata
 import net.flectone.pulse.platform.registry.ListenerRegistry
 import net.flectone.pulse.service.FPlayerService
 import net.flectone.pulse.util.checker.PermissionChecker
-import net.flectone.pulse.util.constant.MessageType
+import net.flectone.pulse.util.constant.ModuleName
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 import java.util.*
@@ -44,7 +44,7 @@ private class FlectonePulsePlayer(
         private val fSerialize = fSerializerCls?.getMethod("serialize", fpulseComponentCls)
         private val fDeserialize = fSerializerCls?.getMethod("deserialize", Object::class.java)
         private val fEntity = Class.forName("net.flectone.pulse.model.entity.FEntity")
-        private val fEntityGetShowEntityName = fEntity.getMethod("getShowEntityName")
+        private val fEntityGetShowEntityName = fEntity.getMethod("showEntityName")
         private val usingNativeAdventure = fpulseComponentCls == null && fSerializerCls == null
 
         fun adventureToFPulse(adventure: Component): Any =
@@ -64,8 +64,8 @@ private class FlectonePulsePlayer(
 
         fun fromFEntity(fPlayer: FEntity): FlectonePulsePlayer {
             return FlectonePulsePlayer(
-                fPlayer.uuid,
-                fPlayer.name,
+                fPlayer.uuid(),
+                fPlayer.name(),
                 fEntityGetShowEntityName.invoke(fPlayer)
                     ?.let { fpulseToAdventure(it) }
                     ?.asString(),
@@ -85,7 +85,7 @@ class FlectonePulseListener(private val bridge: TelegramBridge) : PulseListener 
     @Pulse
     fun onMessagePrepare(e: MessagePrepareEvent) {
         val meta = e.eventMetadata
-        if (e.messageType != MessageType.CHAT || meta !is ChatMetadata) {
+        if (e.moduleName != ModuleName.MESSAGE_CHAT || meta !is ChatMetadata) {
             return
         }
 
@@ -129,7 +129,7 @@ class FlectonePulseModule(bridge: TelegramBridge) : AbstractModule(bridge), ICha
             .onlineFPlayers
             .asSequence()
             .filter { fChatModule.permissionFilter(chat.name).test(it) }
-            .filter { it.isSetting(MessageType.FROM_TELEGRAM_TO_MINECRAFT) }
+            .filter { it.isSetting(ModuleName.INTEGRATION_TELEGRAM) }
             .map { FlectonePulsePlayer.fromFEntity(it) }
             .toList()
 }
