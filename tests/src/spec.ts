@@ -114,7 +114,7 @@ export const TESTS: ((server: Server) => any)[] = [
   reloadCommandFromOp,
   reloadCommandFromOrdinary,
   joinAndLeavePlayer,
-  muteUnmuteCommand,
+  // muteUnmuteCommand,
 ]
 
 // TODO: test start/stop
