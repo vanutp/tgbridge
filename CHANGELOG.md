@@ -1,3 +1,7 @@
+### 0.9.7
+
+- fabric, paper: update FlectonePulse to 1.9.0 
+
 ### 0.9.6
 
 - fabric, paper: fix crash when Plasmo Voice Messages is installed
