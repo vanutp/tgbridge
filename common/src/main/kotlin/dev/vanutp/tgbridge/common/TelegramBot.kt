@@ -179,6 +179,9 @@ enum class TgEntityType {
 
     @SerialName("custom_emoji")
     CUSTOM_EMOJI,
+
+    @SerialName("date_time")
+    DATE_TIME,
 }
 
 @Serializable
