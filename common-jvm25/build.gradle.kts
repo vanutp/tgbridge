@@ -6,7 +6,7 @@ repositories {
 
 dependencies {
     compileOnly(project(":common"))
-    compileOnly("net.flectone.pulse:core:1.9.0")
+    compileOnly("net.flectone.pulse:core:1.9.1")
 }
 
 kotlin {

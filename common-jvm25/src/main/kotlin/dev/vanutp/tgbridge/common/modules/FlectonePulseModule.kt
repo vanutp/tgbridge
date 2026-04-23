@@ -10,7 +10,7 @@ import net.flectone.pulse.FlectonePulseAPI
 import net.flectone.pulse.annotation.Pulse
 import net.flectone.pulse.listener.PulseListener
 import net.flectone.pulse.model.entity.FEntity
-import net.flectone.pulse.model.event.lifecycle.ReloadEvent
+import net.flectone.pulse.model.event.lifecycle.EndReloadEvent
 import net.flectone.pulse.model.event.message.MessagePrepareEvent
 import net.flectone.pulse.module.message.chat.ChatModule
 import net.flectone.pulse.module.message.chat.model.ChatMetadata
@@ -100,7 +100,7 @@ class FlectonePulseListener(private val bridge: TelegramBridge) : PulseListener 
     }
 
     @Pulse
-    fun onReload(e: ReloadEvent) {
+    fun onReload(e: EndReloadEvent) {
         fListenerRegistry.register(this)
     }
 }
