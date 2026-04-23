@@ -1,3 +1,7 @@
+### 0.9.9
+
+- fabric, paper: update FlectonePulse to 1.9.1
+
 ### 0.9.8
 
 - fix crash when a message with a date entity is sent. fixes #148
