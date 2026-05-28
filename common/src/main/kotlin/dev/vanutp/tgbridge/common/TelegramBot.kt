@@ -356,6 +356,17 @@ interface TgApi {
         @Part("parse_mode") parseMode: RequestBody?,
     ): TgResponse<TgMessage>
 
+    @Multipart
+    @POST("sendDocument")
+    suspend fun sendDocument(
+        @Part("chat_id") chatId: RequestBody,
+        @Part document: MultipartBody.Part,
+        @Part("caption") caption: RequestBody?,
+        @Part("caption_entities") captionEntities: RequestBody?,
+        @Part("reply_to_message_id") replyToMessageId: RequestBody?,
+        @Part("parse_mode") parseMode: RequestBody?,
+    ): TgResponse<TgMessage>
+
     @POST("editMessageText")
     suspend fun editMessageText(@Body data: TgEditMessageRequest): TgResponse<TgMessage>
 
@@ -648,6 +659,75 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
             captionEntitiesBody,
             replyToMessageIdBody,
             parseModeBody,
+        )
+    }
+
+    fun sendVoiceAsync(
+        chatId: Long,
+        voice: ByteArray,
+        caption: String? = null,
+        captionEntities: List<TgEntity>? = null,
+        replyToMessageId: Int? = null,
+        parseMode: String? = null,
+    ) = scope.future {
+        sendVoice(
+            chatId,
+            voice,
+            caption,
+            captionEntities,
+            replyToMessageId,
+            parseMode
+        )
+    }
+
+    suspend fun sendDocument(
+        chatId: Long,
+        document: ByteArray,
+        documentFileName: String,
+        caption: String? = null,
+        captionEntities: List<TgEntity>? = null,
+        replyToMessageId: Int? = null,
+        parseMode: String? = null,
+    ): TgMessage = retriableCall {
+        val documentFile = document.toRequestBody(MultipartBody.FORM, 0, document.size)
+        val requestDocument = MultipartBody.Part.createFormData(
+            "document",
+            documentFileName,
+            documentFile
+        )
+        val chatIdBody = chatId.toString().toRequestBody(MultipartBody.FORM)
+        val captionBody = caption?.toRequestBody(MultipartBody.FORM)
+        val captionEntitiesBody =
+            captionEntities?.let { json.encodeToString(it).toRequestBody(MultipartBody.FORM) }
+        val replyToMessageIdBody = replyToMessageId?.toString()?.toRequestBody(MultipartBody.FORM)
+        val parseModeBody = parseMode?.toRequestBody(MultipartBody.FORM)
+        client.sendDocument(
+            chatIdBody,
+            requestDocument,
+            captionBody,
+            captionEntitiesBody,
+            replyToMessageIdBody,
+            parseModeBody,
+        )
+    }
+
+    fun sendDocumentAsync(
+        chatId: Long,
+        document: ByteArray,
+        documentFileName: String,
+        caption: String? = null,
+        captionEntities: List<TgEntity>? = null,
+        replyToMessageId: Int? = null,
+        parseMode: String? = null,
+    ) = scope.future {
+        sendDocument(
+            chatId,
+            document,
+            documentFileName,
+            caption,
+            captionEntities,
+            replyToMessageId,
+            parseMode
         )
     }
 
