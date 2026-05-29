@@ -41,8 +41,24 @@ data class TgUser(
 }
 
 @Serializable
+enum class TgChatType {
+    @SerialName("private")
+    PRIVATE,
+
+    @SerialName("group")
+    GROUP,
+
+    @SerialName("supergroup")
+    SUPERGROUP,
+
+    @SerialName("channel")
+    CHANNEL,
+}
+
+@Serializable
 data class TgChat(
     val id: Long,
+    val type: TgChatType,
     val title: String = "",
     val username: String? = null,
 )
