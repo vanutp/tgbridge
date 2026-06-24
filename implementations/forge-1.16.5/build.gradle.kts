@@ -29,11 +29,6 @@ dependencies {
     shadow(project(":common"))
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-}
-
 kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_1_8)

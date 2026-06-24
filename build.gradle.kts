@@ -18,7 +18,14 @@ version = property("projectVersion") as String
 val kotlinVersion: String by project
 val kotlinxCoroutinesVersion: String by project
 val kotlinxSerializationVersion: String by project
-val adventureVersion: String by project
+val adventureVersionOld: String by project
+val adventureVersionNew: String by project
+
+fun getAdventureLibs(version: String) = listOf(
+    "net.kyori:adventure-api:${version}",
+    "net.kyori:adventure-text-serializer-gson:${version}",
+    "net.kyori:adventure-text-minimessage:${version}",
+)
 
 // kotlinforforge isn't updated for older minecraft versions
 fun shouldBundleKotlin(projectName: String) =
@@ -49,14 +56,13 @@ subprojects {
             "org.jetbrains.kotlinx:kotlinx-serialization-core:${kotlinxSerializationVersion}",
             "org.jetbrains.kotlinx:kotlinx-serialization-json:${kotlinxSerializationVersion}"
         )
-        val ADVENTURE_LIBS = listOf(
-            "net.kyori:adventure-api:${adventureVersion}",
-            "net.kyori:adventure-text-serializer-gson:${adventureVersion}",
-            "net.kyori:adventure-text-minimessage:${adventureVersion}",
-        )
+        val ADVENTURE_LIBS_OLD = getAdventureLibs(adventureVersionOld)
+        val ADVENTURE_LIBS_NEW = getAdventureLibs(adventureVersionNew)
 
-        (KOTLIN_LIBS + ADVENTURE_LIBS).forEach {
-            testImplementation(it)
+        if (project.name.startsWith("common")) {
+            (KOTLIN_LIBS + ADVENTURE_LIBS_NEW).forEach {
+                testImplementation(it)
+            }
         }
         if (shouldBundleKotlin(project.name)) {
             KOTLIN_LIBS.forEach { lib ->
@@ -69,7 +75,7 @@ subprojects {
         }
 
         if (project.name.startsWith("common") || project.name == "paper") {
-            ADVENTURE_LIBS.forEach {
+            ADVENTURE_LIBS_NEW.forEach {
                 compileOnly(it) {
                     // technically needs to be excluded only for text-serializer-gson,
                     // but idk how to do this easily
@@ -77,7 +83,7 @@ subprojects {
                 }
             }
         } else {
-            ADVENTURE_LIBS.forEach { lib ->
+            ADVENTURE_LIBS_OLD.forEach { lib ->
                 shadow(implementation(lib) {
                     exclude(module = "gson")
                 })
@@ -89,9 +95,6 @@ subprojects {
     }
 
     java {
-        // TODO: are these 3 lines AND tasks.withType<JavaCompile> both needed? also for subprojects
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
         toolchain.languageVersion = JavaLanguageVersion.of(25)
         withSourcesJar()
     }
@@ -105,7 +108,7 @@ subprojects {
     }
 
     tasks {
-        withType<JavaCompile> {
+        compileJava {
             options.encoding = "UTF-8"
             options.release = 17
         }

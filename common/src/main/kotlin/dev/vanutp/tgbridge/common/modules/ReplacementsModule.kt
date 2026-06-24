@@ -4,6 +4,7 @@ import dev.vanutp.tgbridge.common.TelegramBridge
 import dev.vanutp.tgbridge.common.TgbridgeEvents
 import kotlinx.serialization.json.Json
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.TextReplacementConfig
 import java.nio.file.Path
 import java.util.regex.Pattern
 import kotlin.io.path.notExists
@@ -32,7 +33,7 @@ class ReplacementsModule(bridge: TelegramBridge) : AbstractModule(bridge) {
         TgbridgeEvents.POST_RELOAD.addListener { loadConfig() }
         TgbridgeEvents.MC_CHAT_MESSAGE.addListener { e ->
             val effectivePattern = pattern ?: return@addListener
-            e.message = e.message.replaceText {
+            e.message = e.message.replaceText { it: TextReplacementConfig.Builder ->
                 it.match(effectivePattern).replacement { match, _ ->
                     val matchStr = match.group()
                     val replacement = replacements[matchStr] ?: matchStr

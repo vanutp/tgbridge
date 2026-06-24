@@ -1,8 +1,8 @@
 package dev.vanutp.tgbridge.common.converters
 
 import dev.vanutp.tgbridge.common.*
-import dev.vanutp.tgbridge.common.ConfigManager.config
 import dev.vanutp.tgbridge.common.ConfigManager.lang
+import dev.vanutp.tgbridge.common.adventure.tgbridgeBuild
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextDecoration
 
@@ -235,7 +235,7 @@ object TelegramToMinecraftConverter {
                 currEntities.addAll(nextEntities)
             }
         }
-        return components.fold(Component.text()) { acc, component -> acc.append(component) }.build()
+        return components.fold(Component.text()) { acc, component -> acc.append(component) }.tgbridgeBuild()
     }
 
     private fun serviceMessageToText(msg: TgMessage): Component? {
@@ -302,7 +302,7 @@ object TelegramToMinecraftConverter {
             val pinnedMessageDataComponent = pinnedMessageComponents
                 .flatMap { listOf(it, Component.text(" ")) }
                 .fold(Component.text()) { acc, component -> acc.append(component) }
-                .build()
+                .tgbridgeBuild()
             components.add(
                 lang.minecraft.messageMeta.pin.formatMiniMessage(
                     Placeholders(component = mapOf("message" to pinnedMessageDataComponent))
@@ -320,6 +320,6 @@ object TelegramToMinecraftConverter {
         return components
             .flatMap { listOf(it, Component.text(" ")) }
             .fold(Component.text()) { acc, component -> acc.append(component) }
-            .build()
+            .tgbridgeBuild()
     }
 }

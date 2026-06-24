@@ -2,6 +2,7 @@ package dev.vanutp.tgbridge.common
 
 import dev.vanutp.tgbridge.common.ConfigManager.config
 import dev.vanutp.tgbridge.common.ConfigManager.lang
+import dev.vanutp.tgbridge.common.adventure.args
 import dev.vanutp.tgbridge.common.converters.TelegramFormattedText
 import dev.vanutp.tgbridge.common.converters.TelegramToMinecraftConverter
 import dev.vanutp.tgbridge.common.models.*
@@ -12,6 +13,7 @@ import dev.vanutp.tgbridge.common.modules.VoiceMessagesModule
 import kotlinx.coroutines.*
 import kotlinx.serialization.SerializationException
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.TextReplacementConfig
 import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.event.HoverEvent
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
@@ -348,7 +350,7 @@ abstract class TelegramBridge {
 
         val tgText = bluemapLink
             ?: e.message.takeIf { config.messages.keepPrefix || prefix.isEmpty() }
-            ?: e.message.replaceText {
+            ?: e.message.replaceText { it: TextReplacementConfig.Builder ->
                 it.match("^" + Regex.escape(prefix)).replacement("")
             }
 

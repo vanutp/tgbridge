@@ -1,3 +1,4 @@
+import org.gradle.api.attributes.java.TargetJvmVersion
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 operator fun String.invoke(): String =
@@ -56,9 +57,18 @@ dependencies {
     testImplementation(kotlin("test"))
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+// allow jvm21 for compile deps (adventure)
+listOf(
+    configurations.compileClasspath,
+    configurations.testCompileClasspath,
+    // tests are only ran by us on jvm 25
+    configurations.testRuntimeClasspath,
+).forEach { conf ->
+    conf {
+        attributes {
+            attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 21)
+        }
+    }
 }
 
 kotlin {

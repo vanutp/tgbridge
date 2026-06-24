@@ -12,6 +12,7 @@ export interface TgUser {
 
 export interface TgChat {
   id: number
+  type: 'supergroup'
   title: string
   username: string | null
 }
@@ -293,6 +294,7 @@ export class BotApiMock {
     const msg: TgMessage = {
       chat: {
         id: this.chatId,
+        type: 'supergroup',
         title: 'Test',
         username: null,
       },

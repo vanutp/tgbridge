@@ -3,6 +3,7 @@ package dev.vanutp.tgbridge.common.converters
 import dev.vanutp.tgbridge.common.LanguageService
 import dev.vanutp.tgbridge.common.TgEntity
 import dev.vanutp.tgbridge.common.TgEntityType
+import dev.vanutp.tgbridge.common.adventure.*
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.TranslatableComponent
@@ -51,7 +52,6 @@ object MinecraftToTelegramConverter {
                 var curr = TelegramFormattedText(
                     LanguageService.getString(comp.key()) ?: comp.key()
                 )
-                // We're using older versions of kyori on some platforms, so using deprecated args() is ok
                 comp.args().forEachIndexed { i, x ->
                     if (i == 0) {
                         curr = replace(curr, "%s", x)
@@ -72,7 +72,7 @@ object MinecraftToTelegramConverter {
         }
 
         val clickEvent = comp.style().clickEvent()
-        val isLink = clickEvent?.action() == ClickEvent.Action.OPEN_URL && clickEvent.value() != res.text
+        val isLink = clickEvent?.isOpenUrl() == true && clickEvent.value() != res.text
         if (isLink) {
             res += TgEntity(TgEntityType.TEXT_LINK, 0, res.text.length, clickEvent.value())
         }
