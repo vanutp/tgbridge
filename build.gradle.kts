@@ -157,7 +157,8 @@ subprojects {
             file("$rootDir/CHANGELOG.md")
                 .readText()
                 .split("###")[1]
-                .let { x -> "###$x" }
+                .split("\n", limit = 2)[1]
+                .trim()
         )
     }
 
