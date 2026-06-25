@@ -1,3 +1,7 @@
+### Unreleased
+
+- honor Telegram's `retry_after` on HTTP 429 (rate limit) responses instead of dropping the message
+
 ### 0.9.10
 
 - fabric, paper: support 26.2

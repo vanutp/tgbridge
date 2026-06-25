@@ -7,6 +7,7 @@ import kotlinx.coroutines.future.future
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
@@ -302,10 +303,21 @@ data class TgUpdate(
 )
 
 @Serializable
+data class TgResponseParameters(
+    @SerialName("retry_after")
+    val retryAfter: Int? = null,
+    @SerialName("migrate_to_chat_id")
+    val migrateToChatId: Long? = null,
+)
+
+@Serializable
 data class TgResponse<T>(
     val ok: Boolean,
     val result: T? = null,
     val description: String? = null,
+    @SerialName("error_code")
+    val errorCode: Int? = null,
+    val parameters: TgResponseParameters? = null,
 )
 
 @Serializable
@@ -350,9 +362,20 @@ data class TgDeleteMessageRequest(
     val messageId: Int,
 )
 
-class TelegramException(val responseBody: String?) : Exception(
-    "Telegram exception: ${responseBody ?: "no response body"}"
-)
+class TelegramException(
+    val errorCode: Int? = null,
+    val description: String? = null,
+    val parameters: TgResponseParameters? = null,
+    val responseBody: String? = null,
+) : Exception(
+    "Telegram exception: ${responseBody ?: description ?: "no response body"}"
+) {
+    /**
+     * Number of seconds Telegram asks us to wait before retrying, as sent in the
+     * `parameters.retry_after` field of an HTTP 429 response. `null` if absent.
+     */
+    val retryAfter: Int? get() = parameters?.retryAfter
+}
 
 interface TgApi {
     @GET("getMe")
@@ -408,6 +431,12 @@ interface TgApi {
 }
 
 const val POLL_TIMEOUT_SECONDS = 60
+
+private const val HTTP_TOO_MANY_REQUESTS = 429
+
+// Extra time added on top of Telegram's requested retry_after to avoid hitting
+// the limit again exactly at the boundary.
+private const val RATE_LIMIT_RETRY_MARGIN_MS = 1000L
 
 class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogger, private val scope: CoroutineScope) {
     init {
@@ -529,7 +558,7 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
                         is CancellationException -> break
                         else -> {
                             logger.error(e.message.toString(), e)
-                            delay(1000)
+                            delay(rateLimitDelayMs(e) ?: 1000)
                         }
                     }
                 }
@@ -560,7 +589,20 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
             return f().result!!
         } catch (e: HttpException) {
             val resp = e.response() ?: throw e
-            throw TelegramException(resp.errorBody()?.string())
+            val body = resp.errorBody()?.string()
+            val parsed = body?.let {
+                try {
+                    json.decodeFromString<TgResponse<JsonElement>>(it)
+                } catch (_: Exception) {
+                    null
+                }
+            }
+            throw TelegramException(
+                errorCode = parsed?.errorCode ?: e.code(),
+                description = parsed?.description,
+                parameters = parsed?.parameters,
+                responseBody = body,
+            )
         }
     }
 
@@ -596,6 +638,19 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
             try {
                 return operation()
             } catch (e: Exception) {
+                // Telegram explicitly told us how long to wait (HTTP 429): honor that
+                // instead of using exponential backoff, and don't spend the connection
+                // retry budget on it — rate limiting is not a connection failure.
+                val rateLimitDelay = rateLimitDelayMs(e)
+                if (rateLimitDelay != null) {
+                    // Honor retry_after exactly: it must not be clamped to maxDelay
+                    // (which only bounds connection backoff). Retrying before the
+                    // server-mandated interval would just trigger another 429.
+                    logger.warn("Rate limited by Telegram, retrying in ${rateLimitDelay / 1000} seconds")
+                    delay(rateLimitDelay)
+                    continue
+                }
+
                 if (!retryExceptions.contains(e::class)) {
                     logger.error("Not retriable exception", e)
                     throw e
@@ -614,6 +669,18 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
             }
         }
     }
+
+    /**
+     * Delay to wait before retrying a rate-limited request, derived from the
+     * `retry_after` Telegram sends on an HTTP 429 response. Returns `null` when
+     * [e] is not a rate-limit error. A small margin is added so we don't hit the
+     * limit again right at the boundary.
+     */
+    private fun rateLimitDelayMs(e: Throwable): Long? =
+        (e as? TelegramException)
+            ?.takeIf { it.errorCode == HTTP_TOO_MANY_REQUESTS }
+            ?.retryAfter
+            ?.let { it.toLong() * 1000 + RATE_LIMIT_RETRY_MARGIN_MS }
 
     suspend fun sendMessage(
         chatId: Long,
