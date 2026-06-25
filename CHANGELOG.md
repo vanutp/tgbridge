@@ -1,3 +1,7 @@
+### 0.9.10
+
+- fabric, paper: support 26.2
+
 ### 0.9.9
 
 - fabric, paper: update FlectonePulse to 1.9.1
