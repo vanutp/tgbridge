@@ -27,21 +27,7 @@ jobs:
         run: ./gradlew test
 
       # TODO: only run after e2e tests
-      - name: Upload to Maven repository
-        if: ${{ github.event_name == 'push' && github.ref_type == 'tag' || github.ref == 'refs/heads/master' }}
-        env:
-          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
-          REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
-        run: |
-          if [[ "${{ github.ref_type }}" != "tag" ]]; then
-            export VERSION="1.0-SNAPSHOT"
-          fi
-          ./gradlew publish
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: tgbridge
-          path: build/release/*.jar
+  
   e2e:
     name: End-to-end tests
     needs: build
