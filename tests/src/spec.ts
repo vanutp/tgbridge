@@ -6,7 +6,7 @@ import { Client } from './client.ts'
 async function minecraftToTelegram(server: Server) {
   const text = 'test minecraftToTelegram'
   await server.client.sendMessage(text)
-  await delay(50)
+  await delay(200)
   assert(server.tg.findMessage((msg) => (msg.text ?? '').includes(text)))
 }
 
@@ -24,7 +24,7 @@ async function advancement(server: Server) {
     `advancement grant ${server.client.username} only minecraft:story/mine_stone`,
   )
   assert(resp.includes('Granted'), `Bad RCON response: ${resp}`)
-  await delay(50)
+  await delay(5000)
   const msg = server.tg.findMessage((msg) =>
     (msg.text ?? '').includes('Stone Age')
   )
@@ -89,6 +89,7 @@ async function muteUnmuteCommand(server: Server) {
 async function joinAndLeavePlayer(server: Server) {
   const secondClient = new Client(server.port, '2nd_user')
   await secondClient.waitForSpawn()
+  await delay(200)
 
   assert(
     server.tg.findMessage((msg) =>
@@ -97,7 +98,7 @@ async function joinAndLeavePlayer(server: Server) {
   )
 
   secondClient.stop()
-  await delay(200)
+  await delay(500)
   assert(
     server.tg.findMessage((msg) =>
       (msg.text ?? '').includes(`${secondClient.username} left the game`)
