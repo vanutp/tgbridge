@@ -24,7 +24,7 @@ async function advancement(server: Server) {
     `advancement grant ${server.client.username} only minecraft:story/mine_stone`,
   )
   assert(resp.includes('Granted'), `Bad RCON response: ${resp}`)
-  await delay(50)
+  await delay(200)
   const msg = server.tg.findMessage((msg) =>
     (msg.text ?? '').includes('Stone Age')
   )
