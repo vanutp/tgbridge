@@ -215,7 +215,12 @@ abstract class TelegramBridge {
             chat,
             msg,
             Placeholders(
-                mapOf("sender" to msg.senderName),
+                mapOf(
+                    "sender" to msg.senderName,
+                    "full_name" to (msg.from?.fullName ?: msg.senderName),
+                    "first_name" to (msg.from?.firstName ?: ""),
+                    "last_name" to (msg.from?.lastName ?: ""),
+                ),
                 mapOf("text" to textComponent),
             )
         )

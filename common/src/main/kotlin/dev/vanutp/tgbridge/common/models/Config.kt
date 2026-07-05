@@ -59,7 +59,7 @@ data class ChatConfig(
     @YamlComment(
         "Format for Telegram -> Minecraft messages when useTellraw is enabled.",
     )
-    val tellrawFormat: String = "<blue>✈ <gray><sender>: <white> <text>",
+    val tellrawFormat: String = "<blue>✈ <gray><full_name>: <white><text>",
 )
 
 @Serializable
