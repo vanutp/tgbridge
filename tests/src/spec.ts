@@ -6,7 +6,7 @@ import { Client } from './client.ts'
 async function minecraftToTelegram(server: Server) {
   const text = 'test minecraftToTelegram'
   await server.client.sendMessage(text)
-  await delay(50)
+  await delay(200)
   assert(server.tg.findMessage((msg) => (msg.text ?? '').includes(text)))
 }
 
@@ -89,6 +89,7 @@ async function muteUnmuteCommand(server: Server) {
 async function joinAndLeavePlayer(server: Server) {
   const secondClient = new Client(server.port, '2nd_user')
   await secondClient.waitForSpawn()
+  await delay(200)
 
   assert(
     server.tg.findMessage((msg) =>
@@ -97,7 +98,7 @@ async function joinAndLeavePlayer(server: Server) {
   )
 
   secondClient.stop()
-  await delay(200)
+  await delay(500)
   assert(
     server.tg.findMessage((msg) =>
       (msg.text ?? '').includes(`${secondClient.username} left the game`)

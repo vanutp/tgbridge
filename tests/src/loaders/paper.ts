@@ -9,18 +9,10 @@ export class PaperServer extends Server {
   }
 
   protected override async _install() {
-    const versionsResp = await fetch(
-      `https://api.papermc.io/v2/projects/paper/versions/${this.version}/builds`,
-    )
-    const versionsData = await versionsResp.json()
-    const version = versionsData.builds[versionsData.builds.length - 1]
-    const suffix = Object.hasOwn(version.downloads, 'mojang-mappings')
-      ? '-mojang'
-      : ''
-    const versionUrl =
-      `https://api.papermc.io/v2/projects/paper/versions/${this.version}/builds/${version.build}/downloads/paper-${this.version}-${version.build}${suffix}.jar`
+    // Fallback to Purpur because Paper API v2 is sunset
+    const versionUrl = `https://api.purpurmc.org/v2/purpur/${this.version}/latest/download`
 
-    const serverFileName = basename(versionUrl)
+    const serverFileName = `purpur-${this.version}.jar`
     const serverFilePath = new URL(serverFileName, this.serverDir)
     await downloadFile(versionUrl, serverFilePath)
 
