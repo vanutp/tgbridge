@@ -222,9 +222,14 @@ abstract class TelegramBridge {
         if (!TgbridgeEvents.TG_CHAT_MESSAGE.invoke(e)) return
 
         val recipientsEvt = TgbridgeRecipientsEvent(chat, originalEvent = e)
-        TgbridgeEvents.RECIPIENTS.invoke(recipientsEvt)
+        if (chat.useTellraw) {
+            recipientsEvt.recipients = platform.getOnlinePlayers()
+        } else {
+            TgbridgeEvents.RECIPIENTS.invoke(recipientsEvt)
+        }
 
-        platform.broadcastMessage(recipientsEvt.recipients, chat.minecraftFormat.formatMiniMessage(e.placeholders))
+        val format = if (chat.useTellraw) chat.tellrawFormat else chat.minecraftFormat
+        platform.broadcastMessage(recipientsEvt.recipients, format.formatMiniMessage(e.placeholders))
     }
 
     private fun tryReinit(ctx: TBCommandContext): Boolean {

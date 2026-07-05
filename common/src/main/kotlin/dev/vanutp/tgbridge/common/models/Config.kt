@@ -52,6 +52,14 @@ data class ChatConfig(
         "Format for Minecraft -> Telegram messages. Uses MiniMessage formatting.",
     )
     val telegramFormat: String = "<b>[<username>]</b> <text>",
+    @YamlComment(
+        "If set to true, messages from Telegram will be sent to all players bypassing mute settings.",
+    )
+    val useTellraw: Boolean = false,
+    @YamlComment(
+        "Format for Telegram -> Minecraft messages when useTellraw is enabled.",
+    )
+    val tellrawFormat: String = "<blue>✈ <gray><sender>: <white> <text>",
 )
 
 @Serializable
