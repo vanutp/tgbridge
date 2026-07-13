@@ -12,13 +12,13 @@ repositories {
             includeGroup("me.lucko")
         }
     }
-    maven {
-        name = "dimaskama"
-        url = uri("https://maven.dimaskama.net/releases")
-        content {
-            includeGroup("ru.dimaskama.voicemessages")
-        }
-    }
+//    maven {
+//        name = "dimaskama"
+//        url = uri("https://maven.dimaskama.net/releases")
+//        content {
+//            includeGroup("ru.dimaskama.voicemessages")
+//        }
+//    }
     maven {
         url = uri("https://maven.maxhenkel.de/repository/public")
         content {
@@ -51,7 +51,7 @@ dependencies {
         exclude(module = "kotlinx-serialization-core")
     }
     compileOnly("me.lucko:spark-api:0.1-SNAPSHOT")
-    compileOnly("ru.dimaskama.voicemessages:voicemessages-api:0.0.1")
+//    compileOnly("ru.dimaskama.voicemessages:voicemessages-api:0.0.1")
     compileOnly("de.maxhenkel.voicechat:voicechat-api:2.5.31")
 
     testImplementation(kotlin("test"))

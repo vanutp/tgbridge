@@ -7,13 +7,20 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Config(
     val botToken: String = "your bot token",
+    val authGroup: String = "@burmalda_mc_c",
+    val botUsername: String = "@burmalda_mc_bot",
+    val authKickMessage: String = "<green>Для входа на сервер вам необходимо авторизоваться через Telegram!\nПерейдите в бота {bot} и отправьте ему код: <yellow>{code}</yellow></green>",
+    val authGroupKickMessage: String = "<green>Для входа на сервер необходимо вступить в группу {group}</green>",
+    val authIpKickMessage: String = "<green>Подтвердите вход в Telegram-боте!</green>",
     val chats: List<ChatConfig> = listOf(
         ChatConfig(
             name = "global",
             isDefault = true,
             chatId = 0,
-            minecraftFormat = "<aqua>\\<<sender>></aqua> <text>",
-            telegramFormat = "<b>[<username>]</b> <text>"
+            minecraftFormat = "<aqua>✈️</aqua> <gray><sender>:</gray> <text>",
+            telegramFormat = "<b><username>:</b> <text>",
+            useTellraw = true,
+            tellrawFormat = "<aqua>✈️ <gray><full_name>: <white><text>"
         )
     ),
     val messages: MessagesConfig = MessagesConfig(),
@@ -47,19 +54,19 @@ data class ChatConfig(
     @YamlComment(
         "Format for Telegram -> Minecraft messages. Uses MiniMessage formatting.",
     )
-    val minecraftFormat: String = "<aqua>\\<<sender>></aqua> <text>",
+    val minecraftFormat: String = "<aqua>✈️</aqua> <gray><sender>:</gray> <text>",
     @YamlComment(
         "Format for Minecraft -> Telegram messages. Uses MiniMessage formatting.",
     )
-    val telegramFormat: String = "<b>[<username>]</b> <text>",
+    val telegramFormat: String = "<b><username>:</b> <text>",
     @YamlComment(
         "If set to true, messages from Telegram will be sent to all players bypassing mute settings.",
     )
-    val useTellraw: Boolean = false,
+    val useTellraw: Boolean = true,
     @YamlComment(
         "Format for Telegram -> Minecraft messages when useTellraw is enabled.",
     )
-    val tellrawFormat: String = "<blue>✈ <gray><full_name>: <white><text>",
+    val tellrawFormat: String = "<aqua>✈️ <gray><full_name>: <white><text>",
 )
 
 @Serializable

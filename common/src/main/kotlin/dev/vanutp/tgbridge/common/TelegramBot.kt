@@ -295,10 +295,49 @@ data class TgFile(
 )
 
 @Serializable
+data class TgInlineKeyboardButton(
+    val text: String,
+    @SerialName("callback_data")
+    val callbackData: String? = null,
+    val url: String? = null,
+    val style: String? = null,
+)
+
+@Serializable
+data class TgInlineKeyboardMarkup(
+    @SerialName("inline_keyboard")
+    val inlineKeyboard: List<List<TgInlineKeyboardButton>>
+)
+
+@Serializable
+data class TgCallbackQuery(
+    val id: String,
+    val from: TgUser,
+    val message: TgMessage? = null,
+    val data: String? = null,
+)
+
+@Serializable
+data class TgChatMember(
+    val status: String,
+)
+
+@Serializable
+data class TgAnswerCallbackQueryRequest(
+    @SerialName("callback_query_id")
+    val callbackQueryId: String,
+    val text: String? = null,
+    @SerialName("show_alert")
+    val showAlert: Boolean = false,
+)
+
+@Serializable
 data class TgUpdate(
     @SerialName("update_id")
     val updateId: Int,
     val message: TgMessage? = null,
+    @SerialName("callback_query")
+    val callbackQuery: TgCallbackQuery? = null,
 )
 
 @Serializable
@@ -324,6 +363,8 @@ data class TgSendMessageRequest(
     val disableWebPagePreview: Boolean,
     @SerialName("disable_notification")
     val disableNotification: Boolean = false,
+    @SerialName("reply_markup")
+    val replyMarkup: TgInlineKeyboardMarkup? = null,
 )
 
 @Serializable
@@ -340,6 +381,8 @@ data class TgEditMessageRequest(
     val parseMode: String? = null,
     @SerialName("disable_web_page_preview")
     val disableWebPagePreview: Boolean,
+    @SerialName("reply_markup")
+    val replyMarkup: TgInlineKeyboardMarkup? = null,
 )
 
 @Serializable
@@ -389,11 +432,20 @@ interface TgApi {
     @POST("deleteMessage")
     suspend fun deleteMessage(@Body data: TgDeleteMessageRequest): TgResponse<Boolean>
 
+    @POST("answerCallbackQuery")
+    suspend fun answerCallbackQuery(@Body data: TgAnswerCallbackQueryRequest): TgResponse<Boolean>
+
+    @GET("getChatMember")
+    suspend fun getChatMember(
+        @Query("chat_id") chatId: String,
+        @Query("user_id") userId: Long,
+    ): TgResponse<TgChatMember>
+
     @GET("getUpdates")
     suspend fun getUpdates(
         @Query("offset") offset: Int,
         @Query("timeout") timeout: Int,
-        @Query("allowed_updates") allowedUpdates: List<String> = listOf("message"),
+        @Query("allowed_updates") allowedUpdates: List<String> = listOf("message", "callback_query"),
     ): TgResponse<List<TgUpdate>>
 
     @POST("deleteWebhook")
@@ -487,6 +539,12 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
         registerCommandHandler(command) { handler.accept(it) }
     }
 
+    private val callbackHandlers: MutableList<suspend (TgCallbackQuery) -> Boolean> = mutableListOf()
+
+    fun registerCallbackHandler(handler: suspend (TgCallbackQuery) -> Boolean) {
+        callbackHandlers.add(handler)
+    }
+
     suspend fun init() {
         retriableCall { client.deleteWebhook() }
         me = retriableCall { client.getMe() }
@@ -512,6 +570,14 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
                     }
                     offset = updates.last().updateId + 1
                     updates.forEach { update ->
+                        if (update.callbackQuery != null) {
+                            for (handler in callbackHandlers) {
+                                if (handler.invoke(update.callbackQuery)) {
+                                    break
+                                }
+                            }
+                            return@forEach
+                        }
                         if (update.message == null) {
                             return@forEach
                         }
@@ -798,5 +864,62 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
 
     fun downloadFileAsync(fileId: String) = scope.future {
         downloadFile(fileId)
+    }
+
+    suspend fun sendMessageWithMarkup(
+        chatId: Long,
+        text: String,
+        replyMarkup: TgInlineKeyboardMarkup?,
+        parseMode: String? = null,
+    ): TgMessage = retriableCall {
+        client.sendMessage(
+            TgSendMessageRequest(
+                chatId = chatId,
+                text = text,
+                disableWebPagePreview = true,
+                parseMode = parseMode,
+                replyMarkup = replyMarkup
+            )
+        )
+    }
+
+    suspend fun editMessageTextWithMarkup(
+        chatId: Long,
+        messageId: Int,
+        text: String,
+        replyMarkup: TgInlineKeyboardMarkup?,
+        parseMode: String? = null,
+    ): TgMessage = retriableCall {
+        client.editMessageText(
+            TgEditMessageRequest(
+                chatId = chatId,
+                messageId = messageId,
+                text = text,
+                disableWebPagePreview = true,
+                parseMode = parseMode,
+                replyMarkup = replyMarkup
+            )
+        )
+    }
+
+    suspend fun answerCallbackQuery(
+        callbackQueryId: String,
+        text: String? = null,
+        showAlert: Boolean = false,
+    ): Boolean = retriableCall {
+        client.answerCallbackQuery(
+            TgAnswerCallbackQueryRequest(
+                callbackQueryId = callbackQueryId,
+                text = text,
+                showAlert = showAlert,
+            )
+        )
+    }
+
+    suspend fun getChatMember(
+        chatId: String,
+        userId: Long,
+    ): TgChatMember = retriableCall {
+        client.getChatMember(chatId, userId)
     }
 }

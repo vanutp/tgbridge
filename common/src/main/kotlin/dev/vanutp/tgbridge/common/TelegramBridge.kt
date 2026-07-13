@@ -56,6 +56,7 @@ abstract class TelegramBridge {
         logger.info("tgbridge starting on ${platform.name}")
         canRetryFailedInit = false
         ConfigManager.init(platform.configDir)
+        AuthManager.init(platform.configDir)
         config.getError()?.let {
             canRetryFailedInit = true
             logger.error(it)
@@ -163,6 +164,7 @@ abstract class TelegramBridge {
         bot.registerCommandHandler("tps", this::onTelegramTpsCommand)
         bot.registerCommandHandler("list", this::onTelegramListCommand)
         bot.registerMessageHandler(this::onTelegramMessage)
+        bot.registerCallbackHandler(this::onTelegramCallbackQuery)
     }
 
     private fun getMessageChat(msg: TgMessage): ChatConfig? {
@@ -208,6 +210,10 @@ abstract class TelegramBridge {
     }
 
     private suspend fun onTelegramMessage(msg: TgMessage) {
+        if (msg.chat.type == TgChatType.PRIVATE) {
+            onTelegramPrivateMessage(msg)
+            return
+        }
         val chat = getMessageChat(msg) ?: return
         chatManager.clearLastMessage(chat)
         val textComponent = TelegramToMinecraftConverter.convert(msg, bot.me.id)
@@ -520,5 +526,186 @@ abstract class TelegramBridge {
         coroutineScope.launch {
             fn()
         }
+    }
+
+    private fun getTgMentionHtml(user: TgUser): String {
+        return if (user.username != null) {
+            "@${user.username}"
+        } else {
+            "<a href=\"tg://user?id=${user.id}\">${user.firstName}</a>"
+        }
+    }
+
+    private suspend fun announceLinking(username: String, user: TgUser) {
+        val mention = getTgMentionHtml(user)
+        val text = "🛫 Игрок <b>$username</b> привязал майнкрафт акк к тг $mention"
+        // Send to Telegram group chat
+        val chat = config.getDefaultChat()
+        chatManager.sendMessage(chat, MessageContentHTMLText(text, disableNotification = false))
+
+        // Also broadcast in Minecraft so online players see it
+        val mm = net.kyori.adventure.text.minimessage.MiniMessage.miniMessage()
+        val plainMention = if (user.username != null) "@${user.username}" else user.firstName
+        val mcText = mm.deserialize("🛫 Игрок <green>$username</green> привязал майнкрафт акк к тг <aqua>$plainMention</aqua>")
+        platform.broadcastMessage(platform.getOnlinePlayers(), mcText)
+    }
+
+    private suspend fun checkGroupMembership(tgId: Long): Boolean {
+        val authGroup = config.authGroup
+        if (authGroup.isEmpty()) return true
+
+        return try {
+            val member = bot.getChatMember(authGroup, tgId)
+            member.status in listOf("creator", "administrator", "member", "restricted")
+        } catch (e: Exception) {
+            logger.error("Failed to check group membership for $tgId in $authGroup", e)
+            false
+        }
+    }
+
+    private suspend fun onTelegramPrivateMessage(msg: TgMessage) {
+        val text = msg.effectiveText?.trim() ?: return
+        val from = msg.from ?: return
+
+        // 1. If `/start` command
+        if (text.startsWith("/start", ignoreCase = true)) {
+            bot.sendMessage(
+                chatId = msg.chat.id,
+                text = "Привет! Чтобы зайти на сервер, отправь мне код из 5-6 цифр, который ты видишь при входе в игру.\n\n" +
+                       "Также тебе необходимо обязательно вступить в нашу группу: <b>${config.authGroup}</b>.\n" +
+                       "После этого ты сможешь зайти на сервер!",
+                parseMode = "HTML"
+            )
+            return
+        }
+
+        // 2. Check if the message is a 5-6 digit code
+        val codeRegex = Regex("^\\d{5,6}$")
+        if (codeRegex.matches(text)) {
+            // Find player with this code (case insensitive lowercase keys)
+            val playerEntry = AuthManager.db.players.values.find { it.currentCode == text }
+            if (playerEntry == null) {
+                bot.sendMessage(
+                    chatId = msg.chat.id,
+                    text = "Код не найден или уже устарел. Попробуй зайти на сервер еще раз, чтобы получить новый код."
+                )
+                return
+            }
+
+            // Check if user is in the group/channel
+            val isMember = checkGroupMembership(from.id)
+            if (!isMember) {
+                // Link anyway, but keep them informed that they need to join the group
+                playerEntry.tgId = from.id
+                playerEntry.tgUsername = from.username ?: from.fullName
+                playerEntry.currentCode = null
+                if (playerEntry.pendingIpToConfirm != null) {
+                    playerEntry.allowedIps.add(playerEntry.pendingIpToConfirm!!)
+                    playerEntry.pendingIpToConfirm = null
+                }
+                AuthManager.save()
+
+                bot.sendMessage(
+                    chatId = msg.chat.id,
+                    text = "Аккаунт <b>${playerEntry.username}</b> успешно привязан!\n\n" +
+                           "⚠️ Но вы ещё не вступили в группу <b>${config.authGroup}</b>. Вступите в неё, чтобы иметь возможность войти на сервер.",
+                    parseMode = "HTML"
+                )
+                return
+            }
+
+            // Account successfully linked and in group!
+            playerEntry.tgId = from.id
+            playerEntry.tgUsername = from.username ?: from.fullName
+            playerEntry.currentCode = null
+            if (playerEntry.pendingIpToConfirm != null) {
+                playerEntry.allowedIps.add(playerEntry.pendingIpToConfirm!!)
+                playerEntry.pendingIpToConfirm = null
+            }
+            AuthManager.save()
+
+            bot.sendMessage(
+                chatId = msg.chat.id,
+                text = "Аккаунт <b>${playerEntry.username}</b> успешно привязан! Вы можете заходить на сервер.",
+                parseMode = "HTML"
+            )
+
+            // Broadcast message about linking!
+            announceLinking(playerEntry.username, from)
+            return
+        }
+
+        // If not a code or start, we can remind them what to do
+        bot.sendMessage(
+            chatId = msg.chat.id,
+            text = "Отправьте мне код из 5-6 цифр для привязки аккаунта или введите /start."
+        )
+    }
+
+    private suspend fun onTelegramCallbackQuery(query: TgCallbackQuery): Boolean {
+        val data = query.data ?: return false
+        val from = query.from
+
+        if (data.startsWith("ip_confirm:") || data.startsWith("ip_decline:")) {
+            val parts = data.split(":")
+            if (parts.size < 3) {
+                bot.answerCallbackQuery(query.id, "Некорректные данные")
+                return true
+            }
+            val username = parts[1]
+            val ip = parts.drop(2).joinToString(":")
+
+            val player = AuthManager.db.players[username.lowercase()]
+            if (player == null) {
+                bot.answerCallbackQuery(query.id, "Игрок не найден")
+                return true
+            }
+
+            if (player.tgId != from.id) {
+                bot.answerCallbackQuery(query.id, "Это не ваш аккаунт!", showAlert = true)
+                return true
+            }
+
+            val chat_id = query.message?.chat?.id ?: from.id
+            val message_id = query.message?.messageId
+
+            if (data.startsWith("ip_confirm:")) {
+                player.allowedIps.add(ip)
+                player.pendingIpToConfirm = null
+                player.pendingIpMessageId = null
+                AuthManager.save()
+
+                bot.answerCallbackQuery(query.id, "Вход подтвержден!")
+
+                if (message_id != null) {
+                    bot.editMessageTextWithMarkup(
+                        chatId = chat_id,
+                        messageId = message_id,
+                        text = "✅ Вход с IP <b>$ip</b> для игрока <b>${player.username}</b> подтвержден!",
+                        replyMarkup = null,
+                        parseMode = "HTML"
+                    )
+                }
+            } else {
+                player.pendingIpToConfirm = null
+                player.pendingIpMessageId = null
+                AuthManager.save()
+
+                bot.answerCallbackQuery(query.id, "Вход отклонен!")
+
+                if (message_id != null) {
+                    bot.editMessageTextWithMarkup(
+                        chatId = chat_id,
+                        messageId = message_id,
+                        text = "❌ Вход с IP <b>$ip</b> для игрока <b>${player.username}</b> отклонен!",
+                        replyMarkup = null,
+                        parseMode = "HTML"
+                    )
+                }
+            }
+            return true
+        }
+
+        return false
     }
 }
