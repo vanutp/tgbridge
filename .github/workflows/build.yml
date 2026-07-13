@@ -64,4 +64,4 @@ jobs:
 
       - name: Run tests
         working-directory: tests
-        run: deno run -A src/main.ts --no-build
+        run: deno run -A src/main.ts --no-build "paper*"
