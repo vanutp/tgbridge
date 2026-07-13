@@ -551,14 +551,15 @@ abstract class TelegramBridge {
     }
 
     private suspend fun checkGroupMembership(tgId: Long): Boolean {
-        val authGroup = config.authGroup
-        if (authGroup.isEmpty()) return true
+        val defaultChat = config.getDefaultChat()
+        val authGroupId = defaultChat.chatId
+        if (authGroupId == 0L) return true
 
         return try {
-            val member = bot.getChatMember(authGroup, tgId)
+            val member = bot.getChatMember(authGroupId.toString(), tgId)
             member.status in listOf("creator", "administrator", "member", "restricted")
         } catch (e: Exception) {
-            logger.error("Failed to check group membership for $tgId in $authGroup", e)
+            logger.error("Failed to check group membership for $tgId in default chat $authGroupId", e)
             false
         }
     }
@@ -572,7 +573,7 @@ abstract class TelegramBridge {
             bot.sendMessage(
                 chatId = msg.chat.id,
                 text = "Привет! Чтобы зайти на сервер, отправь мне код из 5-6 цифр, который ты видишь при входе в игру.\n\n" +
-                       "Также тебе необходимо обязательно вступить в нашу группу: <b>${config.authGroup}</b>.\n" +
+                       "Также тебе необходимо обязательно вступить в нашу группу: <b>@burmalda_mc_c</b>.\n" +
                        "После этого ты сможешь зайти на сервер!",
                 parseMode = "HTML"
             )
@@ -597,10 +598,9 @@ abstract class TelegramBridge {
             if (!isMember) {
                 // Link anyway, but keep them informed that they need to join the group
                 playerEntry.tgId = from.id
-                playerEntry.tgUsername = from.username ?: from.fullName
                 playerEntry.currentCode = null
                 if (playerEntry.pendingIpToConfirm != null) {
-                    playerEntry.allowedIps.add(playerEntry.pendingIpToConfirm!!)
+                    playerEntry.allowedIp = playerEntry.pendingIpToConfirm
                     playerEntry.pendingIpToConfirm = null
                 }
                 AuthManager.save()
@@ -608,7 +608,7 @@ abstract class TelegramBridge {
                 bot.sendMessage(
                     chatId = msg.chat.id,
                     text = "Аккаунт <b>${playerEntry.username}</b> успешно привязан!\n\n" +
-                           "⚠️ Но вы ещё не вступили в группу <b>${config.authGroup}</b>. Вступите в неё, чтобы иметь возможность войти на сервер.",
+                           "⚠️ Но вы ещё не вступили в группу <b>@burmalda_mc_c</b>. Вступите в неё, чтобы иметь возможность войти на сервер.",
                     parseMode = "HTML"
                 )
                 return
@@ -616,10 +616,9 @@ abstract class TelegramBridge {
 
             // Account successfully linked and in group!
             playerEntry.tgId = from.id
-            playerEntry.tgUsername = from.username ?: from.fullName
             playerEntry.currentCode = null
             if (playerEntry.pendingIpToConfirm != null) {
-                playerEntry.allowedIps.add(playerEntry.pendingIpToConfirm!!)
+                playerEntry.allowedIp = playerEntry.pendingIpToConfirm
                 playerEntry.pendingIpToConfirm = null
             }
             AuthManager.save()
@@ -670,7 +669,7 @@ abstract class TelegramBridge {
             val message_id = query.message?.messageId
 
             if (data.startsWith("ip_confirm:")) {
-                player.allowedIps.add(ip)
+                player.allowedIp = ip
                 player.pendingIpToConfirm = null
                 player.pendingIpMessageId = null
                 AuthManager.save()

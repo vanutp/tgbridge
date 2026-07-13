@@ -10,8 +10,7 @@ import kotlin.io.path.*
 data class AuthPlayer(
     val username: String, // lowercase
     var tgId: Long? = null,
-    var tgUsername: String? = null,
-    val allowedIps: MutableSet<String> = mutableSetOf(),
+    var allowedIp: String? = null,
     var currentCode: String? = null,
     var pendingIpToConfirm: String? = null,
     var pendingIpMessageId: Int? = null,

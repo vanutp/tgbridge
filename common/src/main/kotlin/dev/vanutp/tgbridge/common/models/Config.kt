@@ -7,10 +7,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Config(
     val botToken: String = "your bot token",
-    val authGroup: String = "@burmalda_mc_c",
     val botUsername: String = "@burmalda_mc_bot",
     val authKickMessage: String = "<green>Для входа на сервер вам необходимо авторизоваться через Telegram!\nПерейдите в бота {bot} и отправьте ему код: <yellow>{code}</yellow></green>",
-    val authGroupKickMessage: String = "<green>Для входа на сервер необходимо вступить в группу {group}</green>",
+    val authGroupKickMessage: String = "<green>Для входа на сервер необходимо вступить в группу @burmalda_mc_c</green>",
     val authIpKickMessage: String = "<green>Подтвердите вход в Telegram-боте!</green>",
     val chats: List<ChatConfig> = listOf(
         ChatConfig(

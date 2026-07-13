@@ -58,16 +58,21 @@ class EventManager(private val plugin: PaperBootstrap) : Listener {
         // 3. Check group membership
         val isMember = runBlocking {
             try {
-                val status = bridge.bot.getChatMember(config.authGroup, player.tgId!!).status
-                status in listOf("creator", "administrator", "member", "restricted")
+                val defaultChat = config.getDefaultChat()
+                if (defaultChat.chatId == 0L) {
+                    true
+                } else {
+                    val status = bridge.bot.getChatMember(defaultChat.chatId.toString(), player.tgId!!).status
+                    status in listOf("creator", "administrator", "member", "restricted")
+                }
             } catch (ex: Exception) {
-                bridge.logger.error("Failed to check group membership for ${player.tgId} in ${config.authGroup}", ex)
+                bridge.logger.error("Failed to check group membership for ${player.tgId} in default chat ${config.getDefaultChat().chatId}", ex)
                 false
             }
         }
 
         if (!isMember) {
-            val kickMsg = config.authGroupKickMessage.replace("{group}", config.authGroup)
+            val kickMsg = config.authGroupKickMessage
             e.disallow(
                 AsyncPlayerPreLoginEvent.Result.KICK_BANNED,
                 net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(kickMsg)
@@ -76,7 +81,7 @@ class EventManager(private val plugin: PaperBootstrap) : Listener {
         }
 
         // 4. Check IP address
-        if (!player.allowedIps.contains(ip)) {
+        if (player.allowedIp != ip) {
             // New IP!
             // Check if we already sent a DM for this IP
             if (player.pendingIpToConfirm != ip) {
