@@ -1,6 +1,6 @@
 ### Unreleased
 
-- honor Telegram's `retry_after` on HTTP 429 (rate limit) responses instead of dropping the message
+- honor Telegram's `retry_after` on HTTP 429 (rate limit) responses instead of dropping the message, capped at a few retries so a persistently rate-limited bot fails the request instead of retrying forever
 
 ### 0.9.10
 

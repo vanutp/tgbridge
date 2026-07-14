@@ -438,6 +438,87 @@ private const val HTTP_TOO_MANY_REQUESTS = 429
 // the limit again exactly at the boundary.
 private const val RATE_LIMIT_RETRY_MARGIN_MS = 1000L
 
+// Cap on how many times a single request will wait out Telegram's retry_after
+// before giving up. Honoring retry_after recovers from a transient 429, but a
+// bot that is persistently over the limit (e.g. a busy chat exceeding Telegram's
+// per-group message rate) would otherwise retry forever and wedge the caller, so
+// past this cap we fail the request instead (dropping the message, as before).
+internal const val MAX_RATE_LIMIT_RETRIES = 5
+
+/**
+ * Delay to wait before retrying a rate-limited request, derived from the
+ * `retry_after` Telegram sends on an HTTP 429 response. Returns `null` when
+ * [e] is not a rate-limit error. A small margin is added so we don't hit the
+ * limit again right at the boundary.
+ */
+internal fun rateLimitDelayMs(e: Throwable): Long? =
+    (e as? TelegramException)
+        ?.takeIf { it.errorCode == HTTP_TOO_MANY_REQUESTS }
+        ?.retryAfter
+        ?.let { it.toLong() * 1000 + RATE_LIMIT_RETRY_MARGIN_MS }
+
+internal suspend fun <T> withRetry(
+    logger: ILogger,
+    maxAttempts: Int = 3,
+    initialDelay: Long = 1000L,
+    maxDelay: Long = 300000L,
+    retryExceptions: Set<KClass<out Exception>> = setOf(Exception::class),
+    operation: suspend () -> T,
+): T {
+    var attempt = 0
+    var rateLimitRetries = 0
+    val infiniteRetries = maxAttempts <= 0
+
+    while (true) {
+        try {
+            return operation()
+        } catch (e: Exception) {
+            // Telegram explicitly told us how long to wait (HTTP 429): honor that
+            // instead of using exponential backoff, and don't spend the connection
+            // retry budget on it — rate limiting is not a connection failure.
+            val rateLimitDelay = rateLimitDelayMs(e)
+            if (rateLimitDelay != null) {
+                rateLimitRetries++
+                // Honoring retry_after recovers from a transient 429, but retrying
+                // forever would wedge the caller when the bot is persistently over
+                // the limit, so give up (fail the request) once the cap is reached.
+                if (rateLimitRetries > MAX_RATE_LIMIT_RETRIES) {
+                    logger.error(
+                        "Still rate limited by Telegram after $MAX_RATE_LIMIT_RETRIES retries, giving up",
+                        e,
+                    )
+                    throw e
+                }
+                // Honor retry_after exactly: it must not be clamped to maxDelay
+                // (which only bounds connection backoff). Retrying before the
+                // server-mandated interval would just trigger another 429.
+                logger.warn(
+                    "Rate limited by Telegram, retrying in ${rateLimitDelay / 1000} seconds " +
+                        "(retry $rateLimitRetries/$MAX_RATE_LIMIT_RETRIES)"
+                )
+                delay(rateLimitDelay)
+                continue
+            }
+
+            if (!retryExceptions.contains(e::class)) {
+                logger.error("Not retriable exception", e)
+                throw e
+            }
+            attempt++
+
+            if (!infiniteRetries && attempt >= maxAttempts) {
+                logger.error("Operation failed after $maxAttempts attempts", e)
+                throw e
+            }
+
+            val delay = minOf(initialDelay * (1L shl (attempt - 1)), maxDelay)
+            val attemptText = if (infiniteRetries) "attempt $attempt" else "attempt $attempt/$maxAttempts"
+            logger.warn("Operation failed ($attemptText), retrying in ${delay / 1000} seconds: ${e.javaClass.canonicalName}: ${e.message}")
+            delay(delay)
+        }
+    }
+}
+
 class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogger, private val scope: CoroutineScope) {
     init {
         val proxy = config.advanced.proxy
@@ -609,6 +690,7 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
     private suspend fun <T> retriableCall(f: suspend () -> TgResponse<T>): T {
         val retryConf = config.advanced.connectionRetry
         return withRetry(
+            logger = logger,
             maxAttempts = retryConf.maxAttempts,
             initialDelay = retryConf.initialDelay,
             maxDelay = retryConf.maxDelay,
@@ -623,64 +705,6 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
             call(f)
         }
     }
-
-    private suspend fun <T> withRetry(
-        maxAttempts: Int = 3,
-        initialDelay: Long = 1000L,
-        maxDelay: Long = 300000L,
-        retryExceptions: Set<KClass<out Exception>> = setOf(Exception::class),
-        operation: suspend () -> T
-    ): T {
-        var attempt = 0
-        val infiniteRetries = maxAttempts <= 0
-
-        while (true) {
-            try {
-                return operation()
-            } catch (e: Exception) {
-                // Telegram explicitly told us how long to wait (HTTP 429): honor that
-                // instead of using exponential backoff, and don't spend the connection
-                // retry budget on it — rate limiting is not a connection failure.
-                val rateLimitDelay = rateLimitDelayMs(e)
-                if (rateLimitDelay != null) {
-                    // Honor retry_after exactly: it must not be clamped to maxDelay
-                    // (which only bounds connection backoff). Retrying before the
-                    // server-mandated interval would just trigger another 429.
-                    logger.warn("Rate limited by Telegram, retrying in ${rateLimitDelay / 1000} seconds")
-                    delay(rateLimitDelay)
-                    continue
-                }
-
-                if (!retryExceptions.contains(e::class)) {
-                    logger.error("Not retriable exception", e)
-                    throw e
-                }
-                attempt++
-
-                if (!infiniteRetries && attempt >= maxAttempts) {
-                    logger.error("Operation failed after $maxAttempts attempts", e)
-                    throw e
-                }
-
-                val delay = minOf(initialDelay * (1L shl (attempt - 1)), maxDelay)
-                val attemptText = if (infiniteRetries) "attempt $attempt" else "attempt $attempt/$maxAttempts"
-                logger.warn("Operation failed ($attemptText), retrying in ${delay / 1000} seconds: ${e.javaClass.canonicalName}: ${e.message}")
-                delay(delay)
-            }
-        }
-    }
-
-    /**
-     * Delay to wait before retrying a rate-limited request, derived from the
-     * `retry_after` Telegram sends on an HTTP 429 response. Returns `null` when
-     * [e] is not a rate-limit error. A small margin is added so we don't hit the
-     * limit again right at the boundary.
-     */
-    private fun rateLimitDelayMs(e: Throwable): Long? =
-        (e as? TelegramException)
-            ?.takeIf { it.errorCode == HTTP_TOO_MANY_REQUESTS }
-            ?.retryAfter
-            ?.let { it.toLong() * 1000 + RATE_LIMIT_RETRY_MARGIN_MS }
 
     suspend fun sendMessage(
         chatId: Long,
