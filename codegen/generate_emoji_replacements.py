@@ -7,7 +7,7 @@ import httpx
 DATA_URL = 'https://raw.githubusercontent.com/milesj/emojibase/abb21ab07ed1d155d4fc38c8aab42eb773f65f36/packages/data/en/shortcodes/emojibase.raw.json'
 CODEGEN_DIR_PATH = Path(__file__).absolute().parent
 REPO_ROOT = CODEGEN_DIR_PATH.parent
-TARGET_FILE_PATH = REPO_ROOT / 'common' / 'src' / 'main' / 'resources' / 'replacements.json'
+TARGET_FILE_PATH = REPO_ROOT / 'modules' / 'common' / 'src' / 'main' / 'resources' / 'replacements.json'
 SKIP_SHORTCODES_RE = re.compile(r'tone\d+(?:-\d+)?$')
 
 resp = httpx.get(DATA_URL)

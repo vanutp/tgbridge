@@ -12,9 +12,12 @@ pluginManagement {
 }
 
 rootProject.name = "tgbridge"
-include("common", "common-jvm21", "common-jvm25")
 
 listOf(
+    "common",
+    "common-jvm21",
+    "common-jvm25",
+
     "paper",
     "forge-1.16.5",
     "forge-1.19.2",
@@ -24,5 +27,5 @@ listOf(
     "fabric-obf",
 ).forEach {
     include(it)
-    project(":$it").projectDir = file("implementations/$it")
+    project(":$it").projectDir = file("modules/$it")
 }
