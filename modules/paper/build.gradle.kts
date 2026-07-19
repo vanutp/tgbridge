@@ -23,6 +23,7 @@ repositories {
         url = uri("https://jitpack.io")
         content {
             includeGroup("com.github.LeonMangler")
+            includeGroup("com.github.TheJeterLP")
         }
     }
     maven {
@@ -65,6 +66,7 @@ dependencies {
     compileOnly("de.maxhenkel.voicechat:voicechat-api:2.5.31")
     compileOnly("com.dthielke.herochat:Herochat:5.6.5")
     compileOnly("com.discordsrv:discordsrv:1.28.0")
+    compileOnly("com.github.TheJeterLP:ChatEx:v3.2.2")
 }
 
 // Using Mojmap here because we are building for jvm 21,

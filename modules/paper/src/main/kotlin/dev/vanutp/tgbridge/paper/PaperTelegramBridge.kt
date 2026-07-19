@@ -18,6 +18,7 @@ class PaperTelegramBridge(val plugin: PaperBootstrap) : TelegramBridge() {
         addModule(ChattyV2Module(this))
         addModule(ChattyV3Module(this))
         addModule(HeroChatModule(this))
+        addModule(ChatExModule(this))
         addModule(DiscordSRVModule(this))
         addModule(EssentialsVanishModule(this))
         addModule(GenericVanishModule(this))

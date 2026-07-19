@@ -17,6 +17,7 @@
 
 - [Chatty](https://www.spigotmc.org/resources/chatty-lightweight-universal-bukkit-chat-system-solution-1-7-10-1-20.59411/)
 - [HeroChat](https://www.spigotmc.org/resources/herochat-pro-multi-server-chat-channels-and-more-50-off.34305/)
+- [ChatEx](https://www.spigotmc.org/resources/chatex.71041/)
 - [Carbon Chat](https://modrinth.com/plugin/carbon) (Paper, Fabric)
 - [FlectonePulse](https://modrinth.com/plugin/flectonepulse) (Paper, Fabric)
 
