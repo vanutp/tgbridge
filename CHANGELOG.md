@@ -1,3 +1,10 @@
+### 0.9.11
+
+- paper: add ChatEx support
+- fix autoMessagesLanguage silently not working with certain mods installed
+- support displaying advancement/death messages from more mods
+- misc translation system improvements and fixes
+
 ### 0.9.10
 
 - fabric, paper: support 26.2
