@@ -17,7 +17,7 @@ class NeoForgePlatform : IPlatform {
     override val configDir = FMLPaths.CONFIGDIR.get().resolve(NeoForgeTelegramBridge.MOD_ID)
     private val _modResources by lazy {
         ModList.get().mods.mapNotNull {
-            if (it.modId == "minecraft" || it.modId == "forge") {
+            if (it.modId == "minecraft" || it.modId == "neoforge") {
                 return@mapNotNull null
             }
             val root = it.owningFile.file.secureJar.rootPath

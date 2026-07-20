@@ -1,19 +1,38 @@
 package dev.vanutp.tgbridge.common
 
+import com.google.gson.GsonBuilder
 import dev.vanutp.tgbridge.common.ConfigManager.config
 import dev.vanutp.tgbridge.common.models.ResourceReloadEvent
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.TextComponent
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 import okhttp3.OkHttpClient
+import java.lang.reflect.Type
 import java.net.URI
 import java.nio.file.FileSystems
 import java.nio.file.Path
 import kotlin.io.path.*
+import com.google.gson.JsonArray as GsonArray
+import com.google.gson.JsonDeserializationContext as GsonDeserializationContext
+import com.google.gson.JsonDeserializer as GsonDeserializer
+import com.google.gson.JsonElement as GsonElement
+import com.google.gson.JsonObject as GsonObject
+import com.google.gson.JsonParseException as GsonParseException
+import com.google.gson.JsonPrimitive as GsonPrimitive
+import com.google.gson.JsonSerializationContext as GsonSerializationContext
+import com.google.gson.JsonSerializer as GsonSerializer
 
+
+data class LanguageFile(
+    val name: String,
+    val contents: String,
+)
 
 interface IResourceContainer {
     val containerPath: Path
-    fun getLanguageFiles(language: String): List<String>
+    fun getLanguageFiles(language: String): List<LanguageFile>
 }
 
 class ZipResourceContainer(private val zipRoot: Path?, override val containerPath: Path) : IResourceContainer {
@@ -32,7 +51,7 @@ class ZipResourceContainer(private val zipRoot: Path?, override val containerPat
         }
     }
 
-    override fun getLanguageFiles(language: String): List<String> {
+    override fun getLanguageFiles(language: String): List<LanguageFile> {
         val locale = language.lowercase()
         return withZipRoot { zipRoot ->
             val assets = zipRoot.resolve("assets")
@@ -44,26 +63,103 @@ class ZipResourceContainer(private val zipRoot: Path?, override val containerPat
                 .filter { it.isDirectory() && it.name.removeSuffix("/") == "lang" }
                 .flatMap { it.listDirectoryEntries() }
                 .filter { it.isRegularFile() && it.name.lowercase() == "$locale.json" }
-                .map { it.readText() }
+                .map { LanguageFile(it.name, it.readText()) }
                 .toList()
         }
     }
 }
 
-@Serializable
-data class LanguageSourceDataFile(
+private fun parseTranslationValue(v: GsonElement, allowArrays: Boolean = true): Component =
+    when (v) {
+        // TODO: migrate to when guards
+        is GsonArray -> if (allowArrays) {
+            val parsed = v.asList().map { parseTranslationValue(it, false) }
+            if (parsed.isEmpty()) {
+                Component.empty()
+            } else {
+                parsed.first().append(parsed.drop(1))
+            }
+        } else {
+            throw GsonParseException("Expected string or object, found $v")
+        }
+
+        is GsonPrimitive -> if (v.isString) {
+            Component.text(v.asString)
+        } else {
+            throw GsonParseException("Expected string or object, found $v")
+        }
+
+        is GsonObject -> GsonComponentSerializer.gson().deserializeFromTree(
+            v
+        )
+
+        else -> throw UnsupportedOperationException("Unreachable code in parseTranslationValue on $v")
+    }
+
+private data class LanguageSourceDataFile(
     val size: Long,
     val lastModified: Long,
 )
 
-@Serializable
-data class LanguageSourceData(
+private data class LanguageSourceData(
     val version: Int,
     val minecraftVersion: String,
     val language: String,
     // file name -> (size, last modified)
     val files: Map<String, LanguageSourceDataFile>,
 )
+
+private data class LanguageData(
+    val source: LanguageSourceData?,
+    val strings: Map<String, Component>,
+) {
+    companion object {
+        private const val SOURCE_DATA_KEY = "_tgbridge_source_data"
+    }
+
+    class Serializer : GsonDeserializer<LanguageData>, GsonSerializer<LanguageData> {
+        override fun deserialize(
+            json: GsonElement,
+            typeOfT: Type,
+            context: GsonDeserializationContext
+        ): LanguageData {
+            val root = json as? GsonObject
+                ?: throw GsonParseException("Failed to parse minecraft_language.json: not an object")
+            val sourceData = root.get(SOURCE_DATA_KEY)?.let {
+                context.deserialize<LanguageSourceData>(it, LanguageSourceData::class.java)
+            }
+            val strings = root.asMap().mapNotNull {
+                if (it.key != SOURCE_DATA_KEY) {
+                    it.key to parseTranslationValue(it.value, false)
+                } else {
+                    null
+                }
+            }.toMap()
+            return LanguageData(sourceData, strings)
+        }
+
+        override fun serialize(
+            src: LanguageData,
+            typeOfSrc: Type,
+            context: GsonSerializationContext
+        ): GsonElement {
+            return src.strings
+                .asSequence()
+                .map {
+                    val key = it.key
+                    val value = it.value
+                    if (value is TextComponent && value.children().isEmpty()) {
+                        key to GsonPrimitive(value.content())
+                    } else {
+                        key to GsonComponentSerializer.gson().serializeToTree(value)
+                    }
+                }
+                .plusElement(SOURCE_DATA_KEY to context.serialize(src.source))
+                .toMap()
+                .let { context.serialize(it) }
+        }
+    }
+}
 
 @Serializable
 private data class AssetEntry(
@@ -95,17 +191,18 @@ private data class MinecraftManifest(
 object LanguageService {
     private const val MANIFEST_URL = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json"
     private const val RESOURCES_URL = "https://resources.download.minecraft.net"
-    private const val SOURCE_DATA_KEY = "_tgbridge_source_data"
-    private const val SOURCE_DATA_VERSION = 1
+    private const val SOURCE_DATA_VERSION = 2
 
     private val bridge = TelegramBridge.INSTANCE
     private val lenientJson = Json {
         ignoreUnknownKeys = true
     }
+    private val gson = GsonBuilder()
+        .registerTypeAdapter(LanguageData::class.java, LanguageData.Serializer())
+        .create()
 
     private val minecraftLangPath = bridge.platform.configDir.resolve("minecraft_lang.json")
-    private var minecraftLang = mapOf<String, String>()
-    private var sourceData: LanguageSourceData? = null
+    private var language = LanguageData(null, emptyMap())
     private val hardcodedDefaultMinecraftLang = mapOf(
         "gui.xaero-deathpoint-old" to "Old Death",
         "gui.xaero-deathpoint" to "Death",
@@ -113,18 +210,7 @@ object LanguageService {
 
     fun init() {
         if (minecraftLangPath.exists()) {
-            val data = Json.parseToJsonElement(minecraftLangPath.readText())
-            sourceData = data.jsonObject[SOURCE_DATA_KEY]?.let {
-                Json.decodeFromJsonElement(it)
-            }
-            if (sourceData == null || sourceData!!.version == SOURCE_DATA_VERSION) {
-                minecraftLang = data.jsonObject
-                    .filterNot { it.key == SOURCE_DATA_KEY }
-                    .mapValues { it.value.jsonPrimitive.content }
-            } else {
-                sourceData = null
-                minecraftLang = emptyMap()
-            }
+            language = gson.fromJson(minecraftLangPath.readText(), LanguageData::class.java)
         }
 
         TgbridgeEvents.POST_RELOAD.addListener {
@@ -180,6 +266,7 @@ object LanguageService {
             .asSequence()
             .map { it.containerPath }
             .distinct()
+            .filter { it.absolute().startsWith(bridge.platform.gameDir) }
             .associate {
                 val path = try {
                     it.absolute().relativeTo(bridge.platform.gameDir)
@@ -197,37 +284,52 @@ object LanguageService {
             language = lang,
             files = files
         )
-        if (newSourceData == sourceData) {
+        if (newSourceData == language.source) {
             return
         }
 
-        val newLang = mutableMapOf<String, String>()
+        val newLang = mutableMapOf<String, Component>()
         if (lang != "en_us") {
             bridge.logger.info("Generating language file for version $version and language $lang")
-            newLang.putAll(getVanillaLang())
+            newLang.putAll(getVanillaLang().mapValues { Component.text(it.value) })
             bridge.logger.info("Processing mods & resource packs...")
             e.containers
-                .flatMap { it.getLanguageFiles(lang) }
-                .forEach {
-                    val data = Json.decodeFromString<Map<String, String>>(it)
-                    newLang.putAll(data)
+                .flatMap { container ->
+                    container.getLanguageFiles(lang).map {
+                        container.containerPath to it
+                    }
+                }
+                .forEach { (containerPath, file) ->
+                    val err = { entry: Map.Entry<String, GsonElement> ->
+                        bridge.logger.warn("Could not parse the key '${entry.key}' in $containerPath:${file.name}")
+                        null
+                    }
+                    val data = try {
+                        gson.fromJson(file.contents, com.google.gson.JsonObject::class.java)
+                    } catch (e: Throwable) {
+                        bridge.logger.warn("Failed to parse $containerPath:${file.name}: ${e.stackTraceToString()}")
+                        return@forEach
+                    }
+                    val converted = data.asMap().mapNotNull {
+                        try {
+                            it.key to parseTranslationValue(it.value)
+                        } catch (_: Throwable) {
+                            err(it)
+                            return@forEach
+                        }
+                    }
+                    newLang.putAll(converted)
                 }
             bridge.logger.info("Language file generated!")
         }
 
-        sourceData = newSourceData
-        minecraftLang = newLang
-        val sourceDataSerialized = Json.encodeToJsonElement(sourceData!!)
-        val serialized = JsonObject(
-            mapOf(SOURCE_DATA_KEY to sourceDataSerialized)
-                + Json.encodeToJsonElement(minecraftLang).jsonObject
-        )
-        minecraftLangPath.writeText(Json.encodeToString(serialized))
+        language = LanguageData(newSourceData, newLang)
+        minecraftLangPath.writeText(gson.toJson(language))
     }
 
-    fun getString(key: String): String? {
-        return minecraftLang[key]
-            ?: bridge.platform.getLanguageKey(key)
-            ?: hardcodedDefaultMinecraftLang[key]
+    fun getString(key: String): Component? {
+        return language.strings[key]
+            ?: bridge.platform.getLanguageKey(key)?.let(Component::text)
+            ?: hardcodedDefaultMinecraftLang[key]?.let(Component::text)
     }
 }

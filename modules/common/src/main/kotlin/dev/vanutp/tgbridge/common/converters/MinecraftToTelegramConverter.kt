@@ -3,13 +3,16 @@ package dev.vanutp.tgbridge.common.converters
 import dev.vanutp.tgbridge.common.LanguageService
 import dev.vanutp.tgbridge.common.TgEntity
 import dev.vanutp.tgbridge.common.TgEntityType
-import dev.vanutp.tgbridge.common.adventure.*
+import dev.vanutp.tgbridge.common.adventure.args
+import dev.vanutp.tgbridge.common.adventure.isOpenUrl
+import dev.vanutp.tgbridge.common.adventure.value
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
+import net.kyori.adventure.text.TextReplacementConfig
 import net.kyori.adventure.text.TranslatableComponent
-import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.event.HoverEvent
 import net.kyori.adventure.text.format.TextDecoration
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 
 data class TelegramFormattedText(
     val text: String = "",
@@ -29,39 +32,39 @@ data class TelegramFormattedText(
 }
 
 object MinecraftToTelegramConverter {
-    private fun replace(
-        text: TelegramFormattedText,
-        find: String,
-        replace: Component,
-    ) =
-        when (val pos = text.text.indexOf(find)) {
-            -1 -> text
-            else -> {
-                val converted = convert(replace)
-                TelegramFormattedText(
-                    text.text.replaceFirst(find, converted.text),
-                    // this assumes that all existing entities are before the replaced text
-                    text.entities + converted.entities.map { it.copy(offset = it.offset + pos) }
-                )
-            }
-        }
+    fun convert(comp: Component) = convert(comp, decodeLegacy = true)
 
-    fun convert(comp: Component): TelegramFormattedText {
+    private fun convert(comp: Component, decodeLegacy: Boolean): TelegramFormattedText {
         var res = when (comp) {
             is TranslatableComponent -> {
-                var curr = TelegramFormattedText(
-                    LanguageService.getString(comp.key()) ?: comp.key()
-                )
+                var curr = LanguageService.getString(comp.key())
+                    ?: comp.fallback()?.let(Component::text)
+                    ?: Component.text(comp.key())
+                if (curr is TranslatableComponent) {
+                    throw IllegalStateException("LanguageService.getString returned TranslatableComponent")
+                }
+
                 comp.args().forEachIndexed { i, x ->
                     if (i == 0) {
-                        curr = replace(curr, "%s", x)
+                        curr = curr.replaceText { it: TextReplacementConfig.Builder ->
+                            it.matchLiteral("%s").replacement(x)
+                        }
                     }
-                    curr = replace(curr, "%${i + 1}\$s", x)
+                    curr = curr.replaceText { it: TextReplacementConfig.Builder ->
+                        it.matchLiteral("%${i + 1}\$s").replacement(x)
+                    }
                 }
-                curr
+
+                convert(curr)
             }
 
-            is TextComponent -> {
+            // TODO: migrate to when guards
+            is TextComponent -> if (decodeLegacy) {
+                convert(
+                    LegacyComponentSerializer.legacySection().deserialize(comp.content()),
+                    decodeLegacy = false,
+                )
+            } else {
                 TelegramFormattedText(comp.content())
             }
 

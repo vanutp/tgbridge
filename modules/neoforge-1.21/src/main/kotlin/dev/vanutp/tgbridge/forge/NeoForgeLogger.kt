@@ -17,7 +17,7 @@ class NeoForgeLogger : ILogger {
         forgeLogger.error(message)
     }
 
-    override fun error(message: Any, exc: Exception) {
+    override fun error(message: Any, exc: Throwable) {
         forgeLogger.error(message, exc)
     }
 }

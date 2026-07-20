@@ -17,7 +17,7 @@ class FabricLogger : ILogger {
         fabricLogger.error(message.toString())
     }
 
-    override fun error(message: Any, exc: Exception) {
+    override fun error(message: Any, exc: Throwable) {
         fabricLogger.error(message.toString(), exc)
     }
 }

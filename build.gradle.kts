@@ -24,6 +24,7 @@ val adventureVersionNew: String by project
 fun getAdventureLibs(version: String) = listOf(
     "net.kyori:adventure-api:${version}",
     "net.kyori:adventure-text-serializer-gson:${version}",
+    "net.kyori:adventure-text-serializer-legacy:${version}",
     "net.kyori:adventure-text-minimessage:${version}",
 )
 

@@ -17,7 +17,7 @@ class PaperLogger(private val plugin: JavaPlugin) : ILogger {
         plugin.logger.severe(message.toString())
     }
 
-    override fun error(message: Any, exc: Exception) {
+    override fun error(message: Any, exc: Throwable) {
         plugin.logger.log(Level.SEVERE, message.toString(), exc)
     }
 }

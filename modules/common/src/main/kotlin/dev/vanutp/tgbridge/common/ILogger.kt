@@ -4,5 +4,5 @@ interface ILogger {
     fun info(message: Any)
     fun warn(message: Any)
     fun error(message: Any)
-    fun error(message: Any, exc: Exception)
+    fun error(message: Any, exc: Throwable)
 }
