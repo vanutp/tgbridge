@@ -79,7 +79,8 @@ object ConfigManager {
                     requirePrefixInMinecraft = null,
                 ),
             )
-        } else if (config.version == 2) {
+        }
+        if (config.version == 2) {
             val data = yaml.parseToYamlNode(configPath.readText())
             config = config.copy(
                 version = 3,
@@ -89,7 +90,8 @@ object ConfigManager {
                         ?.getScalar("bluemapUrl")?.content ?: ""
                 )
             )
-        } else if (config.version == 3) {
+        }
+        if (config.version == 3) {
             val data = yaml.parseToYamlNode(configPath.readText())
             val oldGeneral = data.yamlMap.get<YamlMap>("general")
             val oldToken = oldGeneral?.getScalar("botToken")?.content ?: Config().botToken
@@ -132,7 +134,8 @@ object ConfigManager {
                         JoinMessagesMode.DISABLED
                 )
             )
-        } else if (config.version != LATEST_CONFIG_VERSION) {
+        }
+        if (config.version != LATEST_CONFIG_VERSION) {
             throw Exception("Unsupported config version ${config.version}")
         }
         if (config.chats.any { it.chatId > 0 }) {
