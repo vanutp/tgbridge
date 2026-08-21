@@ -16,11 +16,8 @@ enum class EventPriority {
 }
 
 class TgbridgeEventHandler<E> internal constructor() {
-    private val listeners = mutableMapOf<EventPriority, MutableList<suspend (E) -> Unit>>().apply {
-        EventPriority.entries.forEach {
-            this[it] = mutableListOf()
-        }
-    }
+    private val listeners = EventPriority.entries
+        .associateWith { mutableListOf<suspend (E) -> Unit>() }
 
     @Deprecated("This signature is deprecated, use addListener(EventPriority, Consumer<E>) instead", level = DeprecationLevel.WARNING)
     fun addListener(priority: EventPriority, listener: Function1<E>) {

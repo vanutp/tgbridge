@@ -1,5 +1,3 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import org.gradle.jvm.tasks.Jar
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -29,6 +27,8 @@ dependencies {
     shadow(project(":common-jvm21"))
     implementation(project(":common-jvm25"))
     shadow(project(":common-jvm25"))
+
+    compileOnly("maven.modrinth:vanish:$vanishVersion")
 }
 
 loom {
