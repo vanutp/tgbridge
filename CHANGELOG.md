@@ -1,3 +1,7 @@
+### 0.9.12
+
+- fabric: bring back vanish compat on 26.1+
+
 ### 0.9.11
 
 - paper: add ChatEx support
