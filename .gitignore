@@ -9,5 +9,6 @@ run/
 
 .env
 .envrc
+.direnv/
 test-servers/
 codegen/.venv
