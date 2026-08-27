@@ -70,6 +70,11 @@ fun String.formatLang(placeholders: Placeholders = Placeholders()): String {
     return res
 }
 
+private const val LEGACY_CODE_PREFIX = "§"
+
+fun String.toEscapedComponent(): Component =
+    Component.text(this.replace(LEGACY_CODE_PREFIX, ""))
+
 private val mm = MiniMessage.miniMessage()
 
 fun String.formatMiniMessage(placeholders: Placeholders = Placeholders()): Component {
@@ -79,7 +84,9 @@ fun String.formatMiniMessage(placeholders: Placeholders = Placeholders()): Compo
     }
     return mm.deserialize(
         res,
-        *placeholders.plain.map { Placeholder.unparsed(it.key, it.value) }.toTypedArray(),
+        *placeholders.plain.map {
+            Placeholder.component(it.key, it.value.toEscapedComponent())
+        }.toTypedArray(),
         *placeholders.component.map { Placeholder.component(it.key, it.value) }.toTypedArray()
     )
 }

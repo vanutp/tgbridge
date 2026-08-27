@@ -150,7 +150,7 @@ object TelegramToMinecraftConverter {
             }
             var isSpoiler = false
             if (entitiesChanged || i == text.length - 1) {
-                var component: Component = Component.text(currText)
+                var component = currText.toEscapedComponent()
                 currEntities.forEach {
                     component = when (it.type) {
                         TgEntityType.BOLD -> component.decoration(TextDecoration.BOLD, true)
@@ -215,6 +215,8 @@ object TelegramToMinecraftConverter {
                     }
                 }
                 if (isSpoiler) {
+                    // TODO: should spoilers be merged before all other processing?
+                    //  if spoilerFormatting is non-trivial, it may break
                     if (prevSpoilerContent != null) {
                         components.removeLast()
                         component = prevSpoilerContent.append(component)

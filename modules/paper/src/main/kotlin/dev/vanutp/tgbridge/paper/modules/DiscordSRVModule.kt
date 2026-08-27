@@ -2,6 +2,7 @@ package dev.vanutp.tgbridge.paper.modules
 
 import dev.vanutp.tgbridge.common.*
 import dev.vanutp.tgbridge.common.ConfigManager.config
+import dev.vanutp.tgbridge.common.converters.MinecraftToTelegramConverter
 import dev.vanutp.tgbridge.paper.PaperTelegramBridge
 import github.scarsz.discordsrv.DiscordSRV
 import github.scarsz.discordsrv.api.Subscribe
@@ -43,7 +44,8 @@ class DiscordSRVModule(bridge: PaperTelegramBridge) : AbstractPaperModule(bridge
                 mapOf("text" to text),
             )
         )
-        bridge.chatManager.sendMessage(chat, MessageContentMergeableText(message))
+        val telegramText = MinecraftToTelegramConverter.convert(message, decodeLegacy = false)
+        bridge.chatManager.sendMessage(chat, MessageContentMergeableText(telegramText))
     }
 
     override fun enable() {

@@ -34,7 +34,7 @@ data class TelegramFormattedText(
 object MinecraftToTelegramConverter {
     fun convert(comp: Component) = convert(comp, decodeLegacy = true)
 
-    private fun convert(comp: Component, decodeLegacy: Boolean): TelegramFormattedText {
+    fun convert(comp: Component, decodeLegacy: Boolean): TelegramFormattedText {
         var res = when (comp) {
             is TranslatableComponent -> {
                 var curr = LanguageService.getString(comp.key())
@@ -71,7 +71,7 @@ object MinecraftToTelegramConverter {
             else -> TelegramFormattedText(comp.toString())
         }
         comp.children().forEach {
-            res += convert(it)
+            res += convert(it, decodeLegacy)
         }
 
         val clickEvent = comp.style().clickEvent()
@@ -81,7 +81,7 @@ object MinecraftToTelegramConverter {
         }
         val hoverEvent = comp.style().hoverEvent()
         if (hoverEvent != null && hoverEvent.action() == HoverEvent.Action.SHOW_TEXT) {
-            val hoverText = convert(hoverEvent.value() as Component)
+            val hoverText = convert(hoverEvent.value() as Component, decodeLegacy)
             // TODO: get config from Styled Chat
             if (res.text.all { it == '▌' } && hoverText.text.length == res.text.length) {
                 res = TelegramFormattedText(

@@ -116,7 +116,9 @@ data class Lang(
     @YamlComment(
         "This section uses MiniMessage formatting (in non-strict mode).",
         "See https://docs.advntr.dev/minimessage/format.html for more information.",
-        "Additionally, {variable} syntax can be used instead of <variable> for plain-text placeholders."
+        "Additionally, {variable} syntax can be used instead of <variable> for plain-text placeholders.",
+        "§ codes are not stripped when using {variable} syntax, so it should only be used for",
+        "MiniMessage tag arguments, not for normally rendered text"
     )
     val minecraft: LangMinecraft = LangMinecraft(),
     @YamlComment("Don't change the version manually")
