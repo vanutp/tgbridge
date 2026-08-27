@@ -1,3 +1,7 @@
+### 0.9.13
+
+- escape § codes in user provided strings
+
 ### 0.9.12
 
 - fabric: bring back vanish compat on 26.1+
