@@ -12,8 +12,11 @@ import okhttp3.Credentials
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.coroutines.executeAsync
+import java.net.Inet6Address
+import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.Proxy
+import java.net.UnknownHostException
 
 @Deprecated(
     "Deprecated, use Consumer<A> instead",
@@ -134,9 +137,28 @@ fun Config.getError(): String? {
 }
 
 
+fun resolveProxySocketAddress(
+    host: String,
+    port: Int,
+    resolver: (String) -> Array<InetAddress> = InetAddress::getAllByName,
+): InetSocketAddress {
+    val resolved = try {
+        resolver(host)
+    } catch (_: UnknownHostException) {
+        return InetSocketAddress.createUnresolved(host, port)
+    }
+
+    if (resolved.isEmpty()) {
+        return InetSocketAddress.createUnresolved(host, port)
+    }
+
+    val preferred = resolved.firstOrNull { it is Inet6Address } ?: resolved.first()
+    return InetSocketAddress(preferred, port)
+}
+
 fun OkHttpClient.Builder.withProxyConfig(): OkHttpClient.Builder {
     val proxy = config.advanced.proxy
-    val addr = InetSocketAddress(proxy.host, proxy.port)
+    val addr = resolveProxySocketAddress(proxy.host, proxy.port)
     return when (proxy.type) {
         ProxyType.NONE -> this
         ProxyType.SOCKS5 -> this.proxy(Proxy(Proxy.Type.SOCKS, addr))
