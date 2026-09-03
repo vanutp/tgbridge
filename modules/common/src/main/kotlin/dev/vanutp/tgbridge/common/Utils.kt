@@ -226,14 +226,14 @@ fun OkHttpClient.Builder.withProxyConfig(logger: ILogger): OkHttpClient.Builder 
                     }
                 }
         }
-            }.fastFallback(false).eventListener(object : EventListener() {
-            override fun connectStart(call: okhttp3.Call, inetSocketAddress: InetSocketAddress, proxy: Proxy) {
-                val proxyAddress = proxy.address() as? InetSocketAddress ?: return
-                val host = proxyAddress.address?.hostAddress ?: proxyAddress.hostString
-                val formattedHost = if (host.contains(':')) "[$host]" else host
-                logger.info("Use $formattedHost:${proxyAddress.port} proxy for telegram")
-            }
-        })
+    }.fastFallback(true).eventListener(object : EventListener() {
+        override fun connectStart(call: okhttp3.Call, inetSocketAddress: InetSocketAddress, proxy: Proxy) {
+            val proxyAddress = proxy.address() as? InetSocketAddress ?: return
+            val host = proxyAddress.address?.hostAddress ?: proxyAddress.hostString
+            val formattedHost = if (host.contains(':')) "[$host]" else host
+            logger.info("Use $formattedHost:${proxyAddress.port} proxy for telegram")
+        }
+    })
 }
 
 suspend fun OkHttpClient.get(url: String) =
