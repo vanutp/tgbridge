@@ -413,10 +413,13 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
     init {
         val proxy = config.advanced.proxy
         if (proxy.type == ProxyType.SOCKS5 && proxy.username != null && proxy.password != null) {
+            val proxyHosts = resolveProxySocketAddresses(proxy.host, proxy.port)
+                .mapNotNull { it.address?.hostAddress }
+                .toSet() + proxy.host.removePrefix("[").removeSuffix("]")
             Authenticator.setDefault(object : Authenticator() {
                 override fun getPasswordAuthentication(): PasswordAuthentication? =
                     if (
-                        requestingHost.equals(proxy.host, ignoreCase = true)
+                        proxyHosts.any { it.equals(requestingHost, ignoreCase = true) }
                         && (requestingPort == proxy.port)
                     ) {
                         PasswordAuthentication(proxy.username, proxy.password.toCharArray())
@@ -429,7 +432,7 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
 
     private val okhttpClient = OkHttpClient.Builder()
         .readTimeout(Duration.ofSeconds((POLL_TIMEOUT_SECONDS + 10).toLong()))
-        .withProxyConfig()
+        .withProxyConfig(logger)
         .build()
     private val fileBaseUrl = "$botApiUrl/file/bot$botToken/"
     private val json = Json {
