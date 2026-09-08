@@ -219,7 +219,7 @@ object LanguageService {
     }
 
     private suspend fun downloadVanillaLang(): String {
-        val http = OkHttpClient.Builder().withProxyConfig().build()
+        val http = OkHttpClient.Builder().withProxyConfig(bridge.logger).build()
         try {
             bridge.logger.info("Downloading vanilla language file...")
             val version = bridge.platform.getMinecraftVersion()

@@ -9,11 +9,12 @@ import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import okhttp3.Credentials
+import okhttp3.EventListener
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.coroutines.executeAsync
-import java.net.InetSocketAddress
-import java.net.Proxy
+import java.io.IOException
+import java.net.*
 
 @Deprecated(
     "Deprecated, use Consumer<A> instead",
@@ -59,7 +60,6 @@ data class Placeholders(
     fun withDefaults(other: Placeholders) = other + this
 }
 
-
 fun String.formatLang(placeholders: Placeholders = Placeholders()): String {
     // TODO: use escapeHTML here?
     val placeholdersMerged = placeholders.plain + placeholders.component.mapValues { it.value.asString() }
@@ -90,7 +90,6 @@ fun String.formatMiniMessage(placeholders: Placeholders = Placeholders()): Compo
         *placeholders.component.map { Placeholder.component(it.key, it.value) }.toTypedArray()
     )
 }
-
 
 val XAERO_WAYPOINT_RGX =
     Regex("""xaero-waypoint:([^:]+):[^:]:([-\d]+):([-\d]+|~):([-\d]+):\d+:(?:false|true):\d+:Internal-(?:the-)?(overworld|nether|end)-waypoints""")
@@ -133,26 +132,67 @@ fun Config.getError(): String? {
     }
 }
 
-
-fun OkHttpClient.Builder.withProxyConfig(): OkHttpClient.Builder {
-    val proxy = config.advanced.proxy
-    val addr = InetSocketAddress(proxy.host, proxy.port)
-    return when (proxy.type) {
-        ProxyType.NONE -> this
-        ProxyType.SOCKS5 -> this.proxy(Proxy(Proxy.Type.SOCKS, addr))
-        ProxyType.HTTP -> this
-            .proxy(Proxy(Proxy.Type.HTTP, addr))
-            .let { builder ->
-                if (proxy.username != null && proxy.password != null) {
-                    builder.proxyAuthenticator { _, response ->
-                        val credential = Credentials.basic(proxy.username, proxy.password)
-                        response.request.newBuilder().header("Proxy-Authorization", credential).build()
-                    }
-                } else {
-                    builder
-                }
-            }
+internal fun resolveProxySocketAddresses(
+    host: String,
+    port: Int,
+): List<InetSocketAddress> {
+    val resolved = try {
+        InetAddress.getAllByName(host)
+    } catch (_: UnknownHostException) {
+        return listOf(InetSocketAddress.createUnresolved(host, port))
     }
+
+    if (resolved.isEmpty()) {
+        return listOf(InetSocketAddress.createUnresolved(host, port))
+    }
+
+    return resolved
+        .sortedByDescending { it is Inet6Address }
+        .map { InetSocketAddress(it, port) }
+}
+
+internal fun OkHttpClient.Builder.withProxyConfig(logger: ILogger): OkHttpClient.Builder {
+    val proxy = config.advanced.proxy
+    if (proxy.type == ProxyType.NONE) {
+        return this
+    }
+    val javaProxyType = when (proxy.type) {
+        ProxyType.SOCKS5 -> Proxy.Type.SOCKS
+        ProxyType.HTTP -> Proxy.Type.HTTP
+        else -> throw IllegalStateException("Unexpected proxy.type: ${proxy.type}")
+    }
+    var res = this.proxySelector(
+        object : ProxySelector() {
+            private val proxies =
+                resolveProxySocketAddresses(proxy.host, proxy.port)
+                    .map { Proxy(javaProxyType, it) }
+
+            override fun select(uri: URI): List<Proxy> = proxies
+
+            override fun connectFailed(
+                uri: URI,
+                socketAddress: SocketAddress,
+                exception: IOException,
+            ) = Unit
+        },
+    ).eventListener(object : EventListener() {
+        override fun connectStart(call: okhttp3.Call, inetSocketAddress: InetSocketAddress, proxy: Proxy) {
+            val proxyAddress = proxy.address() as? InetSocketAddress ?: return
+            val host = proxyAddress.address?.hostAddress ?: proxyAddress.hostString
+            val formattedHost = if (host.contains(':')) "[$host]" else host
+            logger.info("Trying to use $formattedHost:${proxyAddress.port} as a proxy")
+        }
+    })
+    if (proxy.type == ProxyType.HTTP && proxy.username != null && proxy.password != null) {
+        res = res.proxyAuthenticator { _, response ->
+            val credential = Credentials.basic(proxy.username, proxy.password)
+            response.request
+                .newBuilder()
+                .header("Proxy-Authorization", credential)
+                .build()
+        }
+    }
+    return res
 }
 
 suspend fun OkHttpClient.get(url: String) =
