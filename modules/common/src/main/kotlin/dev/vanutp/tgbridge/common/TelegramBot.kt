@@ -415,7 +415,7 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
         if (proxy.type == ProxyType.SOCKS5 && proxy.username != null && proxy.password != null) {
             val proxyHosts = resolveProxySocketAddresses(proxy.host, proxy.port)
                 .mapNotNull { it.address?.hostAddress }
-                .toSet() + proxy.host.removePrefix("[").removeSuffix("]")
+                .toSet()
             Authenticator.setDefault(object : Authenticator() {
                 override fun getPasswordAuthentication(): PasswordAuthentication? =
                     if (
