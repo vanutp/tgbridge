@@ -12,7 +12,6 @@ import net.minecraft.commands.Commands
 import net.minecraft.network.chat.PlayerChatMessage
 import net.minecraft.server.permissions.Permission
 import net.minecraft.server.permissions.PermissionLevel
-import net.minecraft.network.chat.Component as Text
 
 
 object EventManager {
@@ -87,16 +86,16 @@ object EventManager {
 
     private fun registerPlayerAdvancementListener() {
         CustomEvents.ADVANCEMENT_EARN_EVENT.register { player, display ->
-            if (!display.shouldAnnounceChat()) {
+            if (!display.tgbridgeAnnounceToChat()) {
                 return@register
             }
-            val type = display.type?.name?.lowercase() ?: return@register
+            val type = display.tgbridgeType()?.name?.lowercase() ?: return@register
             FabricTelegramBridge.onPlayerAdvancement(
                 TgbridgeAdvancementEvent(
                     player.toTgbridge(),
                     type,
-                    display.title.toAdventure(),
-                    display.description.toAdventure(),
+                    display.tgbridgeTitle().toAdventure(),
+                    display.tgbridgeDescription().toAdventure(),
                     FabricEventWrapper(CustomEvents.AdvancementEarn::class, listOf(player, display)),
                 )
             )
