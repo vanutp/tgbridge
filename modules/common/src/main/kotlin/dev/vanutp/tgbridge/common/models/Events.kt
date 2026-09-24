@@ -3,6 +3,7 @@ package dev.vanutp.tgbridge.common.models
 import dev.vanutp.tgbridge.common.IResourceContainer
 import dev.vanutp.tgbridge.common.Placeholders
 import dev.vanutp.tgbridge.common.TgMessage
+import dev.vanutp.tgbridge.common.converters.TelegramFormattedText
 import net.kyori.adventure.text.Component
 
 interface SyntheticEvent {

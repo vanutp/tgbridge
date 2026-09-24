@@ -53,14 +53,22 @@ Uses [MiniMessage](https://docs.advntr.dev/minimessage/format.html) formatting.
 Don't enable this if you have a chat plugin installed.
 See [Compatibility](https://tgbridge.vanutp.dev/en/compatibility#chat) for more info
 :::
-If this value is set, messages without specified prefix won't be forwarded to Telegram.
+If this value is set, messages without specified prefix won't be forwarded to Telegram
+
+## messages.requirePrefixInTelegram
+
+- **Type:** `string | null`
+- **Default:** `null` (disabled)
+- **Example:** `"!"` (quotes are required)
+
+If this value is set, messages without specified prefix won't be forwarded to Minecraft
 
 ## messages.keepPrefix
 
 - **Type:** `boolean`
 - **Default:** `false`
 
-Set to `true` to keep the prefix specified in the above setting in the message
+Set to `true` to keep the prefix specified by the above settings in the message
 
 ## messages.mergeWindow
 

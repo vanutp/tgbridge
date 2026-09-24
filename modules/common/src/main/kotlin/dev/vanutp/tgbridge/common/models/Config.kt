@@ -67,7 +67,13 @@ data class MessagesConfig(
     )
     val requirePrefixInMinecraft: String? = null,
     @YamlComment(
-        "Set to `true` to keep the prefix specified in the above setting in the message",
+        "If this value is set, messages without specified prefix won't be forwarded to Minecraft.",
+        "Example: \"!\" (quotes are required)",
+        "Default value: null (disabled)",
+    )
+    val requirePrefixInTelegram: String? = null,
+    @YamlComment(
+        "Set to `true` to keep the prefix specified by the above settings in the message",
     )
     val keepPrefix: Boolean = false,
     @YamlComment(

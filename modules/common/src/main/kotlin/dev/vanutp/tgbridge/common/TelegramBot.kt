@@ -1,11 +1,13 @@
 package dev.vanutp.tgbridge.common
 
 import dev.vanutp.tgbridge.common.ConfigManager.config
+import dev.vanutp.tgbridge.common.converters.TelegramFormattedText
 import dev.vanutp.tgbridge.common.models.ProxyType
 import kotlinx.coroutines.*
 import kotlinx.coroutines.future.future
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
@@ -270,7 +272,11 @@ data class TgMessage(
     val videoChatEnded: TgAny? = null,
     @SerialName("video_chat_participants_invited")
     val videoChatParticipantsInvited: TgVideoChatParticipantsInvited? = null,
-) : TgMessageMedia {
+
+    ) : TgMessageMedia {
+    @Transient
+    private var _tgText: TelegramFormattedText? = null
+
     val senderName
         get() = authorSignature
             ?: senderChat?.title
@@ -280,6 +286,14 @@ data class TgMessage(
         get() = text ?: caption
     val entities
         get() = textEntities ?: captionEntities ?: emptyList()
+
+    val tgText
+        get() = _tgText ?: effectiveText?.let {
+            TelegramFormattedText(it, entities)
+        }
+
+    fun withTgText(tgText: TelegramFormattedText) =
+        copy().also { it._tgText = tgText }
 }
 
 @Serializable
@@ -469,7 +483,7 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
     fun registerCommandHandler(command: String, handler: suspend (TgMessage) -> Unit) {
         val cmdRegex = Regex("^/$command(@${me.username})?(\\s|$)", RegexOption.IGNORE_CASE)
         commandHandlers.add {
-            if (cmdRegex.matches(it.effectiveText ?: "")) {
+            if (cmdRegex.matches(it.tgText?.text ?: "")) {
                 handler(it)
                 return@add true
             } else {

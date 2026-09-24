@@ -13,6 +13,8 @@ import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.event.HoverEvent
 import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
+import kotlin.math.max
+import kotlin.math.min
 
 data class TelegramFormattedText(
     val text: String = "",
@@ -29,6 +31,27 @@ data class TelegramFormattedText(
 
     operator fun plus(other: TgEntity) =
         TelegramFormattedText(text, entities + other)
+
+    fun startsWith(prefix: String) = text.startsWith(prefix)
+
+    fun substring(startIndex: Int) = TelegramFormattedText(
+        text.substring(startIndex),
+        entities.map {
+            val newOffset = it.offset - startIndex
+            it.copy(
+                offset = max(newOffset, 0),
+                length = it.length + min(newOffset, 0),
+            )
+        }.filter { it.length > 0 }
+    )
+
+    fun removePrefix(prefix: String) = if (startsWith(prefix)) {
+        substring(prefix.length)
+    } else {
+        this
+    }
+
+    fun isEmpty() = text.isEmpty()
 }
 
 object MinecraftToTelegramConverter {

@@ -68,8 +68,8 @@ object TelegramToMinecraftConverter {
                 isReplyToMinecraft = reply.from?.id == botId,
                 senderName = reply.senderName,
                 media = mediaToText(reply),
-                text = reply.effectiveText ?: "",
-                entities = reply.entities,
+                text = reply.tgText?.text ?: "",
+                entities = reply.tgText?.entities ?: listOf(),
             )
         }
         msg.externalReply?.let { reply ->
@@ -292,12 +292,9 @@ object TelegramToMinecraftConverter {
             forwardFromToText(pinnedMsg)?.let { pinnedMessageComponents.add(it) }
             viaBotToText(pinnedMsg)?.let { pinnedMessageComponents.add(it) }
             mediaToText(pinnedMsg)?.let { pinnedMessageComponents.add(it) }
-            pinnedMsg.effectiveText?.let {
+            pinnedMsg.tgText?.let {
                 pinnedMessageComponents.add(
-                    formattedTextToComponent(
-                        it,
-                        pinnedMsg.entities
-                    )
+                    formattedTextToComponent(it.text, it.entities)
                 )
             }
 
@@ -317,7 +314,7 @@ object TelegramToMinecraftConverter {
         viaBotToText(msg)?.let { components.add(it) }
         replyToText(msg, botId)?.let { components.add(it) }
         mediaToText(msg)?.let { components.add(it) }
-        msg.effectiveText?.let { components.add(formattedTextToComponent(it, msg.entities)) }
+        msg.tgText?.let { components.add(formattedTextToComponent(it.text, it.entities)) }
 
         return components
             .flatMap { listOf(it, Component.text(" ")) }

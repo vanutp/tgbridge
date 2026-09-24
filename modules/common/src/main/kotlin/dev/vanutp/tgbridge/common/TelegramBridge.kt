@@ -214,6 +214,19 @@ abstract class TelegramBridge {
     private suspend fun onTelegramMessage(msg: TgMessage) {
         val chat = getMessageChat(msg) ?: return
         chatManager.clearLastMessage(chat)
+
+        var msg = msg
+        config.messages.requirePrefixInTelegram?.let { prefix ->
+            val tgText = msg.tgText ?: TelegramFormattedText()
+            if (!tgText.startsWith(prefix)) {
+                return
+            }
+            msg = msg.withTgText(
+                tgText.takeIf { config.messages.keepPrefix }
+                    ?: tgText.substring(prefix.length)
+            )
+        }
+
         val textComponent = TelegramToMinecraftConverter.convert(msg, bot.me.id)
         val e = TgbridgeTgChatMessageEvent(
             chat,
