@@ -59,7 +59,7 @@ tasks {
 modrinth {
     uploadFile.set(tasks.remapJar)
     gameVersions.addAll("1.20.1")
-    loaders.addAll("forge", "neoforge")
+    loaders.addAll("forge")
     dependencies {
         required.project("kotlin-for-forge")
     }
