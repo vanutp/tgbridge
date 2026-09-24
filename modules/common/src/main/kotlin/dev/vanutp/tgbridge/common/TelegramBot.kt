@@ -292,6 +292,9 @@ data class TgMessage(
             TelegramFormattedText(it, entities)
         }
 
+    val hasMedia
+        get() = listOf(animation, document, photo, audio, sticker, video, videoNote, voice, poll).any { it != null }
+
     fun withTgText(tgText: TelegramFormattedText) =
         copy().also { it._tgText = tgText }
 }

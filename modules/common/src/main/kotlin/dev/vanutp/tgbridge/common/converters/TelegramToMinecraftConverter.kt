@@ -318,6 +318,7 @@ object TelegramToMinecraftConverter {
 
         return components
             .flatMap { listOf(it, Component.text(" ")) }
+            .dropLast(1)
             .fold(Component.text()) { acc, component -> acc.append(component) }
             .tgbridgeBuild()
     }

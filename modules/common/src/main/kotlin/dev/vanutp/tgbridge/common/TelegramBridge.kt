@@ -218,7 +218,7 @@ abstract class TelegramBridge {
         var msg = msg
         config.messages.requirePrefixInTelegram?.let { prefix ->
             val tgText = msg.tgText ?: TelegramFormattedText()
-            if (!tgText.startsWith(prefix)) {
+            if (!tgText.startsWith(prefix) || (tgText.removePrefix(prefix).isEmpty() && !msg.hasMedia)) {
                 return
             }
             msg = msg.withTgText(
@@ -361,7 +361,10 @@ abstract class TelegramBridge {
         val prefix = config.integrations.incompatiblePluginChatPrefix
             ?: config.messages.requirePrefixInMinecraft
             ?: ""
-        if (bluemapLink == null && !messageText.startsWith(prefix)) {
+        if (
+            bluemapLink == null
+            && (!messageText.startsWith(prefix) || messageText.removePrefix(prefix).isEmpty())
+        ) {
             return@wrapMinecraftHandler
         }
 
