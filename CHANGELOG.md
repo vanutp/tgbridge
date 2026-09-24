@@ -1,6 +1,6 @@
 ### 0.9.14
 
-- try all resolved addresses for proxy connections instead of only ipv6. thanks trassert!
+- try all resolved addresses for proxy connections instead of only ipv4. thanks trassert!
 - fabric: support 26.3
 - add `messages.requirePrefixInTelegram` setting
 - fix: don't forward messages containing only the prefix
