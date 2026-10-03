@@ -27,6 +27,7 @@ import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeoutException
 import java.util.function.Consumer
 import kotlin.reflect.KClass
+import kotlin.time.Duration.Companion.milliseconds
 
 
 @Serializable
@@ -521,7 +522,7 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
             logger.info("pollTask started")
             while (true) {
                 try {
-                    val updates = call {
+                    val updates = retriableCall(infinite = true) {
                         client.getUpdates(
                             offset,
                             timeout = POLL_TIMEOUT_SECONDS,
@@ -544,14 +545,11 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
                             it.invoke(update.message)
                         }
                     }
+                } catch (_: CancellationException) {
+                    break
                 } catch (e: Exception) {
-                    when (e) {
-                        is CancellationException -> break
-                        else -> {
-                            logger.error(e.message.toString(), e)
-                            delay(1000)
-                        }
-                    }
+                    logger.error(e.message.toString(), e)
+                    delay(1000.milliseconds)
                 }
             }
             logger.info("pollTask finished")
@@ -584,10 +582,10 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
         }
     }
 
-    private suspend fun <T> retriableCall(f: suspend () -> TgResponse<T>): T {
+    private suspend fun <T> retriableCall(infinite: Boolean = false, f: suspend () -> TgResponse<T>): T {
         val retryConf = config.advanced.connectionRetry
         return withRetry(
-            maxAttempts = retryConf.maxAttempts,
+            maxAttempts = if (infinite) -1 else retryConf.maxAttempts,
             initialDelay = retryConf.initialDelay,
             maxDelay = retryConf.maxDelay,
             retryExceptions = setOf(
@@ -603,10 +601,10 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
     }
 
     private suspend fun <T> withRetry(
-        maxAttempts: Int = 3,
-        initialDelay: Long = 1000L,
-        maxDelay: Long = 300000L,
-        retryExceptions: Set<KClass<out Exception>> = setOf(Exception::class),
+        maxAttempts: Int,
+        initialDelay: Long,
+        maxDelay: Long,
+        retryExceptions: Set<KClass<out Exception>>,
         operation: suspend () -> T
     ): T {
         var attempt = 0
@@ -617,7 +615,7 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
                 return operation()
             } catch (e: Exception) {
                 if (!retryExceptions.contains(e::class)) {
-                    logger.error("Not retriable exception", e)
+                    logger.error("Non-retryable exception", e)
                     throw e
                 }
                 attempt++
@@ -630,7 +628,7 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
                 val delay = minOf(initialDelay * (1L shl (attempt - 1)), maxDelay)
                 val attemptText = if (infiniteRetries) "attempt $attempt" else "attempt $attempt/$maxAttempts"
                 logger.warn("Operation failed ($attemptText), retrying in ${delay / 1000} seconds: ${e.javaClass.canonicalName}: ${e.message}")
-                delay(delay)
+                delay(delay.milliseconds)
             }
         }
     }
