@@ -339,6 +339,8 @@ abstract class TelegramBridge {
             try {
                 chatManager.sendMessage(chat, content)
                 ctx.reply("Message sent")
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: TelegramException) {
                 ctx.reply("Error sending message: ${e.responseBody}")
                 return@launch

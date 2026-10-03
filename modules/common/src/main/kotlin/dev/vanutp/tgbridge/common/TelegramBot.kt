@@ -26,7 +26,6 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeoutException
 import java.util.function.Consumer
-import kotlin.reflect.KClass
 import kotlin.time.Duration.Companion.milliseconds
 
 
@@ -427,6 +426,14 @@ interface TgApi {
 
 const val POLL_TIMEOUT_SECONDS = 60
 
+private val RETRY_EXCEPTIONS = setOf(
+    UnknownHostException::class,
+    ConnectException::class,
+    SocketTimeoutException::class,
+    SocketException::class,
+    TimeoutException::class,
+)
+
 class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogger, private val scope: CoroutineScope) {
     init {
         val proxy = config.advanced.proxy
@@ -521,38 +528,48 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
             var offset = -1
             logger.info("pollTask started")
             while (true) {
-                try {
-                    val updates = retriableCall(infinite = true) {
+                val updates = try {
+                    retriableCall(forUpdates = true) {
                         client.getUpdates(
                             offset,
                             timeout = POLL_TIMEOUT_SECONDS,
                         )
                     }
-                    if (updates.isEmpty()) {
+                } catch (e: CancellationException) {
+                    logger.info("pollTask cancelled")
+                    throw e
+                } catch (e: Throwable) {
+                    logger.error("Exception while getting updates", e)
+                    delay(1000.milliseconds)
+                    continue
+                }
+                if (updates.isEmpty()) {
+                    continue
+                }
+                offset = updates.last().updateId + 1
+                updates@ for ((_, msg) in updates) {
+                    if (msg == null) {
                         continue
                     }
-                    offset = updates.last().updateId + 1
-                    updates.forEach { update ->
-                        if (update.message == null) {
-                            return@forEach
-                        }
+                    try {
                         for (handler in commandHandlers) {
-                            if (handler.invoke(update.message)) {
-                                return@forEach
+                            if (handler.invoke(msg)) {
+                                continue@updates
                             }
                         }
                         messageHandlers.forEach {
-                            it.invoke(update.message)
+                            it.invoke(msg)
                         }
+                    } catch (e: Throwable) {
+                        if (e is CancellationException && !currentCoroutineContext().isActive) {
+                            // only ever shut down if the coroutine is actually canceled
+                            logger.info("pollTask cancelled")
+                            throw e
+                        }
+                        logger.error("Error handling message ${msg.chat.id}/${msg.messageId}", e)
                     }
-                } catch (_: CancellationException) {
-                    break
-                } catch (e: Exception) {
-                    logger.error(e.message.toString(), e)
-                    delay(1000.milliseconds)
                 }
             }
-            logger.info("pollTask finished")
         }
     }
 
@@ -582,51 +599,36 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
         }
     }
 
-    private suspend fun <T> retriableCall(infinite: Boolean = false, f: suspend () -> TgResponse<T>): T {
-        val retryConf = config.advanced.connectionRetry
-        return withRetry(
-            maxAttempts = if (infinite) -1 else retryConf.maxAttempts,
-            initialDelay = retryConf.initialDelay,
-            maxDelay = retryConf.maxDelay,
-            retryExceptions = setOf(
-                UnknownHostException::class,
-                ConnectException::class,
-                SocketTimeoutException::class,
-                SocketException::class,
-                TimeoutException::class,
-            )
-        ) {
-            call(f)
-        }
-    }
-
-    private suspend fun <T> withRetry(
-        maxAttempts: Int,
-        initialDelay: Long,
-        maxDelay: Long,
-        retryExceptions: Set<KClass<out Exception>>,
-        operation: suspend () -> T
-    ): T {
+    private suspend fun <T> retriableCall(forUpdates: Boolean = false, f: suspend () -> TgResponse<T>): T {
+        val cfg = config.advanced.connectionRetry
+        val infinite = forUpdates || cfg.maxAttempts < 1
         var attempt = 0
-        val infiniteRetries = maxAttempts <= 0
-
+        var currDelay = cfg.initialDelay
         while (true) {
             try {
-                return operation()
+                return call(f)
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
-                if (!retryExceptions.contains(e::class)) {
-                    logger.error("Non-retryable exception", e)
+                if (!RETRY_EXCEPTIONS.contains(e::class)) {
+                    if (!forUpdates) {
+                        logger.error("Non-retryable exception", e)
+                    }
                     throw e
                 }
                 attempt++
 
-                if (!infiniteRetries && attempt >= maxAttempts) {
-                    logger.error("Operation failed after $maxAttempts attempts", e)
+                if (!infinite && attempt >= cfg.maxAttempts) {
+                    logger.error("Operation failed after ${cfg.maxAttempts} attempts", e)
                     throw e
                 }
 
-                val delay = minOf(initialDelay * (1L shl (attempt - 1)), maxDelay)
-                val attemptText = if (infiniteRetries) "attempt $attempt" else "attempt $attempt/$maxAttempts"
+                val delay = if (currDelay >= cfg.maxDelay) {
+                    cfg.maxDelay
+                } else {
+                    currDelay.also { currDelay *= 2 }
+                }
+                val attemptText = if (infinite) "attempt $attempt" else "attempt $attempt/${cfg.maxAttempts}"
                 logger.warn("Operation failed ($attemptText), retrying in ${delay / 1000} seconds: ${e.javaClass.canonicalName}: ${e.message}")
                 delay(delay.milliseconds)
             }

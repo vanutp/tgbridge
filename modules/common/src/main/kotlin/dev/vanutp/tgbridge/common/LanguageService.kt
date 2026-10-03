@@ -306,14 +306,14 @@ object LanguageService {
                     }
                     val data = try {
                         gson.fromJson(file.contents, com.google.gson.JsonObject::class.java)
-                    } catch (e: Throwable) {
+                    } catch (e: Exception) {
                         bridge.logger.warn("Failed to parse $containerPath:${file.name}: ${e.stackTraceToString()}")
                         return@forEach
                     }
                     val converted = data.asMap().mapNotNull {
                         try {
                             it.key to parseTranslationValue(it.value)
-                        } catch (_: Throwable) {
+                        } catch (_: Exception) {
                             err(it)
                             return@forEach
                         }
