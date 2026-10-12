@@ -3,6 +3,10 @@ package dev.vanutp.tgbridge.common.converters
 import dev.vanutp.tgbridge.common.*
 import dev.vanutp.tgbridge.common.ConfigManager.lang
 import dev.vanutp.tgbridge.common.adventure.tgbridgeBuild
+import dev.vanutp.tgbridge.common.tg.TgEntity
+import dev.vanutp.tgbridge.common.tg.TgEntityType
+import dev.vanutp.tgbridge.common.tg.TgMessage
+import dev.vanutp.tgbridge.common.tg.TgMessageMedia
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextDecoration
 

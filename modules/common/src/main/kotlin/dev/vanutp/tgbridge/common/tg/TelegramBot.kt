@@ -1,8 +1,9 @@
-package dev.vanutp.tgbridge.common
+package dev.vanutp.tgbridge.common.tg
 
 import dev.vanutp.tgbridge.common.ConfigManager.config
 import dev.vanutp.tgbridge.common.converters.TelegramFormattedText
 import dev.vanutp.tgbridge.common.models.ProxyType
+import dev.vanutp.tgbridge.common.withProxyConfig
 import kotlinx.coroutines.*
 import kotlinx.coroutines.future.future
 import kotlinx.serialization.SerialName
@@ -434,14 +435,17 @@ private val RETRY_EXCEPTIONS = setOf(
     TimeoutException::class,
 )
 
-class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogger, private val scope: CoroutineScope) {
+class TelegramBot(botApiUrl: String, botToken: String, private val logger: dev.vanutp.tgbridge.common.ILogger, private val scope: CoroutineScope) {
     init {
         val proxy = config.advanced.proxy
         if (proxy.type == ProxyType.SOCKS5 && proxy.username != null && proxy.password != null) {
-            val proxyHosts = resolveProxySocketAddresses(proxy.host, proxy.port)
+            val proxyHosts = _root_ide_package_.dev.vanutp.tgbridge.common.resolveProxySocketAddresses(
+                proxy.host,
+                proxy.port
+            )
                 .mapNotNull { it.address?.hostAddress }
                 .toSet() + proxy.host
-            Authenticator.setDefault(object : Authenticator() {
+            Authenticator.setDefault(object : java.net.Authenticator() {
                 override fun getPasswordAuthentication(): PasswordAuthentication? =
                     if (
                         proxyHosts.any { it.equals(requestingHost, ignoreCase = true) }
@@ -482,11 +486,6 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
         messageHandlers.add(handler)
     }
 
-    @Deprecated("Deprecated, use registerMessageHandler(Consumer<TgMessage>) instead", level = DeprecationLevel.WARNING)
-    fun registerMessageHandler(handler: Function1<TgMessage>) {
-        messageHandlers.add(handler::apply)
-    }
-
     fun registerMessageHandler(handler: Consumer<TgMessage>) {
         messageHandlers.add(handler::accept)
     }
@@ -501,14 +500,6 @@ class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogg
                 return@add false
             }
         }
-    }
-
-    @Deprecated(
-        "Deprecated, use registerCommandHandler(String, Consumer<TgMessage>) instead",
-        level = DeprecationLevel.WARNING
-    )
-    fun registerCommandHandler(command: String, handler: Function1<TgMessage>) {
-        registerCommandHandler(command) { handler.apply(it) }
     }
 
     fun registerCommandHandler(command: String, handler: Consumer<TgMessage>) {

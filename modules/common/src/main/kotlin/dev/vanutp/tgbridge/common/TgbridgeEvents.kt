@@ -19,11 +19,6 @@ class TgbridgeEventHandler<E> internal constructor() {
     private val listeners = EventPriority.entries
         .associateWith { mutableListOf<suspend (E) -> Unit>() }
 
-    @Deprecated("This signature is deprecated, use addListener(EventPriority, Consumer<E>) instead", level = DeprecationLevel.WARNING)
-    fun addListener(priority: EventPriority, listener: Function1<E>) {
-        listeners[priority]!!.add(listener::apply)
-    }
-
     fun addListener(priority: EventPriority, listener: Consumer<E>) {
         listeners[priority]!!.add(listener::accept)
     }
@@ -38,11 +33,6 @@ class TgbridgeEventHandler<E> internal constructor() {
         listeners[priority]!!.add(listener)
     }
 
-    @Deprecated("This signature is deprecated, use addListener(Consumer<E>) instead", level = DeprecationLevel.WARNING)
-    fun addListener(listener: Function1<E>) {
-        addListener(EventPriority.NORMAL, listener::apply)
-    }
-
     fun addListener(listener: Consumer<E>) {
         addListener(EventPriority.NORMAL, listener)
     }
@@ -53,33 +43,6 @@ class TgbridgeEventHandler<E> internal constructor() {
 
     fun addListener(listener: suspend (E) -> Unit) {
         addListener(EventPriority.NORMAL, listener)
-    }
-
-    @Deprecated("This signature is deprecated, use removeListener(handler) instead", level = DeprecationLevel.ERROR)
-    fun removeListener(priority: EventPriority, listener: Function1<E>) {
-        listeners[priority]!!.remove(listener::apply)
-    }
-
-    @Deprecated("This signature is deprecated, use removeListener(handler) instead", level = DeprecationLevel.ERROR)
-    fun removeListener(priority: EventPriority, listener: Consumer<E>) {
-        listeners[priority]!!.remove(listener::accept)
-    }
-
-    @Deprecated("This signature is deprecated, use removeListener(handler) instead", level = DeprecationLevel.ERROR)
-    fun removeListener(priority: EventPriority, listener: Function<E, CompletableFuture<Void>>) {
-        listeners[priority]!!.remove(listener::apply)
-    }
-
-    @Deprecated("This signature is deprecated, use removeListener(handler) instead", level = DeprecationLevel.ERROR)
-    fun removeListener(priority: EventPriority, listener: suspend (E) -> Unit) {
-        listeners[priority]!!.remove(listener)
-    }
-
-    @Deprecated("This signature is deprecated, use removeListener(Consumer<E>) instead", level = DeprecationLevel.WARNING)
-    fun removeListener(listener: Function1<E>) {
-        EventPriority.entries.forEach {
-            listeners[it]!!.remove(listener::apply)
-        }
     }
 
     fun removeListener(listener: Consumer<E>) {

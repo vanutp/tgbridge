@@ -10,6 +10,9 @@ import dev.vanutp.tgbridge.common.modules.IChatModule
 import dev.vanutp.tgbridge.common.modules.ITgbridgeModule
 import dev.vanutp.tgbridge.common.modules.ReplacementsModule
 import dev.vanutp.tgbridge.common.modules.VoiceMessagesModule
+import dev.vanutp.tgbridge.common.tg.TelegramBot
+import dev.vanutp.tgbridge.common.tg.TelegramException
+import dev.vanutp.tgbridge.common.tg.TgMessage
 import kotlinx.coroutines.*
 import kotlinx.serialization.SerializationException
 import net.kyori.adventure.text.Component

@@ -16,15 +16,6 @@ import okhttp3.coroutines.executeAsync
 import java.io.IOException
 import java.net.*
 
-@Deprecated(
-    "Deprecated, use Consumer<A> instead",
-    level = DeprecationLevel.WARNING,
-    replaceWith = ReplaceWith("java.util.function.Consumer<A>"),
-)
-fun interface Function1<A> {
-    fun apply(arg: A)
-}
-
 fun String.escapeHTML(): String = this
     .replace("&", "&amp;")
     .replace(">", "&gt;")

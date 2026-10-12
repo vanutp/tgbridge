@@ -27,11 +27,12 @@ abstract class MessageContent {
     abstract suspend fun send(chat: ChatConfig, lastMessage: TgbridgeTgMessage?): TgbridgeTgMessage?
 }
 
-class MessageContentText(
+class MessageContentText @JvmOverloads constructor(
     val text: TelegramFormattedText,
     val replyToMessageId: Int? = null,
     val disableNotification: Boolean = false,
 ) : MessageContent() {
+    @JvmOverloads
     constructor(
         component: Component,
         replyToMessageId: Int? = null,
@@ -40,20 +41,6 @@ class MessageContentText(
         MinecraftToTelegramConverter.convert(component),
         replyToMessageId,
         disableNotification,
-    )
-
-    // backwards compatibility on java
-    @Deprecated("This constructor is deprecated", level = DeprecationLevel.HIDDEN)
-    constructor(text: TelegramFormattedText, replyToMessageId: Int?) : this(
-        text,
-        replyToMessageId = replyToMessageId,
-        disableNotification = false
-    )
-    @Deprecated("This constructor is deprecated", level = DeprecationLevel.HIDDEN)
-    constructor(text: Component, replyToMessageId: Int?) : this(
-        text,
-        replyToMessageId = replyToMessageId,
-        disableNotification = false
     )
 
     override suspend fun send(chat: ChatConfig, lastMessage: TgbridgeTgMessage?): TgbridgeTgMessage {
@@ -70,19 +57,11 @@ class MessageContentText(
     }
 }
 
-class MessageContentHTMLText(
+class MessageContentHTMLText @JvmOverloads constructor(
     val text: String,
     val replyToMessageId: Int? = null,
     val disableNotification: Boolean = false,
 ) : MessageContent() {
-    // backwards compatibility on java
-    @Deprecated("This constructor is deprecated", level = DeprecationLevel.HIDDEN)
-    constructor(text: String, replyToMessageId: Int?) : this(
-        text,
-        replyToMessageId = replyToMessageId,
-        disableNotification = false
-    )
-
     override suspend fun send(chat: ChatConfig, lastMessage: TgbridgeTgMessage?): TgbridgeTgMessage {
         val tgMessage = TelegramBridge.INSTANCE.bot.sendMessage(
             chat.chatId,
@@ -97,20 +76,15 @@ class MessageContentHTMLText(
     }
 }
 
-class MessageContentMergeableText(
+class MessageContentMergeableText @JvmOverloads constructor(
     val text: TelegramFormattedText,
     val disableNotification: Boolean = false,
 ) : MessageContent() {
+    @JvmOverloads
     constructor(component: Component, disableNotification: Boolean = false) : this(
         MinecraftToTelegramConverter.convert(component),
         disableNotification,
     )
-
-    // backwards compatibility on java
-    @Deprecated("This constructor is deprecated", level = DeprecationLevel.HIDDEN)
-    constructor(text: TelegramFormattedText) : this(text, disableNotification = false)
-    @Deprecated("This constructor is deprecated", level = DeprecationLevel.HIDDEN)
-    constructor(text: Component) : this(text, disableNotification = false)
 
     private suspend fun sendNewMessage(chat: ChatConfig): TgbridgeTgMessage {
         val tgMessage = TelegramBridge.INSTANCE.bot.sendMessage(

@@ -1,8 +1,8 @@
 package dev.vanutp.tgbridge.common.converters
 
 import dev.vanutp.tgbridge.common.LanguageService
-import dev.vanutp.tgbridge.common.TgEntity
-import dev.vanutp.tgbridge.common.TgEntityType
+import dev.vanutp.tgbridge.common.tg.TgEntity
+import dev.vanutp.tgbridge.common.tg.TgEntityType
 import dev.vanutp.tgbridge.common.adventure.args
 import dev.vanutp.tgbridge.common.adventure.isOpenUrl
 import dev.vanutp.tgbridge.common.adventure.value
