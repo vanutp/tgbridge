@@ -1,8 +1,10 @@
 package dev.vanutp.tgbridge.common.tg
 
 import dev.vanutp.tgbridge.common.ConfigManager.config
+import dev.vanutp.tgbridge.common.ILogger
 import dev.vanutp.tgbridge.common.converters.TelegramFormattedText
 import dev.vanutp.tgbridge.common.models.ProxyType
+import dev.vanutp.tgbridge.common.resolveProxySocketAddresses
 import dev.vanutp.tgbridge.common.withProxyConfig
 import kotlinx.coroutines.*
 import kotlinx.coroutines.future.future
@@ -435,17 +437,17 @@ private val RETRY_EXCEPTIONS = setOf(
     TimeoutException::class,
 )
 
-class TelegramBot(botApiUrl: String, botToken: String, private val logger: dev.vanutp.tgbridge.common.ILogger, private val scope: CoroutineScope) {
+class TelegramBot(botApiUrl: String, botToken: String, private val logger: ILogger, private val scope: CoroutineScope) {
     init {
         val proxy = config.advanced.proxy
         if (proxy.type == ProxyType.SOCKS5 && proxy.username != null && proxy.password != null) {
-            val proxyHosts = _root_ide_package_.dev.vanutp.tgbridge.common.resolveProxySocketAddresses(
+            val proxyHosts = resolveProxySocketAddresses(
                 proxy.host,
                 proxy.port
             )
                 .mapNotNull { it.address?.hostAddress }
                 .toSet() + proxy.host
-            Authenticator.setDefault(object : java.net.Authenticator() {
+            Authenticator.setDefault(object : Authenticator() {
                 override fun getPasswordAuthentication(): PasswordAuthentication? =
                     if (
                         proxyHosts.any { it.equals(requestingHost, ignoreCase = true) }
